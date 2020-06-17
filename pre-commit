@@ -1,0 +1,25 @@
+#!/bin/sh
+
+error() {
+    echo "$@" >&2
+    exit 1
+}
+
+check_license() {
+    local path="$1"
+    grep -q "<https://www.gnu.org/licenses/>" "$path" &&
+        grep -q "This file is part of Mouse." "$path"
+}
+
+(
+    cd `git rev-parse --show-toplevel`
+
+    for path in $(git status -s -uno | awk '/^[AM].*rs$/ { print $NF }'); do
+        rustfmt --check "$path" || error "$path is wrong formatted."
+        check_license "$path" || error "$path lacks of the license."
+    done
+
+    cargo test || exit "$?"
+
+    exit 0
+)
