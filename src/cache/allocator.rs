@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use super::{add_usage, allocation_size, sub_usage};
+use core::alloc::{GlobalAlloc, Layout};
+
 /// Implements `std::alloc::GlobalAlloc` and behaves like `std::alloc::System`
 /// except for increasing/decreasing cache memory usage when function
 /// `alloc`/`dealloc` is called.
@@ -30,5 +33,25 @@ impl CacheAlloc {
 impl Default for CacheAlloc {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+unsafe impl GlobalAlloc for CacheAlloc {
+    unsafe fn alloc(&self, layout: Layout) -> *mut u8 {
+        let ptr = std::alloc::alloc(layout);
+
+        if !ptr.is_null() {
+            add_usage(allocation_size(ptr));
+        }
+
+        ptr
+    }
+
+    unsafe fn dealloc(&self, ptr: *mut u8, layout: Layout) {
+        if !ptr.is_null() {
+            sub_usage(allocation_size(ptr));
+        }
+
+        std::alloc::dealloc(ptr, layout);
     }
 }
