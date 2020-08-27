@@ -22,15 +22,17 @@
 //! See the module documents for `logger` for details.
 
 use crate::{GlobalConfig, ModuleInitializer};
-use clap::App;
+use clap::{App, Arg};
 use core::result::Result;
 
 /// Adds the arguments for this module.
-///
-/// This function is stub so far.
-/// Programmer should implement it.
-pub fn arguments(_app: App<'static, 'static>) -> App<'static, 'static> {
-    panic!("custom_logger::arguments is not implemented yet.");
+pub fn arguments(app: App<'static, 'static>) -> App<'static, 'static> {
+    app.arg(
+        Arg::with_name("log_level")
+            .help("DEBUG|INFO|WARN|ERROR (Default is WARN.)")
+            .long("log_level")
+            .takes_value(true),
+    )
 }
 
 /// On success, returns the implementation for ModuleInitializer, or the error message.
