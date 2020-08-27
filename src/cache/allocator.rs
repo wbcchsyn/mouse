@@ -17,6 +17,7 @@
 /// Implements `std::alloc::GlobalAlloc` and behaves like `std::alloc::System`
 /// except for increasing/decreasing cache memory usage when function
 /// `alloc`/`dealloc` is called.
+#[derive(Debug, Clone, Copy)]
 pub struct CacheAlloc;
 
 impl CacheAlloc {
