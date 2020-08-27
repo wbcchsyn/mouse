@@ -15,6 +15,7 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use core::sync::atomic::{AtomicUsize, Ordering};
+use std::os::raw::c_void;
 
 static USAGE: AtomicUsize = AtomicUsize::new(0);
 
@@ -48,4 +49,42 @@ pub fn add_usage(byte_size: usize) -> usize {
 /// The result is not always the latest value.
 pub fn sub_usage(byte_size: usize) -> usize {
     USAGE.fetch_sub(byte_size, Ordering::Relaxed) + byte_size
+}
+
+/// Returns size of memory allocated from heap.
+///
+/// Argument `ptr` must be `std::alloc::alloc` returned, and
+/// must not be deallocated yet.
+///
+/// # Safety
+///
+/// The behavior is undefined if `ptr` doesn't satisfy the
+/// requirements.
+///
+/// # Warnings
+///
+/// This function works both in Linux `dmalloc` and `jemalloc`,
+/// however, it is based on `malloc_usable_size` which is not defined
+/// in POSIX.
+pub unsafe fn allocation_size<T>(ptr: *const T) -> usize {
+    malloc_usable_size(ptr as *const c_void)
+}
+
+extern "C" {
+    /// Returns size of memory allocated from heap.
+    ///
+    /// Argument `ptr` must be `std::alloc::alloc` returned, and
+    /// must not be deallocated yet.
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if `ptr` doesn't satisfy the
+    /// requirements.
+    ///
+    /// # Warnings
+    ///
+    /// Both Linux `dmalloc` and `jemalloc`  implemnets this function,
+    /// however, it is not defined in POSIX.
+    /// For example, `tcmalloc` names `tc_malloc_size` the same function.
+    fn malloc_usable_size(ptr: *const c_void) -> usize;
 }

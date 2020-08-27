@@ -16,4 +16,4 @@
 
 mod usage;
 
-pub use usage::{add_usage, sub_usage, usage};
+pub use usage::{add_usage, allocation_size, sub_usage, usage};
