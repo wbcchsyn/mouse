@@ -22,4 +22,11 @@ pub struct GlobalConfig {
     args_: ArgMatches<'static>,
 }
 
+impl GlobalConfig {
+    /// Accessor to the arguments.
+    pub fn args(&self) -> &ArgMatches<'static> {
+        &self.args_
+    }
+}
+
 fn main() {}
