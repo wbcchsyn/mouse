@@ -16,10 +16,7 @@
 
 //! Implementation for `logger` module.
 //!
-//! All the functions and structs are stub so far.
-//! Programmer should implement them.
-//!
-//! See the module documents for `logger` for details.
+//! Log will be written in stderr.
 
 extern crate simplelog;
 
