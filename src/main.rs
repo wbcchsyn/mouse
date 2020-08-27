@@ -23,6 +23,7 @@ mod logger;
 
 use clap::{App, ArgMatches};
 use core::result::Result;
+use std::os::raw::c_int;
 
 pub struct GlobalConfig {
     args_: ArgMatches<'static>,
@@ -75,9 +76,21 @@ fn run(config: GlobalConfig) {
         eprintln!("{}", e);
         return;
     }
+
+    unsafe {
+        sigwait_();
+    }
 }
 
 fn main() {
     let config = parse_argument();
     run(config);
+}
+
+#[link(name = "mouse_signal")]
+extern "C" {
+    /// Waits for signal SIGHUP, SIGTERM, and SIGINT.
+    ///
+    /// On success returns 0; otherwise sets errno and returns 1.
+    fn sigwait_() -> c_int;
 }
