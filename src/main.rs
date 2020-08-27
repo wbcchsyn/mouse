@@ -78,12 +78,20 @@ fn run(config: GlobalConfig) {
         return;
     }
 
+    warn!("Mouse is starting...");
+
+    // Initialize the other modules here.
+
+    warn!("Mouse is started.");
+
     unsafe {
         if sigwait_() != 0 {
             error!("{}", errno::errno());
             return;
         }
     }
+
+    warn!("Mouse is stopping...");
 }
 
 fn main() {
