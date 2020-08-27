@@ -24,6 +24,7 @@
 use crate::{GlobalConfig, ModuleInitializer};
 use clap::{App, Arg};
 use core::result::Result;
+use log::LevelFilter;
 
 /// Adds the arguments for this module.
 pub fn arguments(app: App<'static, 'static>) -> App<'static, 'static> {
@@ -44,10 +45,9 @@ pub fn initializer(_config: GlobalConfig) -> Result<Initializer, String> {
 }
 
 /// Implementation for ModuleInitializer.
-///
-/// `ModuleInitializer::init` should enable to use macros defined in `log` crate.
-/// (See [log](https://crates.io/crates/log "log") for details.)
-pub struct Initializer;
+pub struct Initializer {
+    level: LevelFilter,
+}
 
 impl ModuleInitializer for Initializer {
     fn init(&self) -> Result<(), String> {
