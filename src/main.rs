@@ -60,7 +60,20 @@ pub trait ModuleInitializer {
     fn init(&self) -> Result<(), String>;
 }
 
-fn run(_config: GlobalConfig) {}
+fn run(config: GlobalConfig) {
+    // Initialize logger first for other ModuleInitializers to enable to log.
+    let logger_ = match logger::initializer(config) {
+        Ok(i) => i,
+        Err(e) => {
+            eprintln!("{}", e);
+            return;
+        }
+    };
+    if let Err(e) = logger_.init() {
+        eprintln!("{}", e);
+        return;
+    }
+}
 
 fn main() {
     let config = parse_argument();
