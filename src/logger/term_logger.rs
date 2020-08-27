@@ -36,12 +36,23 @@ pub fn arguments(app: App<'static, 'static>) -> App<'static, 'static> {
     )
 }
 
-/// On success, returns the implementation for ModuleInitializer, or the error message.
-///
-/// This function is stub so far.
-/// Programmer should implement it.
-pub fn initializer(_config: GlobalConfig) -> Result<Initializer, String> {
-    panic!("custom_logger::initializer is not implemented yet.");
+/// Sanitizes the argument and build Initializer.
+/// On error, returns the error message.
+pub fn initializer(config: GlobalConfig) -> Result<Initializer, String> {
+    let level = if let Some(level) = config.args().value_of("log_level") {
+        match level {
+            "TRACE" => LevelFilter::Trace,
+            "DEBUG" => LevelFilter::Debug,
+            "INFO" => LevelFilter::Info,
+            "WARN" => LevelFilter::Warn,
+            "ERROR" => LevelFilter::Error,
+            _ => return Err(format!("Unknown log level {}.", level)),
+        }
+    } else {
+        LevelFilter::Warn
+    };
+
+    Ok(Initializer { level })
 }
 
 /// Implementation for ModuleInitializer.
