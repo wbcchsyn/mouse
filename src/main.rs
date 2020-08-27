@@ -64,19 +64,14 @@ pub trait ModuleInitializer {
     fn init(&self) -> Result<(), String>;
 }
 
-fn run(config: GlobalConfig) {
+/// Starts logging, initializes each module, and waits for the signal.
+///
+/// If some error is occurred before starting log, returns the error message;
+/// otherwise returns Ok.
+fn run(config: GlobalConfig) -> Result<(), String> {
     // Initialize logger first for other ModuleInitializers to enable to log.
-    let logger_ = match logger::initializer(config) {
-        Ok(i) => i,
-        Err(e) => {
-            eprintln!("{}", e);
-            return;
-        }
-    };
-    if let Err(e) = logger_.init() {
-        eprintln!("{}", e);
-        return;
-    }
+    let logger_ = logger::initializer(config)?;
+    logger_.init()?;
 
     warn!("Mouse is starting...");
 
@@ -87,16 +82,22 @@ fn run(config: GlobalConfig) {
     unsafe {
         if sigwait_() != 0 {
             error!("{}", errno::errno());
-            return;
+            return Ok(());
         }
     }
 
     warn!("Mouse is stopping...");
+    Ok(())
 }
 
 fn main() {
     let config = parse_argument();
-    run(config);
+
+    if let Err(e) = run(config) {
+        eprintln!("{}", e);
+    }
+
+    warn!("Mouse stopped.");
 }
 
 #[link(name = "mouse_signal")]
