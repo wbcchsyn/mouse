@@ -14,6 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+//! Implementation for `logger` module.
+//!
+//! All the functions and structs are stub so far.
+//! Programmer should implement them.
+//!
+//! See the module documents for `logger` for details.
+
 use crate::{GlobalConfig, ModuleInitializer};
 use clap::App;
 use core::result::Result;
