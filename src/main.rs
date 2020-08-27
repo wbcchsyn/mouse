@@ -14,4 +14,36 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-fn main() {}
+#[macro_use]
+extern crate clap;
+
+use clap::{App, ArgMatches};
+
+pub struct GlobalConfig {
+    args_: ArgMatches<'static>,
+}
+
+impl GlobalConfig {
+    /// Accessor to the arguments.
+    pub fn args(&self) -> &ArgMatches<'static> {
+        &self.args_
+    }
+}
+
+/// Parses the arguments and returns GlobalConfig.
+fn parse_argument() -> GlobalConfig {
+    let app = App::new(crate_name!())
+        .version(crate_version!())
+        .about(crate_description!());
+
+    GlobalConfig {
+        args_: app.get_matches(),
+    }
+}
+
+fn run(_config: GlobalConfig) {}
+
+fn main() {
+    let config = parse_argument();
+    run(config);
+}
