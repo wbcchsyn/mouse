@@ -44,7 +44,7 @@
 //!
 //! On success, returns the implementation for ModuleInitializer, or the error message.
 //!
-//! ### stub implements ModuleInitializer
+//! ### struct implements ModuleInitializer
 //!
 //! The implementation for this module.
 //!
