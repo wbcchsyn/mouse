@@ -17,6 +17,8 @@
 #[macro_use]
 extern crate clap;
 
+mod logger;
+
 use clap::{App, ArgMatches};
 use core::result::Result;
 
