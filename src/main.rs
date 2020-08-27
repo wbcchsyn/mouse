@@ -18,6 +18,7 @@
 extern crate clap;
 #[macro_use]
 extern crate log;
+extern crate errno;
 
 mod logger;
 
@@ -78,7 +79,10 @@ fn run(config: GlobalConfig) {
     }
 
     unsafe {
-        sigwait_();
+        if sigwait_() != 0 {
+            error!("{}", errno::errno());
+            return;
+        }
     }
 }
 
