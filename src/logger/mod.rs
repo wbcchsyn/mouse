@@ -19,9 +19,16 @@
 //! Logger enable to use macros defined in log crate.
 //! (See [log](https://crates.io/crates/log "log") for details.)
 //!
-//! ## Implementation
+//! There are 2 implementations; `custom_logger` and `term_logger` .
 //!
-//! Programmer should implement the followings.
+//! ## term_logger
+//!
+//! `term_logger` writes log in stderr. Feature `term_logger` will enable this.
+//!
+//! ## custom_logger
+//!
+//! `custom_logger` implements only stubs to compile. Programmer should
+//! overwrite the followings. This is default implementation.
 //!
 //! ### pub fn arguments
 //!
