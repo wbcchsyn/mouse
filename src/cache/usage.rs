@@ -66,15 +66,23 @@ pub fn sub_usage(byte_size: usize) -> usize {
 /// This function works both in Linux `dmalloc` and `jemalloc`,
 /// however, it is based on `malloc_usable_size` which is not defined
 /// in POSIX.
+///
+/// The behavior is undefined if ptr is null.
 pub unsafe fn allocation_size<T>(ptr: *const T) -> usize {
+    // `malloc_usable_size` works even if ptr is null, however,
+    // it should not be null for future extension and for performance.
+    debug_assert_eq!(false, ptr.is_null());
+
     malloc_usable_size(ptr as *const c_void)
 }
 
 extern "C" {
     /// Returns size of memory allocated from heap.
     ///
-    /// Argument `ptr` must be `std::alloc::alloc` returned, and
-    /// must not be deallocated yet.
+    /// Argument `ptr` must be `std::alloc::alloc` returned and
+    /// must not be deallocated yet, or null.
+    ///
+    /// If `ptr` is null, always returns 0.
     ///
     /// # Safety
     ///
