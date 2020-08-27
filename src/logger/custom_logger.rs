@@ -14,7 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::ModuleInitializer;
 use clap::App;
+use core::result::Result;
 
 /// Adds the arguments for this module.
 ///
@@ -29,3 +31,9 @@ pub fn arguments(_app: App<'static, 'static>) -> App<'static, 'static> {
 /// `ModuleInitializer::init` should enable to use macros defined in `log` crate.
 /// (See [log](https://crates.io/crates/log "log") for details.)
 pub struct Initializer;
+
+impl ModuleInitializer for Initializer {
+    fn init(&self) -> Result<(), String> {
+        panic!("custom_logger::Initializer::init is not implemented yet.");
+    }
+}
