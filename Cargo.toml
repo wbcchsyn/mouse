@@ -10,3 +10,7 @@ license = "GPL-3.0-or-later"
 [dependencies]
 clap = "2.33"
 log = "0.4"
+simplelog = { version = "0.8", optional = true }
+
+[features]
+term_logger = ["simplelog"]
