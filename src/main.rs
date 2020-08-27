@@ -43,4 +43,7 @@ fn parse_argument() -> GlobalConfig {
 
 fn run(_config: GlobalConfig) {}
 
-fn main() {}
+fn main() {
+    let config = parse_argument();
+    run(config);
+}
