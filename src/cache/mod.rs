@@ -15,3 +15,5 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 mod usage;
+
+pub use usage::usage;

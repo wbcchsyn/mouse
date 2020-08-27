@@ -14,6 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use core::sync::atomic::AtomicUsize;
+use core::sync::atomic::{AtomicUsize, Ordering};
 
 static USAGE: AtomicUsize = AtomicUsize::new(0);
+
+/// Returns how many bytes cache is using.
+///
+/// # Warnings
+///
+/// This function doesn't acquire any lock for the performance.
+/// The result is not always the latest value.
+pub fn usage() -> usize {
+    USAGE.load(Ordering::Relaxed)
+}
