@@ -54,4 +54,36 @@ unsafe impl GlobalAlloc for CacheAlloc {
 
         std::alloc::dealloc(ptr, layout);
     }
+
+    unsafe fn alloc_zeroed(&self, layout: Layout) -> *mut u8 {
+        let ptr = std::alloc::alloc_zeroed(layout);
+
+        if !ptr.is_null() {
+            add_usage(allocation_size(ptr));
+        }
+
+        ptr
+    }
+
+    unsafe fn realloc(&self, ptr: *mut u8, layout: Layout, new_size: usize) -> *mut u8 {
+        let old_size = allocation_size(ptr);
+
+        if new_size <= old_size {
+            ptr
+        } else {
+            std::alloc::dealloc(ptr, layout);
+            let layout = Layout::from_size_align_unchecked(new_size, layout.align());
+            let ptr = std::alloc::alloc(layout);
+
+            if ptr.is_null() {
+                sub_usage(old_size);
+            } else {
+                let new_size = allocation_size(ptr);
+                debug_assert!(old_size < new_size);
+                add_usage(new_size - old_size);
+            }
+
+            ptr
+        }
+    }
 }
