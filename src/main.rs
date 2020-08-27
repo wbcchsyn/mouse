@@ -17,6 +17,8 @@
 #[macro_use]
 extern crate clap;
 
+mod logger;
+
 use clap::{App, ArgMatches};
 use core::result::Result;
 
@@ -37,6 +39,8 @@ fn parse_argument() -> GlobalConfig {
         .version(crate_version!())
         .about(crate_description!());
 
+    let app = logger::arguments(app);
+
     GlobalConfig {
         args_: app.get_matches(),
     }
@@ -56,7 +60,20 @@ pub trait ModuleInitializer {
     fn init(&self) -> Result<(), String>;
 }
 
-fn run(_config: GlobalConfig) {}
+fn run(config: GlobalConfig) {
+    // Initialize logger first for other ModuleInitializers to enable to log.
+    let logger_ = match logger::initializer(config) {
+        Ok(i) => i,
+        Err(e) => {
+            eprintln!("{}", e);
+            return;
+        }
+    };
+    if let Err(e) = logger_.init() {
+        eprintln!("{}", e);
+        return;
+    }
+}
 
 fn main() {
     let config = parse_argument();
