@@ -19,9 +19,16 @@
 //! Logger enable to use macros defined in log crate.
 //! (See [log](https://crates.io/crates/log "log") for details.)
 //!
-//! ## Implementation
+//! There are 2 implementations; `custom_logger` and `term_logger` .
 //!
-//! Programmer should implement the followings.
+//! ## term_logger
+//!
+//! `term_logger` writes log in stderr. Feature `term_logger` will enable this.
+//!
+//! ## custom_logger
+//!
+//! `custom_logger` implements only stubs to compile. Programmer should
+//! overwrite the followings. This is default implementation.
 //!
 //! ### pub fn arguments
 //!
@@ -37,13 +44,21 @@
 //!
 //! On success, returns the implementation for ModuleInitializer, or the error message.
 //!
-//! ### stub implements ModuleInitializer
+//! ### struct implements ModuleInitializer
 //!
 //! The implementation for this module.
 //!
 //! `ModuleInitializer::init` should enable to use macros defined in `log` crate.
 //! See [log](https://crates.io/crates/log "log") for details.
 
+#[cfg(not(feature = "term_logger"))]
 mod custom_logger;
 
+#[cfg(not(feature = "term_logger"))]
 pub use custom_logger::*;
+
+#[cfg(feature = "term_logger")]
+mod term_logger;
+
+#[cfg(feature = "term_logger")]
+pub use term_logger::*;
