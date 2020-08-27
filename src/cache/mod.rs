@@ -16,4 +16,4 @@
 
 mod usage;
 
-pub use usage::usage;
+pub use usage::{add_usage, usage};

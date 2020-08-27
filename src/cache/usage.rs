@@ -27,3 +27,14 @@ static USAGE: AtomicUsize = AtomicUsize::new(0);
 pub fn usage() -> usize {
     USAGE.load(Ordering::Relaxed)
 }
+
+/// Increases the memory usage for cache by `byte_size`, returning
+/// the new value.
+///
+/// # Warnings
+///
+/// This function doesn't acquire any lock for the performance.
+/// The result is not always the latest value.
+pub fn add_usage(byte_size: usize) -> usize {
+    USAGE.fetch_add(byte_size, Ordering::Relaxed) + byte_size
+}
