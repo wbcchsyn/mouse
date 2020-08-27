@@ -21,10 +21,13 @@
 //!
 //! See the module documents for `logger` for details.
 
+extern crate simplelog;
+
 use crate::{GlobalConfig, ModuleInitializer};
 use clap::{App, Arg};
 use core::result::Result;
 use log::LevelFilter;
+use simplelog::{Config, TermLogger, TerminalMode};
 
 /// Adds the arguments for this module.
 pub fn arguments(app: App<'static, 'static>) -> App<'static, 'static> {
@@ -62,6 +65,7 @@ pub struct Initializer {
 
 impl ModuleInitializer for Initializer {
     fn init(&self) -> Result<(), String> {
-        panic!("custom_logger::Initializer::init is not implemented yet.");
+        TermLogger::init(self.level, Config::default(), TerminalMode::Stderr)
+            .or_else(|e| Err(e.to_string()))
     }
 }
