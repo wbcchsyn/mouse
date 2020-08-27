@@ -18,3 +18,10 @@
 /// except for increasing/decreasing cache memory usage when function
 /// `alloc`/`dealloc` is called.
 pub struct CacheAlloc;
+
+impl CacheAlloc {
+    /// Create a new instance.
+    pub const fn new() -> Self {
+        Self
+    }
+}
