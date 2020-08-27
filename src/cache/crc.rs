@@ -13,10 +13,3 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
-
-mod allocator;
-mod crc;
-mod usage;
-
-pub use allocator::CacheAlloc;
-pub use usage::{add_usage, allocation_size, sub_usage, usage};
