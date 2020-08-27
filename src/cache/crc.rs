@@ -13,3 +13,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+use core::sync::atomic::AtomicUsize;
+
+struct Bucket<T: ?Sized> {
+    rc: AtomicUsize, // Reference count
+    elm: T,
+}
