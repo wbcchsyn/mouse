@@ -38,3 +38,14 @@ pub fn usage() -> usize {
 pub fn add_usage(byte_size: usize) -> usize {
     USAGE.fetch_add(byte_size, Ordering::Relaxed) + byte_size
 }
+
+/// Decreases the memory usage for cache by `byte_size`, returning
+/// the new value.
+///
+/// # Warnings
+///
+/// This function doesn't acquire any lock for the performance.
+/// The result is not always the latest value.
+pub fn sub_usage(byte_size: usize) -> usize {
+    USAGE.fetch_sub(byte_size, Ordering::Relaxed) + byte_size
+}
