@@ -14,4 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+extern crate clap;
+
+use clap::ArgMatches;
+
+pub struct GlobalConfig {
+    args_: ArgMatches<'static>,
+}
+
 fn main() {}
