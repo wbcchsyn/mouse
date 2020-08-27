@@ -18,7 +18,8 @@ use clap::App;
 
 /// Adds the arguments for this module.
 ///
-/// Programmer should implement this function.
+/// This function is stub so far.
+/// Programmer should implement it.
 pub fn arguments(_app: App<'static, 'static>) -> App<'static, 'static> {
     panic!("custom_logger::arguments is not implemented yet.");
 }

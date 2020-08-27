@@ -39,6 +39,8 @@ fn parse_argument() -> GlobalConfig {
         .version(crate_version!())
         .about(crate_description!());
 
+    let app = logger::arguments(app);
+
     GlobalConfig {
         args_: app.get_matches(),
     }
