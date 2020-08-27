@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::ModuleInitializer;
+use crate::{GlobalConfig, ModuleInitializer};
 use clap::App;
 use core::result::Result;
 
@@ -24,6 +24,14 @@ use core::result::Result;
 /// Programmer should implement it.
 pub fn arguments(_app: App<'static, 'static>) -> App<'static, 'static> {
     panic!("custom_logger::arguments is not implemented yet.");
+}
+
+/// On success, returns the implementation for ModuleInitializer, or the error message.
+///
+/// This function is stub so far.
+/// Programmer should implement it.
+pub fn initializer(_config: GlobalConfig) -> Result<Initializer, String> {
+    panic!("custom_logger::initializer is not implemented yet.");
 }
 
 /// Implementation for ModuleInitializer.
