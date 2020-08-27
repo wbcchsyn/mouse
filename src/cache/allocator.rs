@@ -13,3 +13,8 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+/// Implements `std::alloc::GlobalAlloc` and behaves like `std::alloc::System`
+/// except for increasing/decreasing cache memory usage when function
+/// `alloc`/`dealloc` is called.
+pub struct CacheAlloc;

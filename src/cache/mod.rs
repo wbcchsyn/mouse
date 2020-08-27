@@ -17,4 +17,5 @@
 mod allocator;
 mod usage;
 
+pub use allocator::CacheAlloc;
 pub use usage::{add_usage, allocation_size, sub_usage, usage};
