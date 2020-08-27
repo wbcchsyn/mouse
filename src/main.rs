@@ -18,6 +18,7 @@
 extern crate clap;
 
 use clap::{App, ArgMatches};
+use core::result::Result;
 
 pub struct GlobalConfig {
     args_: ArgMatches<'static>,
@@ -39,6 +40,20 @@ fn parse_argument() -> GlobalConfig {
     GlobalConfig {
         args_: app.get_matches(),
     }
+}
+
+/// Trait to initialize each module.
+///
+/// The implementation for each module is created after parsing the arguments.
+/// The constructor should sanitize the arguments. Then, method `init` is called
+/// for the all instances. `init` should initialize the module if necessary.
+/// Finally the instances are dropped before process exits. `Drop` trait should be
+/// implemented if any cleanup process is.
+pub trait ModuleInitializer {
+    /// Initialize the module.
+    ///
+    /// Return the error message on error.
+    fn init(&self) -> Result<(), String>;
 }
 
 fn run(_config: GlobalConfig) {}
