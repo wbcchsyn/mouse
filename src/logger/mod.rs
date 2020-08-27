@@ -44,6 +44,14 @@
 //! `ModuleInitializer::init` should enable to use macros defined in `log` crate.
 //! See [log](https://crates.io/crates/log "log") for details.
 
+#[cfg(not(feature = "term_logger"))]
 mod custom_logger;
 
+#[cfg(not(feature = "term_logger"))]
 pub use custom_logger::*;
+
+#[cfg(feature = "term_logger")]
+mod term_logger;
+
+#[cfg(feature = "term_logger")]
+pub use term_logger::*;
