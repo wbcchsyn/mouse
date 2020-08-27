@@ -26,3 +26,9 @@ impl CacheAlloc {
         Self
     }
 }
+
+impl Default for CacheAlloc {
+    fn default() -> Self {
+        Self::new()
+    }
+}
