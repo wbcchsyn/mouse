@@ -41,4 +41,6 @@ fn parse_argument() -> GlobalConfig {
     }
 }
 
+fn run(_config: GlobalConfig) {}
+
 fn main() {}
