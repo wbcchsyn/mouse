@@ -20,6 +20,7 @@ extern crate clap;
 extern crate log;
 extern crate errno;
 
+mod cache;
 mod logger;
 
 use clap::{App, ArgMatches};
