@@ -13,3 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+use clap::App;
+
+/// Adds the arguments for this module.
+///
+/// Programmer should implement this function.
+pub fn arguments(_app: App<'static, 'static>) -> App<'static, 'static> {
+    panic!("custom_logger::arguments is not implemented yet.");
+}
