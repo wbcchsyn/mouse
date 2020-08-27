@@ -23,3 +23,9 @@ use clap::App;
 pub fn arguments(_app: App<'static, 'static>) -> App<'static, 'static> {
     panic!("custom_logger::arguments is not implemented yet.");
 }
+
+/// Implementation for ModuleInitializer.
+///
+/// `ModuleInitializer::init` should enable to use macros defined in `log` crate.
+/// (See [log](https://crates.io/crates/log "log") for details.)
+pub struct Initializer;
