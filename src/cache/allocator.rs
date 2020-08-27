@@ -13,8 +13,3 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
-
-mod allocator;
-mod usage;
-
-pub use usage::{add_usage, allocation_size, sub_usage, usage};
