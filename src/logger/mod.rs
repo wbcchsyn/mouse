@@ -15,3 +15,5 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 mod custom_logger;
+
+pub use custom_logger::*;
