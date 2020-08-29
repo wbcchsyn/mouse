@@ -74,6 +74,14 @@ impl Crc {
             }
         }
     }
+
+    /// Returns the pointer to the element.
+    pub fn as_ptr(&self) -> *const dyn Any {
+        unsafe {
+            let bucket = self.ptr.as_ref();
+            &bucket.elm
+        }
+    }
 }
 
 impl Drop for Crc {
