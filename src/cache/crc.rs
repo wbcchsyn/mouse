@@ -47,6 +47,35 @@ pub struct Crc {
 }
 
 const ALLOC: CacheAlloc = CacheAlloc::new();
+impl Crc {
+    /// Creates a new instance.
+    ///
+    /// # Panics
+    ///
+    /// Panics if failed to allocate heap memory.
+    pub fn new<T: 'static>(elm: T) -> Self {
+        let layout = Layout::new::<Bucket<T>>();
+
+        let bucket = Bucket {
+            rc: AtomicUsize::new(1),
+            elm,
+        };
+
+        unsafe {
+            let ptr = ALLOC.alloc(layout) as *mut Bucket<T>;
+            if ptr.is_null() {
+                panic!("Failed to allocate heap memory.");
+            }
+
+            core::ptr::write(ptr, bucket);
+            Crc {
+                ptr: NonNull::new_unchecked(ptr),
+                layout,
+            }
+        }
+    }
+}
+
 impl Drop for Crc {
     fn drop(&mut self) {
         unsafe {
@@ -60,5 +89,36 @@ impl Drop for Crc {
                 ALLOC.dealloc(self.ptr.as_ptr() as *mut u8, self.layout);
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::cache::usage;
+
+    static DROP_COUNT: AtomicUsize = AtomicUsize::new(0);
+
+    struct Foo;
+    impl Drop for Foo {
+        fn drop(&mut self) {
+            DROP_COUNT.fetch_add(1, Ordering::Relaxed);
+        }
+    }
+
+    #[test]
+    #[ignore]
+    fn constructor() {
+        assert_eq!(0, usage());
+        DROP_COUNT.store(0, Ordering::Relaxed);
+
+        {
+            let _crc = Crc::new(Foo);
+            assert_ne!(0, usage());
+            assert_eq!(0, DROP_COUNT.load(Ordering::Relaxed));
+        }
+
+        assert_eq!(0, usage());
+        assert_eq!(1, DROP_COUNT.load(Ordering::Relaxed));
     }
 }
