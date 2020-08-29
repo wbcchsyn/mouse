@@ -19,7 +19,10 @@ check_license() {
         check_license "$path" || error "$path lacks of the license."
     done
 
+    # Some tests in cache module are required to run single thread.
+    # They have 'ignored' modifier
     cargo test || exit "$?"
+    cargo test 'cache::' -- --test-threads=1 --ignored || exit "$?"
 
     exit 0
 )
