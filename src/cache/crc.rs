@@ -92,6 +92,21 @@ impl Drop for Crc {
     }
 }
 
+impl Clone for Crc {
+    fn clone(&self) -> Self {
+        // Increase the reference count.
+        unsafe {
+            let bucket = self.ptr.as_ref();
+            bucket.rc.fetch_add(1, Ordering::Acquire);
+
+            Self {
+                ptr: self.ptr,
+                layout: self.layout,
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -115,6 +130,32 @@ mod tests {
         {
             let _crc = Crc::new(Foo);
             assert_ne!(0, usage());
+            assert_eq!(0, DROP_COUNT.load(Ordering::Relaxed));
+        }
+
+        assert_eq!(0, usage());
+        assert_eq!(1, DROP_COUNT.load(Ordering::Relaxed));
+    }
+
+    #[test]
+    #[ignore]
+    fn clone() {
+        assert_eq!(0, usage());
+        DROP_COUNT.store(0, Ordering::Relaxed);
+
+        {
+            let crc = Crc::new(Foo);
+            let u = usage();
+            assert_ne!(0, u);
+            assert_eq!(0, DROP_COUNT.load(Ordering::Relaxed));
+
+            {
+                let _crc = crc.clone();
+                assert_eq!(u, usage());
+                assert_eq!(0, DROP_COUNT.load(Ordering::Relaxed));
+            }
+
+            assert_eq!(u, usage());
             assert_eq!(0, DROP_COUNT.load(Ordering::Relaxed));
         }
 
