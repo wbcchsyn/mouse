@@ -45,3 +45,20 @@ pub struct Crc {
     ptr: NonNull<Bucket<dyn Any>>,
     layout: Layout,
 }
+
+const ALLOC: CacheAlloc = CacheAlloc::new();
+impl Drop for Crc {
+    fn drop(&mut self) {
+        unsafe {
+            // Decrease the reference count.
+            let bucket = self.ptr.as_mut();
+            let rc = bucket.rc.fetch_sub(1, Ordering::Release);
+
+            // Drop and dealloc if this is the last reference.
+            if rc == 1 {
+                core::ptr::drop_in_place(&mut bucket.elm as *mut dyn Any);
+                ALLOC.dealloc(self.ptr.as_ptr() as *mut u8, self.layout);
+            }
+        }
+    }
+}
