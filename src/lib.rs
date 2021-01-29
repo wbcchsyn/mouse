@@ -17,3 +17,16 @@
 #![deny(missing_docs)]
 
 //! `Mouse` is a Blockchain framework.
+
+use clap::ArgMatches;
+
+/// `Config` is a wrapper of [`clap::ArgMatches<'static>`] .
+///
+/// `Mouse` uses [`clap`] for an argument parser.
+/// See also [`clap`] for details.
+///
+/// [`clap`]: /clap/index.html
+/// [`clap::ArgMatches<'static>`]: /clap/struct.ArgMatches.html
+pub struct Config {
+    args_: ArgMatches<'static>,
+}
