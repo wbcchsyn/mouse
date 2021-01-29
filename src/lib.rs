@@ -18,7 +18,7 @@
 
 //! `Mouse` is a Blockchain framework.
 
-use clap::ArgMatches;
+use clap::{App, ArgMatches};
 
 /// `Config` is a wrapper of [`clap::ArgMatches<'static>`] .
 ///
@@ -29,4 +29,41 @@ use clap::ArgMatches;
 /// [`clap::ArgMatches<'static>`]: /clap/struct.ArgMatches.html
 pub struct Config {
     args_: ArgMatches<'static>,
+}
+
+impl Config {
+    /// Parses the argument and creates a new instance.
+    ///
+    /// This function parses arguments for `Mouse` by default.
+    /// If user want to add some arguments, set them to `app` .
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # #[macro_use] extern crate clap;
+    ///
+    /// use clap::{App, Arg};
+    /// use mouse::Config;
+    ///
+    /// // Initialize app
+    /// let app = App::new(crate_name!())
+    ///     .version(crate_version!())
+    ///     .about(crate_description!());
+    ///
+    /// // Add argument '--foo'
+    /// let app = app.arg(
+    ///     Arg::with_name("foo")
+    ///         .help("Argument 'foo' (Default is 'bar'.)")
+    ///         .long("foo")
+    ///         .takes_value(true),
+    /// );
+    ///
+    /// // Creates 'Config'.
+    /// let config = Config::new(app);
+    /// ```
+    pub fn new(app: App<'static, 'static>) -> Self {
+        Config {
+            args_: app.get_matches(),
+        }
+    }
 }
