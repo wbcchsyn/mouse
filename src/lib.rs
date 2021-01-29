@@ -66,4 +66,39 @@ impl Config {
             args_: app.get_matches(),
         }
     }
+
+    /// Provides a reference to the wrapped value.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # #[macro_use] extern crate clap;
+    ///
+    /// use clap::{App, Arg};
+    /// use mouse::Config;
+    ///
+    /// // Initialize app
+    /// let app = App::new(crate_name!())
+    ///     .version(crate_version!())
+    ///     .about(crate_description!());
+    ///
+    /// // Add argument '--foo'
+    /// let app = app.arg(
+    ///     Arg::with_name("foo")
+    ///         .help("Argument 'foo' (Default is 'bar'.)")
+    ///         .long("foo")
+    ///         .takes_value(true),
+    /// );
+    ///
+    /// let config = Config::new(app);
+    /// let foo = config.args().value_of("foo");
+    ///
+    /// // Check the value of argument '--foo'.
+    /// // If the user specifies argument '--foo', the reuslt will be 'Some' value.
+    /// // ('None' means the argument is not passed.)
+    /// assert_eq!(None, foo);
+    /// ```
+    pub fn args(&self) -> &ArgMatches<'static> {
+        &self.args_
+    }
 }
