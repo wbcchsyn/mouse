@@ -76,3 +76,22 @@ pub trait CryptoHash: Sized {
         ptr as *mut u8
     }
 }
+
+/// Trait for CryptoHash Calculator.
+pub trait CryptoHasher: Default {
+    /// Type of CryptoHash to be calculated.
+    type Hash: CryptoHash;
+
+    /// Appends `bytes` to be calculated.
+    fn write(&mut self, bytes: &[u8]);
+
+    /// Calculates the inputs and creates hash.
+    fn finish(&self) -> Self::Hash;
+
+    /// Calculates the crypto hash of `bytes` and returns the result.
+    fn calculate(bytes: &[u8]) -> Self::Hash {
+        let mut hasher = Self::default();
+        hasher.write(bytes);
+        hasher.finish()
+    }
+}
