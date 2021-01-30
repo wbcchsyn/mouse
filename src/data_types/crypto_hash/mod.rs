@@ -20,6 +20,9 @@ use core::mem::MaybeUninit;
 
 /// Traits for wrapper of `[u8]` indicates crypto hash like 'sha256'.
 pub trait CryptoHash: Sized {
+    /// Type of CryptoHasher to calculate this type.
+    type Hasher: CryptoHasher<Hash = Self>;
+
     /// The number of byte count of this hash type.
     const LEN: usize;
 
