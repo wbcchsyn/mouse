@@ -9,6 +9,7 @@ license = "GPL-3.0-or-later"
 
 [dependencies]
 clap = "2.33"
+errno = "0.2"
 
 [build-dependencies]
 cc = "1.0"
