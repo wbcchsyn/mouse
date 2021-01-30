@@ -46,3 +46,10 @@ impl Borrow<[u8]> for Sha256 {
         &self.0
     }
 }
+
+/// `Sha256Hasher` is an implementation for [`CryptoHasher`] for [`Sha256`] .
+///
+/// [`Sha256`]: struct.Sha256.html
+/// [`CryptoHasher`]: trait.CryptoHasher.html
+#[derive(Clone)]
+pub struct Sha256Hasher(crypto::sha2::Sha256);
