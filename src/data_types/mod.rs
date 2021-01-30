@@ -18,6 +18,7 @@
 //! This module is independent from other modules.
 
 pub mod crypto_hash;
+mod resource;
 
 use crate::{Config, ModuleEnvironment};
 use clap::App;
