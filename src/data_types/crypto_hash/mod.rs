@@ -55,7 +55,9 @@ pub trait CryptoHash: Sized {
     }
 
     /// Calculates crypto hash of `bytes` and returns a new instance.
-    fn calculate(bytes: &[u8]) -> Self;
+    fn calculate(bytes: &[u8]) -> Self {
+        <Self::Hasher as CryptoHasher>::calculate(bytes)
+    }
 
     /// Returns the number of byte count of this hash type.
     #[inline]
