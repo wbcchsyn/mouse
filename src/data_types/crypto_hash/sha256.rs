@@ -53,3 +53,10 @@ impl Borrow<[u8]> for Sha256 {
 /// [`CryptoHasher`]: trait.CryptoHasher.html
 #[derive(Clone)]
 pub struct Sha256Hasher(crypto::sha2::Sha256);
+
+impl Default for Sha256Hasher {
+    #[inline]
+    fn default() -> Self {
+        Self(crypto::sha2::Sha256::new())
+    }
+}
