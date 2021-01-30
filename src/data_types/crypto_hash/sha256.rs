@@ -16,6 +16,8 @@
 
 //! `sha256` defines struct `Sha256` and `Sha256Hasher` .
 
+use std::borrow::Borrow;
+
 const HASH_LEN: usize = 32;
 
 /// `Sha256` is a wrapper of `[u8; 32]` and implements [`CryptoHash`] .
@@ -23,3 +25,24 @@ const HASH_LEN: usize = 32;
 /// [`CryptoHash`]: trait.CryptoHash.html
 #[derive(Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub struct Sha256([u8; HASH_LEN]);
+
+impl AsRef<[u8]> for Sha256 {
+    #[inline]
+    fn as_ref(&self) -> &[u8] {
+        &self.0
+    }
+}
+
+impl AsMut<[u8]> for Sha256 {
+    #[inline]
+    fn as_mut(&mut self) -> &mut [u8] {
+        &mut self.0
+    }
+}
+
+impl Borrow<[u8]> for Sha256 {
+    #[inline]
+    fn borrow(&self) -> &[u8] {
+        &self.0
+    }
+}
