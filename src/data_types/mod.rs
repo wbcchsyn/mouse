@@ -17,6 +17,7 @@
 //! `data_types` declares traits and structs for mouse data.
 //! This module is independent from other modules.
 
+mod acid;
 pub mod crypto_hash;
 mod resource;
 
