@@ -16,6 +16,8 @@
 
 //! `crypto_hash` defines traits and structs relating to cryptographic hash.
 
+mod sha256;
+
 use core::mem::MaybeUninit;
 
 /// Traits for wrapper of `[u8]` indicates crypto hash like 'sha256'.
