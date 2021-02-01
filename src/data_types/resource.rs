@@ -283,6 +283,27 @@ impl Resource {
     pub fn asset_type(&self) -> &[u8] {
         self.id_.asset_type()
     }
+
+    /// Returns how much asset `self` owns.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value = 5;
+    ///
+    /// let resource = Resource::new(&id, value);
+    /// assert_eq!(value, resource.value());
+    /// ```
+    #[inline]
+    pub fn value(&self) -> i64 {
+        self.value_
+    }
 }
 
 #[cfg(test)]
