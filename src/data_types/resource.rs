@@ -101,6 +101,24 @@ impl ResourceId {
 
         ret.assume_init()
     }
+
+    /// Provides a reference to the 'owner'.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::ResourceId;
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    ///
+    /// let resource_id = unsafe { ResourceId::new(owner, asset_type) };
+    /// assert_eq!(owner, resource_id.owner());
+    /// ```
+    #[inline]
+    pub fn owner(&self) -> &[u8] {
+        unsafe { std::slice::from_raw_parts(self.buffer.as_ptr(), self.owner_len as usize) }
+    }
 }
 
 #[cfg(test)]
