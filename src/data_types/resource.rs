@@ -304,6 +304,38 @@ impl Resource {
     pub fn value(&self) -> i64 {
         self.value_
     }
+
+    /// Increases owning value by `value` .
+    ///
+    /// The following sentences have the same effect on `resource` .
+    ///
+    /// - `resource.deposit(10)`
+    /// - `resource.withdraw(-10)`
+    ///
+    /// See also [`withdraw`] .
+    ///
+    /// [`withdraw`]: method.withdraw
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value1 = 5;
+    ///
+    /// let mut resource = Resource::new(&id, value1);
+    /// let value2 = 7;
+    /// resource.deposit(value2);
+    /// assert_eq!(value1 + value2, resource.value());
+    /// ```
+    #[inline]
+    pub fn deposit(&mut self, value: i64) {
+        self.value_ += value;
+    }
 }
 
 #[cfg(test)]
