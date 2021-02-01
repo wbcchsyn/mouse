@@ -113,6 +113,15 @@ impl fmt::Debug for ResourceId {
     }
 }
 
+impl PartialEq<Self> for ResourceId {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        self.owner() == other.owner() && self.asset_type() == other.asset_type()
+    }
+}
+
+impl Eq for ResourceId {}
+
 impl ResourceId {
     /// Provides a reference to the 'owner'.
     ///
