@@ -16,6 +16,7 @@
 
 //! `resource` defines struct `Resource` and relatings.
 
+use core::hash::{Hash, Hasher};
 use core::mem::MaybeUninit;
 use std::fmt;
 
@@ -121,6 +122,17 @@ impl PartialEq<Self> for ResourceId {
 }
 
 impl Eq for ResourceId {}
+
+impl Hash for ResourceId {
+    #[inline]
+    fn hash<H>(&self, hasher: &mut H)
+    where
+        H: Hasher,
+    {
+        self.owner().hash(hasher);
+        self.asset_type().hash(hasher);
+    }
+}
 
 impl ResourceId {
     /// Provides a reference to the 'owner'.
