@@ -17,6 +17,7 @@
 //! `resource` defines struct `Resource` and relatings.
 
 use core::mem::MaybeUninit;
+use std::fmt;
 
 /// The total buffer size of the `ResourceId` .
 pub const RESOURCE_ID_BUFFER_CAPACITY: usize = 118; // The total size of 'Resource' will be 128.
@@ -101,7 +102,18 @@ impl ResourceId {
 
         ret.assume_init()
     }
+}
 
+impl fmt::Debug for ResourceId {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ResourceId")
+            .field("owner", &self.owner())
+            .field("asset_type", &self.asset_type())
+            .finish()
+    }
+}
+
+impl ResourceId {
     /// Provides a reference to the 'owner'.
     ///
     /// # Examples
