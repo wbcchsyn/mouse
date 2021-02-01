@@ -220,6 +220,27 @@ impl Resource {
             value_: value,
         }
     }
+
+    /// Provides a reference to the `ResourceId` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value = 5;
+    ///
+    /// let resource = Resource::new(&id, value);
+    /// assert_eq!(&id, resource.id());
+    /// ```
+    #[inline]
+    pub fn id(&self) -> &ResourceId {
+        &self.id_
+    }
 }
 
 #[cfg(test)]
