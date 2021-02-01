@@ -176,6 +176,27 @@ impl ResourceId {
     }
 }
 
+/// `Resource` is constituted of `ResourceId` and the number of how much asset.
+/// [`Acid`] may spend or deposit `Resource` .
+///
+/// # UTXO type Blockchain (like 'Bitcoin')
+///
+/// `Resource` corresponds to 'TxOut'. `id` is the outpoint to identify the 'TxOut', and `value` is
+/// 1 if it is not spent yet, or 0.
+///
+/// # Account type Blockchain (like 'Ethereum')
+///
+/// `Resource` corresponds to a wallet of specified asset type.
+/// `id` is a pair of the wallet address and the asset type.
+/// `value` represents how much the wallet has the asset.
+///
+/// [`Acid`]: trait.Acid.html
+#[derive(Debug, Clone, Copy)]
+pub struct Resource {
+    id_: ResourceId,
+    value_: i64,
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -185,5 +206,11 @@ mod tests {
     fn resource_id_size() {
         // The size of 'ResourceId' should be multipiles of '8'.
         assert_eq!(0, size_of::<ResourceId>() % 8);
+    }
+
+    #[test]
+    fn resource_size() {
+        // No special reason to '128', but I feel like setting a round number.
+        assert_eq!(128, size_of::<Resource>());
     }
 }
