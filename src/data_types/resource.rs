@@ -197,6 +197,31 @@ pub struct Resource {
     value_: i64,
 }
 
+impl Resource {
+    /// Creates a new instance from `id` and `value` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value = 5;
+    ///
+    /// let _resource = Resource::new(&id, value);
+    /// ```
+    #[inline]
+    pub fn new(id: &ResourceId, value: i64) -> Self {
+        Self {
+            id_: *id,
+            value_: value,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
