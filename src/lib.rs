@@ -104,4 +104,28 @@ impl Config {
     pub fn args(&self) -> &ArgMatches<'static> {
         &self.args_
     }
+
+    /// Provides a reference to the name of app.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # #[macro_use] extern crate clap;
+    ///
+    /// use clap::{App, Arg};
+    /// use mouse::Config;
+    ///
+    /// // Initialize app
+    /// let app = App::new(crate_name!())
+    ///     .version(crate_version!())
+    ///     .about(crate_description!());
+    ///
+    /// // Creates 'Config'.
+    /// let config = Config::new(app);
+    ///
+    /// assert_eq!(crate_name!(), config.name());
+    /// ```
+    pub fn name(&self) -> &str {
+        &self.name_
+    }
 }
