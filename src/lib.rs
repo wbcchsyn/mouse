@@ -29,6 +29,7 @@ use clap::{App, ArgMatches};
 /// [`clap::ArgMatches<'static>`]: /clap/struct.ArgMatches.html
 pub struct Config {
     args_: ArgMatches<'static>,
+    name_: String,
 }
 
 impl Config {
@@ -62,8 +63,10 @@ impl Config {
     /// let config = Config::new(app);
     /// ```
     pub fn new(app: App<'static, 'static>) -> Self {
+        let name = String::from(app.get_name());
         Config {
             args_: app.get_matches(),
+            name_: name,
         }
     }
 
