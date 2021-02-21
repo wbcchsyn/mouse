@@ -55,3 +55,14 @@ impl Borrow<Id> for CAcid {
         self.0.id()
     }
 }
+
+impl PartialEq<Self> for CAcid {
+    #[inline]
+    fn eq(&self, other: &Self) -> bool {
+        let this: &Id = self.borrow();
+        let other: &Id = other.borrow();
+        this == other
+    }
+}
+
+impl Eq for CAcid {}
