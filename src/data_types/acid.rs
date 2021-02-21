@@ -15,3 +15,10 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 //! `acid` defines trait `Acid` and `Id` .
+
+#[cfg(feature = "sha256_id")]
+/// `Id` is an alias to [`CryptoHash`] and used as unique id of [`Acid`] .
+///
+/// [`CryptoHash`]: crypto_hash/trait.CryptoHash.html
+/// [`Acid`]: trait.Acid.html
+pub type Id = super::crypto_hash::Sha256;
