@@ -16,6 +16,7 @@
 
 use super::{Acid, Id};
 use crate::data_types::CAlloc;
+use core::any::TypeId;
 use core::hash::{Hash, Hasher};
 use core::ops::Deref;
 use counting_pointer::Asc;
@@ -79,6 +80,22 @@ impl Hash for CAcid {
 }
 
 impl CAcid {
+    /// If the wrapped address points to an instance of `T` , provides a reference to it, or
+    /// `None` .
+    #[inline]
+    pub fn downcast<T>(&self) -> Option<&T>
+    where
+        T: 'static + Send + Sync + Acid,
+    {
+        let wrapped: &dyn Acid = &*self.0;
+
+        if wrapped.type_id() == TypeId::of::<T>() {
+            Some(unsafe { self.downcast_unchecked() })
+        } else {
+            None
+        }
+    }
+
     /// Provides a reference to the wrapped address points to.
     ///
     /// # Safety
