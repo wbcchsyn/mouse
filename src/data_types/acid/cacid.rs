@@ -16,6 +16,7 @@
 
 use super::{Acid, Id};
 use crate::data_types::CAlloc;
+use core::hash::{Hash, Hasher};
 use core::ops::Deref;
 use counting_pointer::Asc;
 use std::borrow::Borrow;
@@ -66,3 +67,13 @@ impl PartialEq<Self> for CAcid {
 }
 
 impl Eq for CAcid {}
+
+impl Hash for CAcid {
+    fn hash<H>(&self, hasher: &mut H)
+    where
+        H: Hasher,
+    {
+        let this: &Id = self.borrow();
+        this.hash(hasher);
+    }
+}
