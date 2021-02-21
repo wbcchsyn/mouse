@@ -15,3 +15,64 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 //! `crypto_hash` defines traits and structs relating to cryptographic hash.
+
+use core::mem::MaybeUninit;
+
+/// Traits for wrapper of `[u8]` indicates crypto hash like 'sha256'.
+pub trait CryptoHash: Sized {
+    /// The number of byte count of this hash type.
+    const LEN: usize;
+
+    /// Creates a new instance filled with 0.
+    #[inline]
+    fn zeroed() -> Self {
+        // Assume the implementation is just a wrapper of '[u8]' and don't have any other property.
+        unsafe {
+            let mut ret = MaybeUninit::uninit();
+            let ptr = ret.as_mut_ptr() as *mut u8;
+            ptr.write_bytes(0, Self::LEN);
+            ret.assume_init()
+        }
+    }
+
+    /// Copies `bytes` and creates a new instance.
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if `bytes.len` does not equal to `Self::LEN` .
+    #[inline]
+    unsafe fn copy_bytes(bytes: &[u8]) -> Self {
+        // Assume the implementation is just a wrapper of '[u8]' and don't have any other property.
+        let mut ret = MaybeUninit::uninit();
+
+        let ptr = ret.as_mut_ptr() as *mut u8;
+        ptr.copy_from_nonoverlapping(bytes.as_ptr(), Self::LEN);
+
+        ret.assume_init()
+    }
+
+    /// Calculates crypto hash of `bytes` and returns a new instance.
+    fn calculate(bytes: &[u8]) -> Self;
+
+    /// Returns the number of byte count of this hash type.
+    #[inline]
+    fn len(&self) -> usize {
+        Self::LEN
+    }
+
+    /// Provides a raw pointer to the wrapped `[u8]` .
+    #[inline]
+    fn as_ptr(&self) -> *const u8 {
+        // Assume the implementation is just a wrapper of '[u8]' and don't have any other property.
+        let ptr = self as *const Self;
+        ptr as *const u8
+    }
+
+    /// Provides a mutable raw pointer to the wrapped `[u8]` .
+    #[inline]
+    fn as_mut_ptr(&mut self) -> *mut u8 {
+        // Assume the implementation is just a wrapper of '[u8]' and don't have any other property.
+        let ptr = self as *mut Self;
+        ptr as *mut u8
+    }
+}
