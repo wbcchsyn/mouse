@@ -20,6 +20,7 @@
 
 use clap::{App, ArgMatches};
 use std::error::Error;
+use std::os::raw::c_int;
 
 /// `Config` is a wrapper of [`clap::ArgMatches<'static>`] .
 ///
@@ -133,5 +134,20 @@ impl Config {
 
 /// Initializes mouse, starts to listen to the user requests, and waits for the signal.
 pub fn run(_config: Config) -> Result<(), Box<dyn Error>> {
+    unsafe {
+        if sigwait_() != 0 {
+            let msg = errno::errno().to_string();
+            return Err(Box::from(msg));
+        }
+    }
+
     Ok(())
+}
+
+#[link(name = "mouse_signal")]
+extern "C" {
+    /// Waits for signals 'SIGHUP' or 'SIGTERM' or 'SIGINT' and returns `0` on success, or `1`.
+    ///
+    /// 'errno' will be set on error.
+    fn sigwait_() -> c_int;
 }
