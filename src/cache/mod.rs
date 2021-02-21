@@ -17,8 +17,10 @@
 //! `cache` provides cache system for mouse.
 //! `cache` may depend on module `data_types` , but is independent from other modules.
 
-use crate::ModuleEnvironment;
+use crate::{Config, ModuleEnvironment};
 use clap::App;
+use core::result::Result;
+use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 pub struct Environment {}
@@ -32,5 +34,9 @@ impl Default for Environment {
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
         app
+    }
+
+    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+        Ok(())
     }
 }
