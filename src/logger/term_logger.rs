@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::ModuleEnvironment;
 use log::LevelFilter;
 
 /// `Environment` implements `ModuleEnvironment` .
@@ -28,3 +29,5 @@ impl Default for Environment {
         }
     }
 }
+
+impl ModuleEnvironment for Environment {}
