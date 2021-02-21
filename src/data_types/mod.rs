@@ -22,7 +22,7 @@ mod resource;
 
 use crate::{Config, ModuleEnvironment};
 use clap::App;
-pub use resource::ResourceId;
+pub use resource::{ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` .
