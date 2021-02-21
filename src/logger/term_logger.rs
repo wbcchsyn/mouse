@@ -15,6 +15,7 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::ModuleEnvironment;
+use clap::{App, Arg};
 use log::LevelFilter;
 
 /// `Environment` implements `ModuleEnvironment` .
@@ -30,4 +31,14 @@ impl Default for Environment {
     }
 }
 
-impl ModuleEnvironment for Environment {}
+impl ModuleEnvironment for Environment {
+    fn args(app: App<'static, 'static>) -> App<'static, 'static> {
+        app.arg(
+            Arg::with_name("log_level")
+                .possible_values(&["TRACE", "DEBUG", "INFO", "WARN", "ERROR"])
+                .long("log-level")
+                .default_value("WARN")
+                .takes_value(true),
+        )
+    }
+}
