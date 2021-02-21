@@ -19,3 +19,9 @@
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 pub struct Environment {}
+
+impl Default for Environment {
+    fn default() -> Environment {
+        Self {}
+    }
+}
