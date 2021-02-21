@@ -77,3 +77,20 @@ impl Hash for CAcid {
         this.hash(hasher);
     }
 }
+
+impl CAcid {
+    /// Provides a reference to the wrapped address points to.
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if the wrapped address does not point to an instance of `T` .
+    #[inline]
+    pub unsafe fn downcast_unchecked<T>(&self) -> &T
+    where
+        T: 'static + Send + Sync + Acid,
+    {
+        let ptr = Asc::as_ptr(&self.0);
+        let ptr = ptr as *const T;
+        &*ptr
+    }
+}
