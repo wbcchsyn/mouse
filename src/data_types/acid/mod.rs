@@ -19,6 +19,7 @@
 mod cacid;
 
 use crate::data_types::Resource;
+pub use cacid::CAcid;
 use core::any::TypeId;
 use std::borrow::Cow;
 use std::error::Error;
