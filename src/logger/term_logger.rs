@@ -14,9 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::ModuleEnvironment;
+use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
+use core::result::Result;
 use log::LevelFilter;
+use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` .
 pub struct Environment {
@@ -40,5 +42,21 @@ impl ModuleEnvironment for Environment {
                 .default_value("WARN")
                 .takes_value(true),
         )
+    }
+
+    unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
+        match config.args().value_of("log_level").unwrap() {
+            "TRACE" => self.level = LevelFilter::Trace,
+            "DEBUG" => self.level = LevelFilter::Debug,
+            "INFO" => self.level = LevelFilter::Info,
+            "WARN" => self.level = LevelFilter::Warn,
+            "Error" => self.level = LevelFilter::Error,
+            arg => {
+                let msg = format!("Bad parameter for '--log-level': {}", arg);
+                return Err(Box::from(msg));
+            }
+        }
+
+        Ok(())
     }
 }
