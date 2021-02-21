@@ -23,3 +23,17 @@ use counting_pointer::Asc;
 /// - `CAcid` does not support weak count for the performance.
 /// - `CAcid` uses [`CAlloc`] to allocate/deallocate heap memory.
 pub struct CAcid(Asc<dyn 'static + Sync + Send + Acid, CAlloc>);
+
+impl<T> From<T> for CAcid
+where
+    T: 'static + Sync + Send + Acid,
+{
+    #[inline]
+    fn from(val: T) -> Self {
+        let asc = Asc::new(val, CAlloc::default());
+        let (ptr, alloc) = Asc::into_raw_alloc(asc);
+        let ptr = ptr as *const (dyn 'static + Sync + Send + Acid);
+        let asc = unsafe { Asc::from_raw_alloc(ptr, alloc) };
+        Self(asc)
+    }
+}
