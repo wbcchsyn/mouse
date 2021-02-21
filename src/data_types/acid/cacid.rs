@@ -14,10 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::Acid;
+use super::{Acid, Id};
 use crate::data_types::CAlloc;
 use core::ops::Deref;
 use counting_pointer::Asc;
+use std::borrow::Borrow;
 
 /// `CAcid` is like `std::Arc<dyn 'static + Sync + Send + Acid>` except for the followings.
 ///
@@ -45,5 +46,12 @@ impl Deref for CAcid {
     #[inline]
     fn deref(&self) -> &Self::Target {
         &*self.0
+    }
+}
+
+impl Borrow<Id> for CAcid {
+    #[inline]
+    fn borrow(&self) -> &Id {
+        self.0.id()
     }
 }
