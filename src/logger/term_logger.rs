@@ -20,3 +20,11 @@ use log::LevelFilter;
 pub struct Environment {
     level: LevelFilter,
 }
+
+impl Default for Environment {
+    fn default() -> Self {
+        Self {
+            level: LevelFilter::Warn,
+        }
+    }
+}
