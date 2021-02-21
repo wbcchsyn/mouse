@@ -13,3 +13,13 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+use super::Acid;
+use crate::data_types::CAlloc;
+use counting_pointer::Asc;
+
+/// `CAcid` is like `std::Arc<dyn 'static + Sync + Send + Acid>` except for the followings.
+///
+/// - `CAcid` does not support weak count for the performance.
+/// - `CAcid` uses [`CAlloc`] to allocate/deallocate heap memory.
+pub struct CAcid(Asc<dyn 'static + Sync + Send + Acid, CAlloc>);
