@@ -49,3 +49,7 @@ impl ModuleEnvironment for Environment {
         Ok(())
     }
 }
+
+/// `CAlloc` implements `GlobalAlloc` and behaves like `std::alloc::System` except for that
+/// `CAlloc` increases/decreases the caching byte size as allocate/deallocate heap memory.
+pub use mouse_cache_alloc::Alloc as CAlloc;
