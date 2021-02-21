@@ -16,6 +16,7 @@
 
 use super::Acid;
 use crate::data_types::CAlloc;
+use core::ops::Deref;
 use counting_pointer::Asc;
 
 /// `CAcid` is like `std::Arc<dyn 'static + Sync + Send + Acid>` except for the followings.
@@ -35,5 +36,14 @@ where
         let ptr = ptr as *const (dyn 'static + Sync + Send + Acid);
         let asc = unsafe { Asc::from_raw_alloc(ptr, alloc) };
         Self(asc)
+    }
+}
+
+impl Deref for CAcid {
+    type Target = dyn 'static + Sync + Send + Acid;
+
+    #[inline]
+    fn deref(&self) -> &Self::Target {
+        &*self.0
     }
 }
