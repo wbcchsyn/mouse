@@ -18,6 +18,7 @@
 //! This module is independent from other modules.
 
 use crate::ModuleEnvironment;
+use clap::App;
 
 /// `Environment` implements `ModuleEnvironment` .
 pub struct Environment {}
@@ -28,4 +29,8 @@ impl Default for Environment {
     }
 }
 
-impl ModuleEnvironment for Environment {}
+impl ModuleEnvironment for Environment {
+    fn args(app: App<'static, 'static>) -> App<'static, 'static> {
+        app
+    }
+}
