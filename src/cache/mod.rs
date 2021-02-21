@@ -16,3 +16,6 @@
 
 //! `cache` provides cache system for mouse.
 //! `cache` may depend on module `data_types` , but is independent from other modules.
+
+/// `Environment` implements `ModuleEnvironment` for this module.
+pub struct Environment {}
