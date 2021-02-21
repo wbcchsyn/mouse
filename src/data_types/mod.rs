@@ -53,3 +53,10 @@ impl ModuleEnvironment for Environment {
 /// `CAlloc` implements `GlobalAlloc` and behaves like `std::alloc::System` except for that
 /// `CAlloc` increases/decreases the caching byte size as allocate/deallocate heap memory.
 pub use mouse_cache_alloc::Alloc as CAlloc;
+
+/// `CMmapAlloc` implements `GlobalAlloc` and behaves like `std::alloc::System` except for the
+/// followings.
+///
+/// - `CMmapAlloc` increases/decreases the caching byte size as allocate/deallocate heap memory.
+/// - `CMmapAlloc` calls unix 'mmap(2)' to allocate heap memory.
+pub use mouse_cache_alloc::MmapAlloc as CMmapAlloc;
