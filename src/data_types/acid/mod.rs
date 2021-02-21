@@ -16,6 +16,8 @@
 
 //! `acid` defines trait `Acid` and `Id` .
 
+mod cacid;
+
 use crate::data_types::Resource;
 use core::any::TypeId;
 use std::borrow::Cow;
