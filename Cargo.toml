@@ -20,6 +20,6 @@ rust-crypto = "0.2"
 cc = "1.0"
 
 [features]
-default = ["term_logger"]
+default = ["term_logger", "sha256_id"]
 term_logger = ["simplelog"]
 sha256_id = []
