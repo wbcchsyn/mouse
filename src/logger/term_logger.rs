@@ -18,6 +18,7 @@ use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use core::result::Result;
 use log::LevelFilter;
+use simplelog::{TermLogger, TerminalMode};
 use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` .
@@ -58,5 +59,12 @@ impl ModuleEnvironment for Environment {
         }
 
         Ok(())
+    }
+
+    unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+        TermLogger::init(self.level, Default::default(), TerminalMode::Stdout).map_err(|e| {
+            let msg = format!("Failed to open log: {}", e);
+            Box::from(msg)
+        })
     }
 }
