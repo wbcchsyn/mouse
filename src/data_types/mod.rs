@@ -60,3 +60,13 @@ pub use mouse_cache_alloc::Alloc as CAlloc;
 /// - `CMmapAlloc` increases/decreases the caching byte size as allocate/deallocate heap memory.
 /// - `CMmapAlloc` calls unix 'mmap(2)' to allocate heap memory.
 pub use mouse_cache_alloc::MmapAlloc as CMmapAlloc;
+
+/// `CVec` behaves like `std::vec::Vec` except for the followings.
+///
+/// - `CVec` does not implement methods to cost 'O(n)' CPU time on purpose.
+/// - `CVec` uses [`CAlloc`] to allocate/deallocate heap memory.
+/// - Method `push` and `extend_from_slice` panics if the instance did not have sufficient
+///   capacity in advance. Call `reserve` in advance.
+///
+/// [`CAlloc`]: struct.CAlloc.html
+pub use mouse_containers::Vec as CVec;
