@@ -17,6 +17,8 @@
 //! `cache` provides cache system for mouse.
 //! `cache` may depend on module `data_types` , but is independent from other modules.
 
+use crate::ModuleEnvironment;
+
 /// `Environment` implements `ModuleEnvironment` for this module.
 pub struct Environment {}
 
@@ -25,3 +27,5 @@ impl Default for Environment {
         Self {}
     }
 }
+
+impl ModuleEnvironment for Environment {}
