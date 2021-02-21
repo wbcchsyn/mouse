@@ -39,4 +39,8 @@ impl ModuleEnvironment for Environment {
     unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
+
+    unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
 }
