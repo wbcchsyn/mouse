@@ -17,6 +17,8 @@
 //! `data_types` declares traits and structs for mouse data.
 //! This module is independent from other modules.
 
+use crate::ModuleEnvironment;
+
 /// `Environment` implements `ModuleEnvironment` .
 pub struct Environment {}
 
@@ -25,3 +27,5 @@ impl Default for Environment {
         Self {}
     }
 }
+
+impl ModuleEnvironment for Environment {}
