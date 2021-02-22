@@ -184,3 +184,13 @@ pub trait ModuleEnvironment: Default {
         panic!("Not implemented yet.");
     }
 }
+
+/// A set of `ModuleEnvironment` instances for all the module.
+pub struct Environment {
+    // !!! Warnings
+    // !! The order of the property is important, because they are dropped in this order.
+    // !! Method 'check()' and  'init()' treat the properties in the reverse order.
+    // !!
+    // !! See Rust-RFC 1857 for details.
+    // !! https://github.com/rust-lang/rfcs/blob/master/text/1857-stabilize-drop-order.md
+}
