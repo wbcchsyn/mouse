@@ -196,3 +196,41 @@ pub fn find(id: &Id, environment: &Environment) -> CacheFindResult {
         }
     }
 }
+
+/// Inserts `val` into the cache if not cached yet; otherwise merges the information into the
+/// current cache element and drops `val` .
+///
+/// Inserted `val` or current cache element will be regarded as the 'Most Recently Used (MRU)'
+/// anyway.
+pub fn insert(val: CAcid, environment: &Environment) {
+    debug_assert_eq!(false, is_not_found(&val));
+
+    // Insert into the cache.
+    let op = |element: &mut CAcid, val: CAcid| {
+        if is_not_found(element) {
+            // If element represents 'Not found', replace it.
+            *element = val;
+        } else {
+            // Merge the information.
+            unsafe { element.merge(&*val) };
+        }
+    };
+    match unsafe { environment.cache.insert_with(val, op) } {
+        (Some(_), entry) => {
+            // The same id element exists.
+            // Update the LRU order.
+            entry.to_mru();
+        }
+        _ => {
+            // `val` is inserted newly.
+            // Do nothing because it is added as an MRU element.
+        }
+    }
+
+    // Expire the LRU cache if the caching size exceeds the soft limit.
+    while environment.size_soft_limit < cache_using_byte_size() {
+        if !unsafe { environment.cache.expire() } {
+            break;
+        }
+    }
+}
