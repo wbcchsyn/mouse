@@ -17,10 +17,12 @@
 //! `data_types` declares traits and structs for mouse data.
 //! This module is independent from other modules.
 
+mod acid;
 pub mod crypto_hash;
 mod resource;
 
 use crate::{Config, ModuleEnvironment};
+pub use acid::Id;
 use clap::App;
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::error::Error;
