@@ -74,6 +74,7 @@ impl Config {
         let name = String::from(app.get_name());
 
         let app = logger::Environment::args(app);
+        let app = data_types::Environment::args(app);
 
         Config {
             args_: app.get_matches(),
