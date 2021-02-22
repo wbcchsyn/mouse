@@ -91,3 +91,9 @@ The LRU cache is expired when the total cache size exceeds this value.",
 ///
 /// [`Acid`]: /mouse/data_types::struct.Acid.html
 struct NotFound(Id);
+
+impl From<Id> for NotFound {
+    fn from(id: Id) -> Self {
+        Self(id)
+    }
+}
