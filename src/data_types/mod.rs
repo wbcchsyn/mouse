@@ -17,6 +17,8 @@
 //! `data_types` declares traits and structs for mouse data.
 //! This module is independent from other modules.
 
+pub mod crypto_hash;
+
 use crate::{Config, ModuleEnvironment};
 use clap::App;
 use std::error::Error;
