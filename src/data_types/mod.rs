@@ -18,9 +18,11 @@
 //! This module is independent from other modules.
 
 pub mod crypto_hash;
+mod resource;
 
 use crate::{Config, ModuleEnvironment};
 use clap::App;
+pub use resource::{ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` .
