@@ -18,9 +18,12 @@
 //! `cache` may depend on module `data_types` , but is independent from other modules.
 
 use crate::{Config, ModuleEnvironment};
-use clap::App;
+use clap::{App, Arg};
 use core::result::Result;
 use std::error::Error;
+
+/// 64 MB.
+const DEFAULT_SIZE_SOFT_LIMIT: &'static str = "67108864";
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 pub struct Environment {}
@@ -33,7 +36,16 @@ impl Default for Environment {
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
-        app
+        app.arg(
+            Arg::with_name("cache_size_soft_limit")
+                .help(
+                    "The soft limit of cache byte size.
+The LRU cache is expired when the total cache size exceeds this value.",
+                )
+                .long("--cache-size-soft-limit")
+                .default_value(DEFAULT_SIZE_SOFT_LIMIT)
+                .takes_value(true),
+        )
     }
 
     unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
