@@ -139,6 +139,14 @@ impl Config {
 
 /// Initializes mouse, starts to listen to the user requests, and waits for the signal.
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    // Open log.
+    // 'logger' is a special module and exclude from 'Environment'
+    let mut logger = logger::Environment::default();
+    unsafe { logger.check(&config) }?;
+    unsafe { logger.init() }?;
+
+    // Log has opend here.
+
     {
         let mut environment = Environment::default();
         unsafe { environment.check(&config) }?;
@@ -155,6 +163,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
+
+    // 'logger' is dropped here.
 }
 
 #[link(name = "mouse_signal")]
