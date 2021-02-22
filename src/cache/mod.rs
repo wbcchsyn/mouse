@@ -169,3 +169,25 @@ pub enum CacheFindResult {
     /// The last DataBase query found no such data is stored in DataBase.
     Fault,
 }
+
+fn is_not_found(val: &CAcid) -> bool {
+    val.downcast::<NotFound>().is_some()
+}
+
+/// Finds cache whose id equals to `id` and returns the result.
+///
+/// The found cache element will be regarded as the 'Most Recently Used (MRU)'.
+pub fn find(id: &Id, environment: &Environment) -> CacheFindResult {
+    match unsafe { environment.cache.get(id) } {
+        None => CacheFindResult::Lost,
+        Some(entry) => {
+            entry.to_mru();
+
+            if is_not_found(&*entry) {
+                CacheFindResult::Fault
+            } else {
+                CacheFindResult::Hit(entry.clone())
+            }
+        }
+    }
+}
