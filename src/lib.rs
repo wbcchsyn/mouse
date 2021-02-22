@@ -21,6 +21,7 @@
 #[macro_use]
 extern crate log;
 
+pub mod cache;
 pub mod data_types;
 mod logger;
 
@@ -75,6 +76,7 @@ impl Config {
 
         let app = logger::Environment::args(app);
         let app = data_types::Environment::args(app);
+        let app = cache::Environment::args(app);
 
         Config {
             args_: app.get_matches(),
@@ -226,12 +228,14 @@ pub struct Environment {
     // !!
     // !! See Rust-RFC 1857 for details.
     // !! https://github.com/rust-lang/rfcs/blob/master/text/1857-stabilize-drop-order.md
+    cache: cache::Environment,
     data_types: data_types::Environment,
 }
 
 impl Default for Environment {
     fn default() -> Self {
         Self {
+            cache: Default::default(),
             data_types: Default::default(),
         }
     }
@@ -248,6 +252,7 @@ impl Environment {
     /// [`ModuleEnvironment.check`]: struct.ModuleEnvironment.html#method.check
     pub unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
         self.data_types.check(config)?;
+        self.cache.check(config)?;
 
         Ok(())
     }
@@ -261,6 +266,7 @@ impl Environment {
     /// [`ModuleEnvironment.init`]: struct.ModuleEnvironment.html#method.init
     pub unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         self.data_types.init()?;
+        self.cache.init()?;
 
         Ok(())
     }
