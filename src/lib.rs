@@ -68,6 +68,9 @@ impl Config {
     /// ```
     pub fn new(app: App<'static, 'static>) -> Self {
         let name = String::from(app.get_name());
+
+        let app = logger::Environment::args(app);
+
         Config {
             args_: app.get_matches(),
             name_: name,
