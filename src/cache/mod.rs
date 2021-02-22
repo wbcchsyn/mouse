@@ -17,9 +17,12 @@
 //! `cache` provides cache system for mouse.
 //! `cache` may depend on module `data_types` , but is independent from other modules.
 
+use crate::data_types::{CAcid, CMmapAlloc};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use core::result::Result;
+use mouse_containers::lru_hash_set::LruHashSet;
+use std::collections::hash_map::RandomState;
 use std::error::Error;
 
 /// 64 MB.
@@ -28,12 +31,14 @@ const DEFAULT_SIZE_SOFT_LIMIT: &'static str = "67108864";
 /// `Environment` implements `ModuleEnvironment` for this module.
 pub struct Environment {
     size_soft_limit: usize,
+    cache: LruHashSet<CAcid, CMmapAlloc, RandomState>,
 }
 
 impl Default for Environment {
     fn default() -> Environment {
         Self {
             size_soft_limit: DEFAULT_SIZE_SOFT_LIMIT.parse().unwrap(),
+            cache: LruHashSet::new(CMmapAlloc::default(), RandomState::new()),
         }
     }
 }
