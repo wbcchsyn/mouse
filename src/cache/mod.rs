@@ -26,11 +26,15 @@ use std::error::Error;
 const DEFAULT_SIZE_SOFT_LIMIT: &'static str = "67108864";
 
 /// `Environment` implements `ModuleEnvironment` for this module.
-pub struct Environment {}
+pub struct Environment {
+    size_soft_limit: usize,
+}
 
 impl Default for Environment {
     fn default() -> Environment {
-        Self {}
+        Self {
+            size_soft_limit: DEFAULT_SIZE_SOFT_LIMIT.parse().unwrap(),
+        }
     }
 }
 
