@@ -17,13 +17,15 @@
 //! `cache` provides cache system for mouse.
 //! `cache` may depend on module `data_types` , but is independent from other modules.
 
-use crate::data_types::{CAcid, CMmapAlloc, Id};
+use crate::data_types::{Acid, CAcid, CMmapAlloc, Id, Resource};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
+use core::any::TypeId;
 use core::mem::size_of;
 use core::result::Result;
 use mouse_containers::lru_hash_set::LruHashSet;
 use spin_sync::Mutex8;
+use std::borrow::Cow;
 use std::collections::hash_map::RandomState;
 use std::error::Error;
 
@@ -95,5 +97,63 @@ struct NotFound(Id);
 impl From<Id> for NotFound {
     fn from(id: Id) -> Self {
         Self(id)
+    }
+}
+
+impl Acid for NotFound {
+    fn id(&self) -> &Id {
+        &self.0
+    }
+
+    fn intrinsic(&self) -> Cow<[u8]> {
+        panic!("Method 'NotFound.intrinsic' is called.");
+    }
+
+    fn extrinsic(&self) -> Cow<[u8]> {
+        panic!("Method 'NotFound.extrinsic' is called.");
+    }
+
+    fn parent_count(&self) -> usize {
+        panic!("Method 'NotFound.parent_count' is called.");
+    }
+
+    fn parent(&self, _index: usize) -> Option<Id> {
+        panic!("Method 'NotFound.parent' is called.");
+    }
+
+    fn resource_count(&self) -> usize {
+        panic!("Method 'NotFound.resource_count' is called");
+    }
+
+    fn resource(&self, _index: usize) -> Option<Resource> {
+        panic!("Method 'NotFound.resource' is called.");
+    }
+
+    fn is_traceable(&self) -> bool {
+        panic!("Method 'NotFound.is_traceable' is called.");
+    }
+
+    fn set_traceable(&self) -> bool {
+        panic!("Method 'Notfound.set_traceable' is called.");
+    }
+
+    fn is_invalid(&self) -> bool {
+        panic!("Method 'NotFound.is_invalid' is called.");
+    }
+
+    fn invalidate(&self, _reason: &'static dyn Error) -> bool {
+        panic!("Method 'NotFound.invalidate' is called.");
+    }
+
+    fn invalid_reason(&self) -> Option<&'static dyn Error> {
+        panic!("Method 'NotFound.invalid_reason' is called.");
+    }
+
+    unsafe fn merge(&self, _other: &dyn Acid) -> bool {
+        panic!("Method 'NotFound.merge' is called.");
+    }
+
+    fn type_id(&self) -> TypeId {
+        TypeId::of::<Self>()
     }
 }
