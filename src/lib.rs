@@ -133,12 +133,20 @@ impl Config {
 }
 
 /// Initializes mouse, starts to listen to the user requests, and waits for the signal.
-pub fn run(_config: Config) -> Result<(), Box<dyn Error>> {
-    unsafe {
-        if sigwait_() != 0 {
-            let msg = errno::errno().to_string();
-            return Err(Box::from(msg));
+pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    {
+        let mut environment = Environment::default();
+        unsafe { environment.check(&config) }?;
+        unsafe { environment.init() }?;
+
+        unsafe {
+            if sigwait_() != 0 {
+                let msg = errno::errno().to_string();
+                return Err(Box::from(msg));
+            }
         }
+
+        // 'environment' is dropped here.
     }
 
     Ok(())
@@ -150,4 +158,78 @@ extern "C" {
     ///
     /// 'errno' will be set on error.
     fn sigwait_() -> c_int;
+}
+
+/// `ModuleEnvironment` represents a set of the followings for each module.
+///
+/// - Connection to the outside of the process, DataBase connection, socket to listen to the user
+///   requests, files, and so on.
+/// - Functions that mouse user specifies.
+pub trait ModuleEnvironment: Default {
+    /// Consumes `App` , adding arguments for the module uses.
+    fn args(_app: App<'static, 'static>) -> App<'static, 'static> {
+        panic!("Not implemented yet.");
+    }
+
+    /// Sanitises the arguments and overwrite properties.
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if called after method [`init`] is called.
+    ///
+    /// [`init`]: #method.init
+    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+        panic!("Not implemented yet.");
+    }
+
+    /// Initializes `self` and makes `self` ready for use.
+    /// (Open the DataBase Connections, and so on.)
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if this method is called twice or more than twice.
+    unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+        panic!("Not implemented yet.");
+    }
+}
+
+/// A set of `ModuleEnvironment` instances for all the module.
+pub struct Environment {
+    // !!! Warnings
+    // !! The order of the property is important, because they are dropped in this order.
+    // !! Method 'check()' and  'init()' treat the properties in the reverse order.
+    // !!
+    // !! See Rust-RFC 1857 for details.
+    // !! https://github.com/rust-lang/rfcs/blob/master/text/1857-stabilize-drop-order.md
+}
+
+impl Default for Environment {
+    fn default() -> Self {
+        Self {}
+    }
+}
+
+impl Environment {
+    /// Calls method [`ModuleEnvironment.check`] for each property.
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if this method is called after method [`init`] is called.
+    ///
+    /// [`init`]: #method.init
+    /// [`ModuleEnvironment.check`]: struct.ModuleEnvironment.html#method.check
+    pub unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
+
+    /// Calls method [`ModuleEnvironment.init`] for each property.
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if this method is called twice or more than twice.
+    ///
+    /// [`ModuleEnvironment.init`]: struct.ModuleEnvironment.html#method.init
+    pub unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
 }
