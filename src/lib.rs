@@ -18,6 +18,8 @@
 
 //! `Mouse` is a Blockchain framework.
 
+#[macro_use]
+extern crate log;
 mod logger;
 
 use clap::{App, ArgMatches};
@@ -146,15 +148,20 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     unsafe { logger.init() }?;
 
     // Log has opend here.
+    let log_error = |e| {
+        error!("{}", e);
+        e
+    };
 
     {
         let mut environment = Environment::default();
-        unsafe { environment.check(&config) }?;
-        unsafe { environment.init() }?;
+        unsafe { environment.check(&config).map_err(log_error) }?;
+        unsafe { environment.init().map_err(log_error) }?;
 
         unsafe {
             if sigwait_() != 0 {
                 let msg = errno::errno().to_string();
+                error!("{}", &msg);
                 return Err(Box::from(msg));
             }
         }
