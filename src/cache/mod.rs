@@ -234,3 +234,31 @@ pub fn insert(val: CAcid, environment: &Environment) {
         }
     }
 }
+
+/// Caches that the DataBase query failed to find the data with `id` .
+pub fn not_found(id: Id, environment: &Environment) {
+    let val = CAcid::from(NotFound::from(id));
+
+    // Do nothing if already cached.
+    // (Do not update the LRU order.)
+    let op = |_element: &mut CAcid, _: CAcid| {};
+    match unsafe { environment.cache.insert_with(val, op) } {
+        (None, entry) => {
+            // 'val' is inserted newly.
+            // The cache size could be enlarged.
+
+            // Make sure to drop 'entry' to help a dead lock.
+            drop(entry);
+
+            // Expire the LRU cache if the caching size exceeds the soft limit.
+            while environment.size_soft_limit < cache_using_byte_size() {
+                if !unsafe { environment.cache.expire() } {
+                    break;
+                }
+            }
+        }
+        _ => {
+            // Nothing is changed.
+        }
+    }
+}
