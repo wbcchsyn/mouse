@@ -133,12 +133,20 @@ impl Config {
 }
 
 /// Initializes mouse, starts to listen to the user requests, and waits for the signal.
-pub fn run(_config: Config) -> Result<(), Box<dyn Error>> {
-    unsafe {
-        if sigwait_() != 0 {
-            let msg = errno::errno().to_string();
-            return Err(Box::from(msg));
+pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    {
+        let mut environment = Environment::default();
+        unsafe { environment.check(&config) }?;
+        unsafe { environment.init() }?;
+
+        unsafe {
+            if sigwait_() != 0 {
+                let msg = errno::errno().to_string();
+                return Err(Box::from(msg));
+            }
         }
+
+        // 'environment' is dropped here.
     }
 
     Ok(())
