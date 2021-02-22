@@ -52,7 +52,13 @@ The LRU cache is expired when the total cache size exceeds this value.",
         )
     }
 
-    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+    unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
+        let size_soft_limit = config.args().value_of("cache_size_soft_limit").unwrap();
+        self.size_soft_limit = size_soft_limit.parse().map_err(|e| {
+            let msg = format!("Failed to parse '--cache-size-soft-limit': {}", e);
+            Box::<dyn Error>::from(msg)
+        })?;
+
         Ok(())
     }
 
