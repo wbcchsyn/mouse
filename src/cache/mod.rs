@@ -174,6 +174,11 @@ fn is_not_found(val: &CAcid) -> bool {
     val.downcast::<NotFound>().is_some()
 }
 
+/// Returns the byte size that the cache system is using.
+pub fn cache_using_byte_size() -> usize {
+    mouse_cache_alloc::cache_size()
+}
+
 /// Finds cache whose id equals to `id` and returns the result.
 ///
 /// The found cache element will be regarded as the 'Most Recently Used (MRU)'.
