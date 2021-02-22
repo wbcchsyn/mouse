@@ -227,12 +227,14 @@ pub struct Environment {
     // !!
     // !! See Rust-RFC 1857 for details.
     // !! https://github.com/rust-lang/rfcs/blob/master/text/1857-stabilize-drop-order.md
+    cache: cache::Environment,
     data_types: data_types::Environment,
 }
 
 impl Default for Environment {
     fn default() -> Self {
         Self {
+            cache: Default::default(),
             data_types: Default::default(),
         }
     }
