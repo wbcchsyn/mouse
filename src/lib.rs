@@ -19,6 +19,7 @@
 //! `Mouse` is a Blockchain framework.
 
 use clap::{App, ArgMatches};
+use std::error::Error;
 
 /// `Config` is a wrapper of [`clap::ArgMatches<'static>`] .
 ///
@@ -128,4 +129,9 @@ impl Config {
     pub fn name(&self) -> &str {
         &self.name_
     }
+}
+
+/// Initializes mouse, starts to listen to the user requests, and waits for the signal.
+pub fn run(_config: Config) -> Result<(), Box<dyn Error>> {
+    Ok(())
 }
