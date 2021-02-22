@@ -266,6 +266,7 @@ impl Environment {
     /// [`ModuleEnvironment.init`]: struct.ModuleEnvironment.html#method.init
     pub unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         self.data_types.init()?;
+        self.cache.init()?;
 
         Ok(())
     }
