@@ -26,6 +26,7 @@ use std::borrow::Borrow;
 ///
 /// - `CAcid` does not support weak count for the performance.
 /// - `CAcid` uses [`CAlloc`] to allocate/deallocate heap memory.
+#[derive(Clone)]
 pub struct CAcid(Asc<dyn 'static + Sync + Send + Acid, CAlloc>);
 
 impl<T> From<T> for CAcid
