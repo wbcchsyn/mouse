@@ -200,3 +200,17 @@ impl Default for Environment {
         Self {}
     }
 }
+
+impl Environment {
+    /// Calls method [`ModuleEnvironment.check`] for each property.
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if this method is called after method [`init`] is called.
+    ///
+    /// [`init`]: #method.init
+    /// [`ModuleEnvironment.check`]: struct.ModuleEnvironment.html#method.check
+    pub unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
+}
