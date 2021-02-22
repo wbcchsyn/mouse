@@ -176,6 +176,200 @@ impl ResourceId {
     }
 }
 
+/// `Resource` is constituted of `ResourceId` and the number of how much asset.
+/// [`Acid`] may spend or deposit `Resource` .
+///
+/// # UTXO type Blockchain (like 'Bitcoin')
+///
+/// `Resource` corresponds to 'TxOut'. `id` is the outpoint to identify the 'TxOut', and `value` is
+/// 1 if it is not spent yet, or 0.
+///
+/// # Account type Blockchain (like 'Ethereum')
+///
+/// `Resource` corresponds to a wallet of specified asset type.
+/// `id` is a pair of the wallet address and the asset type.
+/// `value` represents how much the wallet has the asset.
+///
+/// [`Acid`]: trait.Acid.html
+#[derive(Debug, Clone, Copy)]
+pub struct Resource {
+    id_: ResourceId,
+    value_: i64,
+}
+
+impl Resource {
+    /// Creates a new instance from `id` and `value` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value = 5;
+    ///
+    /// let _resource = Resource::new(&id, value);
+    /// ```
+    #[inline]
+    pub fn new(id: &ResourceId, value: i64) -> Self {
+        Self {
+            id_: *id,
+            value_: value,
+        }
+    }
+
+    /// Provides a reference to the `ResourceId` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value = 5;
+    ///
+    /// let resource = Resource::new(&id, value);
+    /// assert_eq!(&id, resource.id());
+    /// ```
+    #[inline]
+    pub fn id(&self) -> &ResourceId {
+        &self.id_
+    }
+
+    /// Provides a reference to the owner.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value = 5;
+    ///
+    /// let resource = Resource::new(&id, value);
+    /// assert_eq!(owner, resource.owner());
+    /// ```
+    #[inline]
+    pub fn owner(&self) -> &[u8] {
+        self.id_.owner()
+    }
+
+    /// Provides a reference to the asset type.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value = 5;
+    ///
+    /// let resource = Resource::new(&id, value);
+    /// assert_eq!(asset_type, resource.asset_type());
+    /// ```
+    #[inline]
+    pub fn asset_type(&self) -> &[u8] {
+        self.id_.asset_type()
+    }
+
+    /// Returns how much asset `self` owns.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value = 5;
+    ///
+    /// let resource = Resource::new(&id, value);
+    /// assert_eq!(value, resource.value());
+    /// ```
+    #[inline]
+    pub fn value(&self) -> i64 {
+        self.value_
+    }
+
+    /// Increases owning value by `value` .
+    ///
+    /// The following sentences have the same effect on `resource` .
+    ///
+    /// - `resource.deposit(10)`
+    /// - `resource.withdraw(-10)`
+    ///
+    /// See also [`withdraw`] .
+    ///
+    /// [`withdraw`]: method.withdraw
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value1 = 5;
+    ///
+    /// let mut resource = Resource::new(&id, value1);
+    /// let value2 = 7;
+    /// resource.deposit(value2);
+    /// assert_eq!(value1 + value2, resource.value());
+    /// ```
+    #[inline]
+    pub fn deposit(&mut self, value: i64) {
+        self.value_ += value;
+    }
+
+    /// Decreases owning value by `value` .
+    ///
+    /// The following sentences have the same effect on `resource` .
+    ///
+    /// - `resource.deposit(10)`
+    /// - `resource.withdraw(-10)`
+    ///
+    /// See also [`deposit`] .
+    ///
+    /// [`deposit`]: method.deposit
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Resource, ResourceId};
+    ///
+    /// let owner = &[1,2,3];
+    /// let asset_type = "asset name".as_ref();
+    /// let id = unsafe { ResourceId::new(owner, asset_type) };
+    ///
+    /// let value1 = 5;
+    ///
+    /// let mut resource = Resource::new(&id, value1);
+    /// let value2 = 7;
+    /// resource.withdraw(value2);
+    /// assert_eq!(value1 - value2, resource.value());
+    /// ```
+    #[inline]
+    pub fn withdraw(&mut self, value: i64) {
+        self.value_ -= value;
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -185,5 +379,11 @@ mod tests {
     fn resource_id_size() {
         // The size of 'ResourceId' should be multipiles of '8'.
         assert_eq!(0, size_of::<ResourceId>() % 8);
+    }
+
+    #[test]
+    fn resource_size() {
+        // No special reason to '128', but I feel like setting a round number.
+        assert_eq!(128, size_of::<Resource>());
     }
 }
