@@ -16,3 +16,6 @@
 
 #[cfg(feature = "term_logger")]
 mod term_logger;
+
+#[cfg(feature = "term_logger")]
+pub use term_logger::Environment;
