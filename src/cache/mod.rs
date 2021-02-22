@@ -17,7 +17,7 @@
 //! `cache` provides cache system for mouse.
 //! `cache` may depend on module `data_types` , but is independent from other modules.
 
-use crate::data_types::{CAcid, CMmapAlloc};
+use crate::data_types::{CAcid, CMmapAlloc, Id};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use core::mem::size_of;
@@ -83,3 +83,11 @@ The LRU cache is expired when the total cache size exceeds this value.",
         Ok(())
     }
 }
+
+/// `NotFound` represents the data is not found in KVS.
+///
+/// `NotFound` implements [`Acid`] , but all the methods except for `id` and `type_id` causes a
+/// panic.
+///
+/// [`Acid`]: /mouse/data_types::struct.Acid.html
+struct NotFound(Id);
