@@ -22,6 +22,7 @@ pub mod crypto_hash;
 mod resource;
 
 use crate::{Config, ModuleEnvironment};
+pub use acid::Id;
 use clap::App;
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::error::Error;
