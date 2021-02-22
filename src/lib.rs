@@ -76,6 +76,7 @@ impl Config {
 
         let app = logger::Environment::args(app);
         let app = data_types::Environment::args(app);
+        let app = cache::Environment::args(app);
 
         Config {
             args_: app.get_matches(),
