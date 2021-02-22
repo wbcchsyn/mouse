@@ -20,8 +20,10 @@
 use crate::data_types::{CAcid, CMmapAlloc};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
+use core::mem::size_of;
 use core::result::Result;
 use mouse_containers::lru_hash_set::LruHashSet;
+use spin_sync::Mutex8;
 use std::collections::hash_map::RandomState;
 use std::error::Error;
 
@@ -68,6 +70,16 @@ The LRU cache is expired when the total cache size exceeds this value.",
     }
 
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+        // Use about 1/128 bytes of '--cache-size-soft-limit' for bucket chain.
+        // 8 buckets consumes '8 * size_of::<raw pointer>() + 1 * size_of::<Mutex8>()' bytes.
+        let bucket8_size = 8 * size_of::<*mut u8>() + size_of::<Mutex8>();
+        let chain_len = self.size_soft_limit / 128 * 8 / bucket8_size;
+
+        // 'chain_len' must be greater than 0 (excluding 0), and (I think) it should not be a round
+        // value.
+        let chain_len = chain_len + 1;
+        self.cache.init(chain_len);
+
         Ok(())
     }
 }
