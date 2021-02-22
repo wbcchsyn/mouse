@@ -246,7 +246,9 @@ impl Environment {
     ///
     /// [`init`]: #method.init
     /// [`ModuleEnvironment.check`]: struct.ModuleEnvironment.html#method.check
-    pub unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+    pub unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
+        self.data_types.check(config)?;
+
         Ok(())
     }
 
