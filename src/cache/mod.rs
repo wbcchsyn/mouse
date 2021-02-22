@@ -157,3 +157,15 @@ impl Acid for NotFound {
         TypeId::of::<Self>()
     }
 }
+
+/// `CacheFindResult` is return value for function [`find`] .
+///
+/// [`find`]: fn.find.html
+pub enum CacheFindResult {
+    /// The element is stored in DataBase and cached.
+    Hit(CAcid),
+    /// The cache does not know about the element at all.
+    Lost,
+    /// The last DataBase query found no such data is stored in DataBase.
+    Fault,
+}
