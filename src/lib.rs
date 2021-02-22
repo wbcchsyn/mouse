@@ -213,4 +213,15 @@ impl Environment {
     pub unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
+
+    /// Calls method [`ModuleEnvironment.init`] for each property.
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if this method is called twice or more than twice.
+    ///
+    /// [`ModuleEnvironment.init`]: struct.ModuleEnvironment.html#method.init
+    pub unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+        Ok(())
+    }
 }
