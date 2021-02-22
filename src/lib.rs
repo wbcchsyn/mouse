@@ -18,6 +18,8 @@
 
 //! `Mouse` is a Blockchain framework.
 
+mod logger;
+
 use clap::{App, ArgMatches};
 use std::error::Error;
 use std::os::raw::c_int;
