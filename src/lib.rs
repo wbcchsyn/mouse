@@ -20,6 +20,8 @@
 
 #[macro_use]
 extern crate log;
+
+pub mod data_types;
 mod logger;
 
 use clap::{App, ArgMatches};
