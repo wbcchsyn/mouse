@@ -151,3 +151,36 @@ extern "C" {
     /// 'errno' will be set on error.
     fn sigwait_() -> c_int;
 }
+
+/// `ModuleEnvironment` represents a set of the followings for each module.
+///
+/// - Connection to the outside of the process, DataBase connection, socket to listen to the user
+///   requests, files, and so on.
+/// - Functions that mouse user specifies.
+pub trait ModuleEnvironment: Default {
+    /// Consumes `App` , adding arguments for the module uses.
+    fn args(_app: App<'static, 'static>) -> App<'static, 'static> {
+        panic!("Not implemented yet.");
+    }
+
+    /// Sanitises the arguments and overwrite properties.
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if called after method [`init`] is called.
+    ///
+    /// [`init`]: #method.init
+    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+        panic!("Not implemented yet.");
+    }
+
+    /// Initializes `self` and makes `self` ready for use.
+    /// (Open the DataBase Connections, and so on.)
+    ///
+    /// # Safety
+    ///
+    /// The behavior is undefined if this method is called twice or more than twice.
+    unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+        panic!("Not implemented yet.");
+    }
+}
