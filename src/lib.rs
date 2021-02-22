@@ -18,6 +18,10 @@
 
 //! `Mouse` is a Blockchain framework.
 
+#[macro_use]
+extern crate log;
+mod logger;
+
 use clap::{App, ArgMatches};
 use std::error::Error;
 use std::os::raw::c_int;
@@ -66,6 +70,9 @@ impl Config {
     /// ```
     pub fn new(app: App<'static, 'static>) -> Self {
         let name = String::from(app.get_name());
+
+        let app = logger::Environment::args(app);
+
         Config {
             args_: app.get_matches(),
             name_: name,
@@ -134,14 +141,27 @@ impl Config {
 
 /// Initializes mouse, starts to listen to the user requests, and waits for the signal.
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
+    // Open log.
+    // 'logger' is a special module and exclude from 'Environment'
+    let mut logger = logger::Environment::default();
+    unsafe { logger.check(&config) }?;
+    unsafe { logger.init() }?;
+
+    // Log has opend here.
+    let log_error = |e| {
+        error!("{}", e);
+        e
+    };
+
     {
         let mut environment = Environment::default();
-        unsafe { environment.check(&config) }?;
-        unsafe { environment.init() }?;
+        unsafe { environment.check(&config).map_err(log_error) }?;
+        unsafe { environment.init().map_err(log_error) }?;
 
         unsafe {
             if sigwait_() != 0 {
                 let msg = errno::errno().to_string();
+                error!("{}", &msg);
                 return Err(Box::from(msg));
             }
         }
@@ -150,6 +170,8 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     }
 
     Ok(())
+
+    // 'logger' is dropped here.
 }
 
 #[link(name = "mouse_signal")]
