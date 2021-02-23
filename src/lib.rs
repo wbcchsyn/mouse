@@ -145,6 +145,7 @@ impl Config {
 }
 
 /// Initializes mouse, starts to listen to the user requests, and waits for the signal.
+#[cfg(unix)]
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // Open log.
     // 'logger' is a special module and excluded from 'GlobalEnvironment'.
@@ -184,6 +185,7 @@ extern "C" {
     /// Waits for signals 'SIGHUP' or 'SIGTERM' or 'SIGINT' and returns `0` on success, or `1`.
     ///
     /// 'errno' will be set on error.
+    #[cfg(unix)]
     fn sigwait_() -> c_int;
 }
 
