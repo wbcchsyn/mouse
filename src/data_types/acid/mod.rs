@@ -183,7 +183,7 @@ pub trait Acid {
     fn invalidate(&self, reason: &'static dyn Error) -> bool;
 
     /// Returns the reason why `self` was invalidated if `is_invalid` returns true, or None.
-    fn invalid_reason(&self) -> Option<&'static dyn Error>;
+    fn invalid_reason(&self) -> Option<&dyn Error>;
 
     /// Tries to update the extrinsic data of `self` to that of `other` as much as possible, and
     /// returns `true` if something is changed, or `false` .
