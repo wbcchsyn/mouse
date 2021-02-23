@@ -17,6 +17,15 @@
 //! `cache` provides cache system for mouse.
 //! `cache` may depend on module `data_types` , but is independent from other modules.
 
+// //////////////////////////////////////
+//
+// # Warnings
+//
+// 'Mouse' is using 'mouse_containers::lru_hash_set::LruHashSet' for the cache system.
+// Don't leak 'mouse_containers::lru_hash_set::Entry' to help a dead lock.
+//
+// //////////////////////////////////////
+
 use crate::data_types::{Acid, CAcid, CMmapAlloc, Id, Resource};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
