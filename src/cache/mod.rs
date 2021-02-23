@@ -312,3 +312,22 @@ pub enum CacheState {
     /// The last DataBase query found no such data was stored in the DataBase.
     Fault,
 }
+
+/// Checks how the element with `id` is cached.
+///
+/// If the element is cached (either `Cached` or `Fault` ,) the cache entry will be regarded as
+/// the 'Most Recently Used (MRU.)'
+pub fn is_cached(id: &Id, environment: &Environment) -> CacheState {
+    match unsafe { environment.cache.get(id) } {
+        None => CacheState::Lost,
+        Some(entry) => {
+            entry.to_mru();
+
+            if is_not_found(&*entry) {
+                CacheState::Fault
+            } else {
+                CacheState::Cached
+            }
+        }
+    }
+}
