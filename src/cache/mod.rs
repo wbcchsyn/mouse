@@ -205,6 +205,11 @@ pub fn increase_cache_using_size(bytes: usize) -> usize {
     mouse_cache_alloc::increase_cache_size(bytes)
 }
 
+/// Decreases the cache using size by `bytes` and returns the new using size.
+pub fn decrease_cache_using_size(bytes: usize) -> usize {
+    mouse_cache_alloc::decrease_cache_size(bytes)
+}
+
 /// Returns the byte size of the memory allocated from the heap.
 ///
 /// Argument `ptr` must fulfill the followings.
