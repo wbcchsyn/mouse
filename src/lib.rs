@@ -274,3 +274,7 @@ impl GlobalEnvironment {
         Ok(())
     }
 }
+
+/// `NotImplementedError` implements `std::error::Error` for default functions and so on.
+#[derive(Debug, Clone, Copy)]
+struct NotImplementedError;
