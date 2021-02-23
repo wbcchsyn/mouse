@@ -27,6 +27,7 @@ mod logger;
 
 use clap::{App, ArgMatches};
 use std::error::Error;
+use std::fmt::{self, Display};
 use std::os::raw::c_int;
 
 /// `Config` is a wrapper of [`clap::ArgMatches<'static>`] .
@@ -278,3 +279,9 @@ impl GlobalEnvironment {
 /// `NotImplementedError` implements `std::error::Error` for default functions and so on.
 #[derive(Debug, Clone, Copy)]
 struct NotImplementedError;
+
+impl Display for NotImplementedError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("Not implemented yet.")
+    }
+}
