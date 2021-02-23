@@ -262,3 +262,20 @@ pub fn not_found(id: Id, environment: &Environment) {
         }
     }
 }
+
+/// Expires the 'Least Recently Used (LRU)' cache element and returns `true` if something is
+/// cached; otherwise does nothing and returns `false` .
+///
+/// # Warnings
+///
+/// Cache memory is used for the following things.
+/// The cache memory usage will not be 0 even if it is empty.
+///
+/// - Meta data for the cache system.
+/// - Reserving memories for next cache.
+/// - Cache elements that another thread is using.
+///   (The cache element is really freed if it is expired and if all the threads finished to using
+///   it.)
+pub fn expire(environment: &Environment) -> bool {
+    unsafe { environment.cache.expire() }
+}
