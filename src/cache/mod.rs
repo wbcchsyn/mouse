@@ -166,7 +166,7 @@ impl Acid for NotFound {
         panic!("Method 'NotFound.invalidate' is called.");
     }
 
-    fn invalid_reason(&self) -> Option<&'static dyn Error> {
+    fn invalid_reason(&self) -> Option<&dyn Error> {
         panic!("Method 'NotFound.invalid_reason' is called.");
     }
 
