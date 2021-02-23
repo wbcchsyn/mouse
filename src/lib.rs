@@ -285,3 +285,5 @@ impl Display for NotImplementedError {
         f.write_str("Not implemented yet.")
     }
 }
+
+impl Error for NotImplementedError {}
