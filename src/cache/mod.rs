@@ -300,3 +300,15 @@ pub fn not_found(id: Id, environment: &Environment) {
 pub fn expire(environment: &Environment) -> bool {
     unsafe { environment.cache.expire() }
 }
+
+/// `CacheState` is return value for function [`is_cached`] .
+///
+/// [`is_cached`]: fn.is_cached.html
+pub enum CacheState {
+    /// The element is stored in the DataBase and cached.
+    Cached,
+    /// The cache does not know about the element at all.
+    Lost,
+    /// The last DataBase query found no such data was stored in the DataBase.
+    Fault,
+}
