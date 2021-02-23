@@ -191,6 +191,7 @@ extern "C" {
 ///
 /// - Connection to the outside of the process, DataBase connection, socket to listen to the user
 ///   requests, files, and so on.
+/// - Cache for module.
 /// - Functions that mouse user specifies.
 pub trait ModuleEnvironment: Default {
     /// Consumes `App` , adding arguments for the module uses.
