@@ -33,6 +33,18 @@ use std::error::Error;
 const DEFAULT_SIZE_SOFT_LIMIT: &'static str = "67108864";
 
 /// `Environment` implements `ModuleEnvironment` for this module.
+///
+/// # Arguments
+///
+/// `Environment` requests the following arguments.
+///
+/// - --cache-size-soft-limit
+///
+/// # Default
+///
+/// The `Default` implementation assumes the following arguments.
+///
+/// - --cache-size-soft-limit: 67108864 (= 64 MB)
 pub struct Environment {
     size_soft_limit: usize,
     cache: LruHashSet<CAcid, CMmapAlloc, RandomState>,
