@@ -147,7 +147,7 @@ impl Config {
 /// Initializes mouse, starts to listen to the user requests, and waits for the signal.
 pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     // Open log.
-    // 'logger' is a special module and exclude from 'Environment'
+    // 'logger' is a special module and excluded from 'GlobalEnvironment'.
     let mut logger = logger::Environment::default();
     unsafe { logger.check(&config) }?;
     unsafe { logger.init() }?;
@@ -159,7 +159,7 @@ pub fn run(config: Config) -> Result<(), Box<dyn Error>> {
     };
 
     {
-        let mut environment = Environment::default();
+        let mut environment = GlobalEnvironment::default();
         unsafe { environment.check(&config).map_err(log_error) }?;
         unsafe { environment.init().map_err(log_error) }?;
 
@@ -222,7 +222,7 @@ pub trait ModuleEnvironment: Default {
 }
 
 /// A set of `ModuleEnvironment` instances for all the module.
-pub struct Environment {
+pub struct GlobalEnvironment {
     // !!! Warnings
     // !! The order of the property is important, because they are dropped in this order.
     // !! Method 'check()' and  'init()' treat the properties in the reverse order.
@@ -233,7 +233,7 @@ pub struct Environment {
     data_types: data_types::Environment,
 }
 
-impl Default for Environment {
+impl Default for GlobalEnvironment {
     fn default() -> Self {
         Self {
             cache: Default::default(),
@@ -242,7 +242,7 @@ impl Default for Environment {
     }
 }
 
-impl Environment {
+impl GlobalEnvironment {
     /// Calls method [`ModuleEnvironment.check`] for each property.
     ///
     /// # Safety
