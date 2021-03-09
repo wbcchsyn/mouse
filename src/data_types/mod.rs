@@ -69,4 +69,4 @@ pub use mouse_cache_alloc::MmapAlloc as CMmapAlloc;
 ///   capacity in advance. Call `reserve` in advance.
 ///
 /// [`CAlloc`]: struct.CAlloc.html
-pub use mouse_containers::Vec as CVec;
+pub type CVec<T> = mouse_containers::Vec<T, CAlloc>;
