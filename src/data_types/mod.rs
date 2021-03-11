@@ -24,6 +24,7 @@ mod resource;
 use crate::{Config, ModuleEnvironment};
 pub use acid::{Acid, CAcid, Id};
 use clap::App;
+pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::error::Error;
 
