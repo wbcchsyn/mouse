@@ -17,5 +17,7 @@
 //! 'stub::data_types' uses DER to serialize/deserialize.
 //!
 //! Id ::= [APPLICATION 0] OCTET STRING
+//!
+//! Blob ::= [APPLICATION 1] OCTET STRING
 
 mod acid;

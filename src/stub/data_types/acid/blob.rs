@@ -13,3 +13,20 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+use crate::data_types::{CVec, Id};
+
+/// Format
+///
+/// Intrinsic ::= [APPLICATION 1] OCTET STRING
+struct Intrinsic {
+    data: CVec<u8>,
+}
+
+/// `Blob` implements `Acid` , and represents binary data without no resource, no parents.
+///
+/// This must not be orphan nor invalidate.
+pub struct Blob {
+    id_: Id,
+    intrinsic_: Intrinsic,
+}
