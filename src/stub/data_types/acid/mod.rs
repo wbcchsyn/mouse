@@ -15,3 +15,5 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 mod blob;
+
+pub use blob::Blob;

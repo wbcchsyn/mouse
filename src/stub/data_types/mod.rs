@@ -21,3 +21,5 @@
 //! Blob ::= [APPLICATION 1] OCTET STRING
 
 mod acid;
+
+pub use acid::Blob;

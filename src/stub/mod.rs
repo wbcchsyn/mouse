@@ -17,4 +17,5 @@
 mod data_types;
 mod errors;
 
+pub use data_types::Blob;
 pub use errors::Error;
