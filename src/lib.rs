@@ -24,6 +24,8 @@ extern crate log;
 pub mod cache;
 pub mod data_types;
 mod logger;
+#[cfg(test)]
+mod stub;
 
 use clap::{App, ArgMatches};
 use std::error::Error;
