@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::data_types::{CVec, Id};
+use crate::data_types::{Acid, CVec, Id, Resource};
+use core::any::TypeId;
+use std::borrow::Cow;
+use std::error::Error;
 
 /// Format
 ///
@@ -29,4 +32,58 @@ struct Intrinsic {
 pub struct Blob {
     id_: Id,
     intrinsic_: Intrinsic,
+}
+
+impl Acid for Blob {
+    fn id(&self) -> &Id {
+        &self.id_
+    }
+
+    fn intrinsic(&self) -> Cow<[u8]> {
+        Cow::Borrowed(self.intrinsic_.data.as_ref())
+    }
+
+    fn extrinsic(&self) -> Cow<[u8]> {
+        Cow::default()
+    }
+
+    fn parent_count(&self) -> usize {
+        0
+    }
+
+    fn parent(&self, _: usize) -> Option<Id> {
+        None
+    }
+
+    fn resource_count(&self) -> usize {
+        0
+    }
+
+    fn resource(&self, _: usize) -> Option<Resource> {
+        None
+    }
+
+    fn is_traceable(&self) -> bool {
+        true
+    }
+
+    fn set_traceable(&self) -> bool {
+        false
+    }
+
+    fn is_invalid(&self) -> bool {
+        false
+    }
+
+    fn invalid_reason(&self) -> Option<&dyn Error> {
+        None
+    }
+
+    unsafe fn merge(&self, _other: &dyn Acid) -> bool {
+        false
+    }
+
+    fn type_id(&self) -> TypeId {
+        TypeId::of::<Self>()
+    }
 }
