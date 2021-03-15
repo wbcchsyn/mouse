@@ -271,4 +271,42 @@ impl<T> CVec_<T> {
     pub fn len(&self) -> usize {
         self.buffer.len()
     }
+
+    /// Returns the number of elements that `self` can hold without allocation.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// for i in 0..10 {
+    ///     cvec.reserve(i);
+    ///     assert!(i <= cvec.capacity());
+    /// }
+    /// ```
+    pub fn capacity(&self) -> usize {
+        self.buffer.capacity()
+    }
+
+    /// Reserves capacity at least `additional` more elements to be inserted in `self` .
+    ///
+    /// This method does nothing if the capacity is already sufficient.
+    /// After this method is called, the capacity will be greater than or equal to
+    /// `self.len() + additional` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// for i in 0..10 {
+    ///     cvec.reserve(i);
+    ///     assert!(i <= cvec.capacity());
+    /// }
+    /// ```
+    pub fn reserve(&mut self, additional: usize) {
+        self.buffer.reserve(additional);
+    }
 }
