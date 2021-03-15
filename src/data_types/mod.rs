@@ -27,6 +27,7 @@ use clap::App;
 use core::ops::{Deref, DerefMut};
 pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
+use std::borrow::Borrow;
 use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` .
@@ -102,6 +103,12 @@ impl<T> AsRef<[T]> for CVec_<T> {
 impl<T> AsMut<[T]> for CVec_<T> {
     fn as_mut(&mut self) -> &mut [T] {
         self.buffer.as_mut()
+    }
+}
+
+impl<T> Borrow<[T]> for CVec_<T> {
+    fn borrow(&self) -> &[T] {
+        self.buffer.borrow()
     }
 }
 
