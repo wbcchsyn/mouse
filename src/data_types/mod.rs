@@ -356,4 +356,22 @@ impl<T> CVec_<T> {
     pub fn is_empty(&self) -> bool {
         self.buffer.is_empty()
     }
+
+    /// Returns a raw pointer to the buffer.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// cvec.push(7);
+    ///
+    /// let ptr = cvec.as_ptr();
+    /// let first = unsafe { *ptr };
+    /// assert_eq!(7, first);
+    /// ```
+    pub fn as_ptr(&self) -> *const T {
+        self.buffer.as_ptr()
+    }
 }
