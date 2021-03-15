@@ -99,6 +99,12 @@ impl<T> AsRef<[T]> for CVec_<T> {
     }
 }
 
+impl<T> AsMut<[T]> for CVec_<T> {
+    fn as_mut(&mut self) -> &mut [T] {
+        self.buffer.as_mut()
+    }
+}
+
 impl<T> Deref for CVec_<T> {
     type Target = [T];
 
