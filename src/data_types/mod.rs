@@ -93,6 +93,12 @@ where
     }
 }
 
+impl<T> AsRef<[T]> for CVec_<T> {
+    fn as_ref(&self) -> &[T] {
+        self.buffer.as_ref()
+    }
+}
+
 impl<T> Deref for CVec_<T> {
     type Target = [T];
 
