@@ -24,6 +24,7 @@ mod resource;
 use crate::{Config, ModuleEnvironment};
 pub use acid::{Acid, CAcid, Id};
 use clap::App;
+use core::ops::Deref;
 pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::error::Error;
@@ -89,5 +90,13 @@ where
         Self {
             buffer: mouse_containers::Vec::from_slice(vals, CAlloc::default()),
         }
+    }
+}
+
+impl<T> Deref for CVec_<T> {
+    type Target = [T];
+
+    fn deref(&self) -> &Self::Target {
+        self.buffer.deref()
     }
 }
