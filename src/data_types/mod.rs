@@ -131,3 +131,14 @@ impl<T> DerefMut for CVec_<T> {
         self.buffer.deref_mut()
     }
 }
+
+impl<T> PartialEq<Self> for CVec_<T>
+where
+    T: PartialEq,
+{
+    fn eq(&self, other: &Self) -> bool {
+        self.buffer.eq(&other.buffer)
+    }
+}
+
+impl<T> Eq for CVec_<T> where T: Eq {}
