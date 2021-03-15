@@ -339,4 +339,21 @@ impl<T> CVec_<T> {
     pub fn reserve(&mut self, additional: usize) {
         self.buffer.reserve(additional);
     }
+
+    /// Returns `true` if `self` does not hold any element, or `false` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// assert_eq!(true, cvec.is_empty());
+    ///
+    /// cvec.push(0);
+    /// assert_eq!(false, cvec.is_empty());
+    /// ```
+    pub fn is_empty(&self) -> bool {
+        self.buffer.is_empty()
+    }
 }
