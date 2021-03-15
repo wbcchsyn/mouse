@@ -69,3 +69,14 @@ pub use mouse_cache_alloc::MmapAlloc as CMmapAlloc;
 ///
 /// [`CAlloc`]: struct.CAlloc.html
 pub type CVec<T> = mouse_containers::Vec<T, CAlloc>;
+
+/// `CVec` behaves like `std::vec::Vec` except for the followings.
+///
+/// - `CVec` does not implement methods to cost 'O(n)' CPU time on purpose.
+/// - `CVec` uses [`CAlloc`] to allocate/deallocate heap memory.
+///
+/// [`CAlloc`]: struct.CAlloc.html
+#[derive(Clone, Default)]
+pub struct CVec_<T> {
+    buffer: mouse_containers::Vec<T, CAlloc>,
+}
