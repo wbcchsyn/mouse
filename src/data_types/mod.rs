@@ -26,7 +26,7 @@ pub use acid::{Acid, CAcid, Id};
 use clap::App;
 use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
-use core::ops::{Deref, DerefMut, Index};
+use core::ops::{Deref, DerefMut, Index, IndexMut};
 use core::slice::SliceIndex;
 pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
@@ -184,5 +184,14 @@ where
 
     fn index(&self, i: I) -> &Self::Output {
         self.buffer.index(i)
+    }
+}
+
+impl<T, I> IndexMut<I> for CVec_<T>
+where
+    I: SliceIndex<[T], Output = T>,
+{
+    fn index_mut(&mut self, i: I) -> &mut Self::Output {
+        self.buffer.index_mut(i)
     }
 }
