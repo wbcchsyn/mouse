@@ -254,4 +254,21 @@ impl<T> CVec_<T> {
     pub fn push(&mut self, val: T) {
         self.buffer.push(val);
     }
+
+    /// Returns the number of elements that `self` holds.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// for i in 0..10 {
+    ///     assert_eq!(i, cvec.len());
+    ///     cvec.push(0);
+    /// }
+    /// ```
+    pub fn len(&self) -> usize {
+        self.buffer.len()
+    }
 }
