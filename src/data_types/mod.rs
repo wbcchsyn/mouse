@@ -272,6 +272,36 @@ impl<T> CVec_<T> {
         self.buffer.len()
     }
 
+    /// Forces the length of `self` `new_len` .
+    ///
+    /// This is a low-level operation that maintains none of the normal invariants of the type.
+    /// Normally changing the length of a vector is done using one of the safe operations instead,
+    /// such as [`truncate`] or [`clear`] .
+    ///
+    /// # Safety
+    ///
+    /// - `new_len` must be less than or equal to the capacity.
+    /// - The elements at `old_len..new_len` must be initialized.
+    ///
+    /// [`truncate`]: #method.truncate
+    /// [`clear`]: #method.clear
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// cvec.reserve(10);
+    /// for i in 0..10 {
+    ///     unsafe { cvec.set_len(i) };
+    ///     assert_eq!(i, cvec.len());
+    /// }
+    /// ```
+    pub unsafe fn set_len(&mut self, new_len: usize) {
+        self.buffer.set_len(new_len);
+    }
+
     /// Returns the number of elements that `self` can hold without allocation.
     ///
     /// # Examples
