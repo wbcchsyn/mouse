@@ -24,6 +24,7 @@ mod resource;
 use crate::{Config, ModuleEnvironment};
 pub use acid::{Acid, CAcid, Id};
 use clap::App;
+use core::cmp::Ordering;
 use core::ops::{Deref, DerefMut};
 pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
@@ -142,3 +143,21 @@ where
 }
 
 impl<T> Eq for CVec_<T> where T: Eq {}
+
+impl<T> PartialOrd<Self> for CVec_<T>
+where
+    T: PartialOrd,
+{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        self.buffer.partial_cmp(&other.buffer)
+    }
+}
+
+impl<T> Ord for CVec_<T>
+where
+    T: Ord,
+{
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.buffer.cmp(&other.buffer)
+    }
+}
