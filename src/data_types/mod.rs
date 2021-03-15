@@ -26,7 +26,8 @@ pub use acid::{Acid, CAcid, Id};
 use clap::App;
 use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
-use core::ops::{Deref, DerefMut};
+use core::ops::{Deref, DerefMut, Index};
+use core::slice::SliceIndex;
 pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::borrow::{Borrow, BorrowMut};
@@ -172,5 +173,16 @@ where
         H: Hasher,
     {
         self.buffer.hash(hasher)
+    }
+}
+
+impl<T, I> Index<I> for CVec_<T>
+where
+    I: SliceIndex<[T], Output = T>,
+{
+    type Output = T;
+
+    fn index(&self, i: I) -> &Self::Output {
+        self.buffer.index(i)
     }
 }
