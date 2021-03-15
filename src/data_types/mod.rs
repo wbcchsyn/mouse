@@ -374,4 +374,22 @@ impl<T> CVec_<T> {
     pub fn as_ptr(&self) -> *const T {
         self.buffer.as_ptr()
     }
+
+    /// Returns a mutable pointer to the buffer.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// cvec.push(7);
+    ///
+    /// let ptr = cvec.as_mut_ptr();
+    /// unsafe { *ptr += 1 };
+    /// assert_eq!(8, cvec[0]);
+    /// ```
+    pub fn as_mut_ptr(&mut self) -> *mut T {
+        self.buffer.as_mut_ptr()
+    }
 }
