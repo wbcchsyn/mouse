@@ -14,7 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use crate::data_types::{Acid, CVec, Id, Resource};
+use crate::data_types::{Acid, CVec, CryptoHash, Id, Resource};
+use bsn1::DerRef;
 use core::any::TypeId;
 use std::borrow::Cow;
 use std::error::Error;
@@ -26,12 +27,27 @@ struct Intrinsic {
     data: CVec<u8>,
 }
 
+impl From<&DerRef> for Intrinsic {
+    fn from(der: &DerRef) -> Self {
+        let data = CVec::from(der.as_ref());
+        Self { data }
+    }
+}
+
 /// `Blob` implements `Acid` , and represents binary data without no resource, no parents.
 ///
 /// This must not be orphan nor invalidate.
 pub struct Blob {
     id_: Id,
     intrinsic_: Intrinsic,
+}
+
+impl From<&DerRef> for Blob {
+    fn from(der: &DerRef) -> Self {
+        let id_ = Id::calculate(der.as_ref());
+        let intrinsic_ = Intrinsic::from(der);
+        Self { id_, intrinsic_ }
+    }
 }
 
 impl Acid for Blob {
