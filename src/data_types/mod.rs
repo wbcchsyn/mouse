@@ -392,4 +392,23 @@ impl<T> CVec_<T> {
     pub fn as_mut_ptr(&mut self) -> *mut T {
         self.buffer.as_mut_ptr()
     }
+
+    /// Shrinks the capacity to the length as much as possible.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// cvec.reserve(1000);
+    /// let old_capacity = cvec.capacity();
+    /// assert!(1000 <= old_capacity);
+    ///
+    /// cvec.shrink_to_fit();
+    /// assert!(cvec.capacity() <= old_capacity);
+    /// ```
+    pub fn shrink_to_fit(&mut self) {
+        self.buffer.shrink_to_fit();
+    }
 }
