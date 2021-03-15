@@ -26,8 +26,9 @@ pub use acid::{Acid, CAcid, Id};
 use clap::App;
 use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
+use core::iter::IntoIterator;
 use core::ops::{Deref, DerefMut, Index, IndexMut};
-use core::slice::SliceIndex;
+use core::slice::{Iter, SliceIndex};
 pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::borrow::{Borrow, BorrowMut};
@@ -193,5 +194,14 @@ where
 {
     fn index_mut(&mut self, i: I) -> &mut Self::Output {
         self.buffer.index_mut(i)
+    }
+}
+
+impl<'a, T> IntoIterator for &'a CVec_<T> {
+    type Item = &'a T;
+    type IntoIter = Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.buffer.into_iter()
     }
 }
