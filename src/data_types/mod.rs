@@ -25,6 +25,7 @@ use crate::{Config, ModuleEnvironment};
 pub use acid::{Acid, CAcid, Id};
 use clap::App;
 use core::cmp::Ordering;
+use core::hash::{Hash, Hasher};
 use core::ops::{Deref, DerefMut};
 pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
@@ -159,5 +160,17 @@ where
 {
     fn cmp(&self, other: &Self) -> Ordering {
         self.buffer.cmp(&other.buffer)
+    }
+}
+
+impl<T> Hash for CVec_<T>
+where
+    T: Hash,
+{
+    fn hash<H>(&self, hasher: &mut H)
+    where
+        H: Hasher,
+    {
+        self.buffer.hash(hasher)
     }
 }
