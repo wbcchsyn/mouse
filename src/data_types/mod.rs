@@ -231,3 +231,27 @@ impl<'a, T> IntoIterator for &'a mut CVec_<T> {
         (&mut self.buffer).into_iter()
     }
 }
+
+impl<T> CVec_<T> {
+    /// Appends `val` to the end of the buffer.
+    ///
+    /// # Warnings
+    ///
+    /// This method calls `self.reserve(1)` internally.
+    /// It makes the performance better to call [`reserve`] in advance to call this method twice
+    /// or more than twice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// cvec.push(1);
+    /// cvec.push(2);
+    /// assert_eq!(&[1, 2], cvec.as_ref());
+    /// ```
+    pub fn push(&mut self, val: T) {
+        self.buffer.push(val);
+    }
+}
