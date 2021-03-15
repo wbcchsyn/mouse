@@ -80,3 +80,14 @@ pub type CVec<T> = mouse_containers::Vec<T, CAlloc>;
 pub struct CVec_<T> {
     buffer: mouse_containers::Vec<T, CAlloc>,
 }
+
+impl<T> From<&[T]> for CVec_<T>
+where
+    T: Clone,
+{
+    fn from(vals: &[T]) -> Self {
+        Self {
+            buffer: mouse_containers::Vec::from_slice(vals, CAlloc::default()),
+        }
+    }
+}
