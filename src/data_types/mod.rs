@@ -98,6 +98,23 @@ where
     }
 }
 
+impl<T> CVec_<T> {
+    /// Creates a new empty instance.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let _cvec = CVec_::<u8>::new();
+    /// ```
+    pub fn new() -> Self {
+        Self {
+            buffer: mouse_containers::Vec::from(CAlloc::default()),
+        }
+    }
+}
+
 impl<T> AsRef<[T]> for CVec_<T> {
     fn as_ref(&self) -> &[T] {
         self.buffer.as_ref()
