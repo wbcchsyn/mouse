@@ -28,7 +28,7 @@ use core::cmp::Ordering;
 use core::hash::{Hash, Hasher};
 use core::iter::IntoIterator;
 use core::ops::{Deref, DerefMut, Index, IndexMut};
-use core::slice::{Iter, SliceIndex};
+use core::slice::{Iter, IterMut, SliceIndex};
 pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::borrow::{Borrow, BorrowMut};
@@ -203,5 +203,14 @@ impl<'a, T> IntoIterator for &'a CVec_<T> {
 
     fn into_iter(self) -> Self::IntoIter {
         self.buffer.into_iter()
+    }
+}
+
+impl<'a, T> IntoIterator for &'a mut CVec_<T> {
+    type Item = &'a mut T;
+    type IntoIter = IterMut<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        (&mut self.buffer).into_iter()
     }
 }
