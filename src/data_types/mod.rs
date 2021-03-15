@@ -24,7 +24,7 @@ mod resource;
 use crate::{Config, ModuleEnvironment};
 pub use acid::{Acid, CAcid, Id};
 use clap::App;
-use core::ops::Deref;
+use core::ops::{Deref, DerefMut};
 pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::error::Error;
@@ -98,5 +98,11 @@ impl<T> Deref for CVec_<T> {
 
     fn deref(&self) -> &Self::Target {
         self.buffer.deref()
+    }
+}
+
+impl<T> DerefMut for CVec_<T> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.buffer.deref_mut()
     }
 }
