@@ -456,4 +456,29 @@ impl<T> CVec_<T> {
     pub fn shrink_to_fit(&mut self) {
         self.buffer.shrink_to_fit();
     }
+
+    /// Enshorten `self` , keeping the first `len` elements and drops the rest if `len` is less
+    /// than the current length; otherwise does nothing.
+    ///
+    /// Note that this method does not have any effect on the allocated capacity.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// cvec.extend_from_slice(&[0, 1, 2, 3, 4]);
+    /// assert_eq!(5, cvec.len());
+    ///
+    /// cvec.truncate(7);
+    /// assert_eq!(5, cvec.len());
+    ///
+    /// cvec.truncate(2);
+    /// assert_eq!(2, cvec.len());
+    /// assert_eq!(&[0, 1], cvec.as_ref());
+    /// ```
+    pub fn truncate(&mut self, len: usize) {
+        self.buffer.truncate(len);
+    }
 }
