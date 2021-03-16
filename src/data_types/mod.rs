@@ -74,20 +74,12 @@ pub use mouse_cache_alloc::MmapAlloc as CMmapAlloc;
 /// - `CVec` uses [`CAlloc`] to allocate/deallocate heap memory.
 ///
 /// [`CAlloc`]: struct.CAlloc.html
-pub type CVec<T> = mouse_containers::Vec<T, CAlloc>;
-
-/// `CVec` behaves like `std::vec::Vec` except for the followings.
-///
-/// - `CVec` does not implement methods to cost 'O(n)' CPU time on purpose.
-/// - `CVec` uses [`CAlloc`] to allocate/deallocate heap memory.
-///
-/// [`CAlloc`]: struct.CAlloc.html
 #[derive(Clone, Default)]
-pub struct CVec_<T> {
+pub struct CVec<T> {
     buffer: mouse_containers::Vec<T, CAlloc>,
 }
 
-impl<T> From<&[T]> for CVec_<T>
+impl<T> From<&[T]> for CVec<T>
 where
     T: Clone,
 {
@@ -98,15 +90,15 @@ where
     }
 }
 
-impl<T> CVec_<T> {
+impl<T> CVec<T> {
     /// Creates a new empty instance.
     ///
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let _cvec = CVec_::<u8>::new();
+    /// let _cvec = CVec::<u8>::new();
     /// ```
     pub fn new() -> Self {
         Self {
@@ -115,31 +107,31 @@ impl<T> CVec_<T> {
     }
 }
 
-impl<T> AsRef<[T]> for CVec_<T> {
+impl<T> AsRef<[T]> for CVec<T> {
     fn as_ref(&self) -> &[T] {
         self.buffer.as_ref()
     }
 }
 
-impl<T> AsMut<[T]> for CVec_<T> {
+impl<T> AsMut<[T]> for CVec<T> {
     fn as_mut(&mut self) -> &mut [T] {
         self.buffer.as_mut()
     }
 }
 
-impl<T> Borrow<[T]> for CVec_<T> {
+impl<T> Borrow<[T]> for CVec<T> {
     fn borrow(&self) -> &[T] {
         self.buffer.borrow()
     }
 }
 
-impl<T> BorrowMut<[T]> for CVec_<T> {
+impl<T> BorrowMut<[T]> for CVec<T> {
     fn borrow_mut(&mut self) -> &mut [T] {
         self.buffer.borrow_mut()
     }
 }
 
-impl<T> Deref for CVec_<T> {
+impl<T> Deref for CVec<T> {
     type Target = [T];
 
     fn deref(&self) -> &Self::Target {
@@ -147,13 +139,13 @@ impl<T> Deref for CVec_<T> {
     }
 }
 
-impl<T> DerefMut for CVec_<T> {
+impl<T> DerefMut for CVec<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.buffer.deref_mut()
     }
 }
 
-impl<T> PartialEq<Self> for CVec_<T>
+impl<T> PartialEq<Self> for CVec<T>
 where
     T: PartialEq,
 {
@@ -162,9 +154,9 @@ where
     }
 }
 
-impl<T> Eq for CVec_<T> where T: Eq {}
+impl<T> Eq for CVec<T> where T: Eq {}
 
-impl<T> PartialOrd<Self> for CVec_<T>
+impl<T> PartialOrd<Self> for CVec<T>
 where
     T: PartialOrd,
 {
@@ -173,7 +165,7 @@ where
     }
 }
 
-impl<T> Ord for CVec_<T>
+impl<T> Ord for CVec<T>
 where
     T: Ord,
 {
@@ -182,7 +174,7 @@ where
     }
 }
 
-impl<T> Hash for CVec_<T>
+impl<T> Hash for CVec<T>
 where
     T: Hash,
 {
@@ -194,7 +186,7 @@ where
     }
 }
 
-impl<T, I> Index<I> for CVec_<T>
+impl<T, I> Index<I> for CVec<T>
 where
     I: SliceIndex<[T], Output = T>,
 {
@@ -205,7 +197,7 @@ where
     }
 }
 
-impl<T, I> IndexMut<I> for CVec_<T>
+impl<T, I> IndexMut<I> for CVec<T>
 where
     I: SliceIndex<[T], Output = T>,
 {
@@ -214,7 +206,7 @@ where
     }
 }
 
-impl<'a, T> IntoIterator for &'a CVec_<T> {
+impl<'a, T> IntoIterator for &'a CVec<T> {
     type Item = &'a T;
     type IntoIter = Iter<'a, T>;
 
@@ -223,7 +215,7 @@ impl<'a, T> IntoIterator for &'a CVec_<T> {
     }
 }
 
-impl<'a, T> IntoIterator for &'a mut CVec_<T> {
+impl<'a, T> IntoIterator for &'a mut CVec<T> {
     type Item = &'a mut T;
     type IntoIter = IterMut<'a, T>;
 
@@ -232,7 +224,7 @@ impl<'a, T> IntoIterator for &'a mut CVec_<T> {
     }
 }
 
-impl<T> CVec_<T> {
+impl<T> CVec<T> {
     /// Clones and appends all the elements in `vals` to the end of `self` .
     ///
     /// # Warnings
@@ -244,9 +236,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// cvec.extend_from_slice(&[0, 1, 2, 3]);
     /// assert_eq!(&[0, 1, 2, 3], cvec.as_ref());
     /// ```
@@ -268,9 +260,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// cvec.push(1);
     /// cvec.push(2);
     /// assert_eq!(&[1, 2], cvec.as_ref());
@@ -284,9 +276,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     ///
     /// assert_eq!(None, cvec.pop());
     ///
@@ -305,9 +297,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// for i in 0..10 {
     ///     assert_eq!(i, cvec.len());
     ///     cvec.push(0);
@@ -334,9 +326,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// cvec.reserve(10);
     /// for i in 0..10 {
     ///     unsafe { cvec.set_len(i) };
@@ -352,9 +344,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// for i in 0..10 {
     ///     cvec.reserve(i);
     ///     assert!(i <= cvec.capacity());
@@ -373,9 +365,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// for i in 0..10 {
     ///     cvec.reserve(i);
     ///     assert!(i <= cvec.capacity());
@@ -390,9 +382,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// assert_eq!(true, cvec.is_empty());
     ///
     /// cvec.push(0);
@@ -407,9 +399,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// cvec.push(7);
     ///
     /// let ptr = cvec.as_ptr();
@@ -425,9 +417,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// cvec.push(7);
     ///
     /// let ptr = cvec.as_mut_ptr();
@@ -443,9 +435,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// cvec.reserve(1000);
     /// let old_capacity = cvec.capacity();
     /// assert!(1000 <= old_capacity);
@@ -465,9 +457,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// cvec.extend_from_slice(&[0, 1, 2, 3, 4]);
     /// assert_eq!(5, cvec.len());
     ///
@@ -489,9 +481,9 @@ impl<T> CVec_<T> {
     /// # Examples
     ///
     /// ```
-    /// use mouse::data_types::CVec_;
+    /// use mouse::data_types::CVec;
     ///
-    /// let mut cvec = CVec_::<u8>::new();
+    /// let mut cvec = CVec::<u8>::new();
     /// cvec.extend_from_slice(&[0, 1, 2, 3, 4]);
     /// assert_eq!(5, cvec.len());
     ///
