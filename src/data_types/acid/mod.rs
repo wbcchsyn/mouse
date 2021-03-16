@@ -167,22 +167,15 @@ pub trait Acid {
 
     /// Returns true if it is sure that `self` is not acceptable and that the status will never be
     /// recorvered.
+    ///
+    /// Note that `Acid` does not have a method to invalidate the instance, and it depends on the
+    /// implementation.
     fn is_invalid(&self) -> bool;
 
-    /// Marks `self` as traceable and returns true if it was not invalidated.
-    ///
-    /// The behavior depends on the implementation when `self` has already been invalidated.
-    /// (Some implementation may update `self` and returns true if reason is different, and others
-    /// do nothing.)
-    ///
-    /// After this method is called, method `is_invalid` returns true.
-    ///
-    /// # Warnings
-    ///
-    /// This method may update the extrinsic data even though it takes `&self` as the argument.
-    fn invalidate(&self, reason: &'static dyn Error) -> bool;
-
     /// Returns the reason why `self` was invalidated if `is_invalid` returns true, or None.
+    ///
+    /// Note that `Acid` does not have a method to invalidate the instance, and it depends on the
+    /// implementation.
     fn invalid_reason(&self) -> Option<&dyn Error>;
 
     /// Tries to update the extrinsic data of `self` to that of `other` as much as possible, and
