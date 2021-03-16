@@ -15,4 +15,5 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 /// Represents errors for module `stub` .
+#[derive(Debug, Clone, Copy, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub enum Error {}

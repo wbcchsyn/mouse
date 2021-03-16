@@ -15,3 +15,5 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 mod errors;
+
+pub use errors::Error;
