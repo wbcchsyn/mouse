@@ -24,6 +24,7 @@ mod resource;
 use crate::{Config, ModuleEnvironment};
 pub use acid::{Acid, CAcid, Id};
 use clap::App;
+pub use crypto_hash::{CryptoHash, CryptoHasher};
 pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::error::Error;
 
@@ -65,8 +66,6 @@ pub use mouse_cache_alloc::MmapAlloc as CMmapAlloc;
 ///
 /// - `CVec` does not implement methods to cost 'O(n)' CPU time on purpose.
 /// - `CVec` uses [`CAlloc`] to allocate/deallocate heap memory.
-/// - Method `push` and `extend_from_slice` panics if the instance did not have sufficient
-///   capacity in advance. Call `reserve` in advance.
 ///
 /// [`CAlloc`]: struct.CAlloc.html
-pub use mouse_containers::Vec as CVec;
+pub type CVec<T> = mouse_containers::Vec<T, CAlloc>;
