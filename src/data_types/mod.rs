@@ -481,4 +481,24 @@ impl<T> CVec_<T> {
     pub fn truncate(&mut self, len: usize) {
         self.buffer.truncate(len);
     }
+
+    /// Clears `self` , removing all the elements.
+    ///
+    /// Note that this method does not have any effect on the allocated capacity.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// cvec.extend_from_slice(&[0, 1, 2, 3, 4]);
+    /// assert_eq!(5, cvec.len());
+    ///
+    /// cvec.clear();
+    /// assert_eq!(0, cvec.len());
+    /// ```
+    pub fn clear(&mut self) {
+        self.buffer.clear();
+    }
 }
