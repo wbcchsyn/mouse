@@ -233,6 +233,30 @@ impl<'a, T> IntoIterator for &'a mut CVec_<T> {
 }
 
 impl<T> CVec_<T> {
+    /// Clones and appends all the elements in `vals` to the end of `self` .
+    ///
+    /// # Warnings
+    ///
+    /// This method calls `self.reserve(vals.len())` everytime.
+    /// It makes the performance better to call [`reserve`] in advance to call this method twice
+    /// or more than twice.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    /// cvec.extend_from_slice(&[0, 1, 2, 3]);
+    /// assert_eq!(&[0, 1, 2, 3], cvec.as_ref());
+    /// ```
+    pub fn extend_from_slice(&mut self, vals: &[T])
+    where
+        T: Clone,
+    {
+        self.buffer.extend_from_slice(vals);
+    }
+
     /// Appends `val` to the end of the buffer.
     ///
     /// # Warnings
