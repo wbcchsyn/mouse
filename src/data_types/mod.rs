@@ -79,6 +79,18 @@ pub struct CVec<T> {
     buffer: mouse_containers::Vec<T, CAlloc>,
 }
 
+impl<T> From<Vec<T>> for CVec<T> {
+    fn from(vec: Vec<T>) -> Self {
+        unsafe {
+            let buffer = mouse_containers::Vec::<T, CAlloc>::from_vec_alloc(vec, CAlloc::default());
+            let allocating_size = mouse_cache_alloc::allocating_size(buffer.as_ptr());
+            mouse_cache_alloc::increase_cache_size(allocating_size);
+
+            Self { buffer }
+        }
+    }
+}
+
 impl<T> From<&[T]> for CVec<T>
 where
     T: Clone,
