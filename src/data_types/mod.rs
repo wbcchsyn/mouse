@@ -255,6 +255,27 @@ impl<T> CVec_<T> {
         self.buffer.push(val);
     }
 
+    /// Removes the last element from `self` and returns it if any, or `None` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::CVec_;
+    ///
+    /// let mut cvec = CVec_::<u8>::new();
+    ///
+    /// assert_eq!(None, cvec.pop());
+    ///
+    /// cvec.push(1);
+    /// cvec.push(2);
+    /// assert_eq!(2, cvec.pop().unwrap());
+    /// assert_eq!(1, cvec.pop().unwrap());
+    /// assert_eq!(None, cvec.pop());
+    /// ```
+    pub fn pop(&mut self) -> Option<T> {
+        self.buffer.pop()
+    }
+
     /// Returns the number of elements that `self` holds.
     ///
     /// # Examples
