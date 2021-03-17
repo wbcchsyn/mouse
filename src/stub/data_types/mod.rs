@@ -14,8 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-mod data_types;
-mod errors;
+//! 'stub::data_types' uses DER to serialize/deserialize.
+//!
+//! Id ::= [APPLICATION 0] OCTET STRING
+//!
+//! Blob ::= [APPLICATION 1] OCTET STRING
 
-pub use data_types::Blob;
-pub use errors::Error;
+mod acid;
+
+pub use acid::Blob;

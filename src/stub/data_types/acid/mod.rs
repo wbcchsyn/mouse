@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-mod data_types;
-mod errors;
+mod blob;
 
-pub use data_types::Blob;
-pub use errors::Error;
+pub use blob::Blob;
