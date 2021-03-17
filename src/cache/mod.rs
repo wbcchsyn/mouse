@@ -206,28 +206,6 @@ pub fn decrease_cache_using_size(bytes: usize) -> usize {
     mouse_cache_alloc::decrease_cache_size(bytes)
 }
 
-/// Returns the byte size of the memory allocated from the heap.
-///
-/// Argument `ptr` must fulfill the followings.
-///
-/// - It must be allocated via `std::alloc::alloc` or `std::alloc::System` and so on.
-/// - It must not be null.
-/// - It must not have been deallocated yet.
-///
-/// # Safety
-///
-/// The behavior is undefined if `ptr` does not satisfy the requirements.
-///
-/// # Warnings
-///
-/// This function is based on C function 'malloc_usable_size()'.
-/// Both 'dmalloc' and 'jemalloc' implements the function, however, 'POSIX' does not define it.
-#[cfg(unix)]
-#[inline]
-pub unsafe fn allocating_size<T>(ptr: *const T) -> usize {
-    mouse_cache_alloc::allocating_size(ptr)
-}
-
 /// Finds cache whose id equals to `id` and returns the result.
 ///
 /// The found cache element will be regarded as the 'Most Recently Used (MRU)'.
