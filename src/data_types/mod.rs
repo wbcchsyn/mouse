@@ -59,6 +59,26 @@ impl ModuleEnvironment for Environment {
     }
 }
 
+impl Environment {
+    /// Registor `deserializer` to `self` .
+    ///
+    /// The default deserializer always returns an `Err` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Environment, AcidDeserializer};
+    ///
+    /// let deserializer: AcidDeserializer = |_: &[u8]| Err(Box::from("test"));
+    ///
+    /// let mut env = Environment::default();
+    /// env.set_acid_deserializer(deserializer);
+    /// ```
+    pub fn set_acid_deserializer(&mut self, deserializer: AcidDeserializer) {
+        self.acid_deserializer = deserializer;
+    }
+}
+
 /// Function type to deserialize `Acid` .
 pub type AcidDeserializer = fn(&[u8]) -> Result<CAcid, Box<dyn Error>>;
 
