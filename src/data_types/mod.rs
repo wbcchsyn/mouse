@@ -33,11 +33,15 @@ use std::borrow::{Borrow, BorrowMut};
 use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` .
-pub struct Environment {}
+pub struct Environment {
+    acid_deserializer: AcidDeserializer,
+}
 
 impl Default for Environment {
     fn default() -> Self {
-        Self {}
+        Self {
+            acid_deserializer: default_acid_deserializer,
+        }
     }
 }
 
