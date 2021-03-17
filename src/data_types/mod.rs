@@ -58,6 +58,10 @@ impl ModuleEnvironment for Environment {
 /// Function type to deserialize `Acid` .
 pub type AcidDeserializer = fn(&[u8]) -> Result<CAcid, Box<dyn Error>>;
 
+fn default_acid_deserializer(_: &[u8]) -> Result<CAcid, Box<dyn Error>> {
+    Err(Box::from("Not specified how to deserialize 'Acid'."))
+}
+
 /// `CAlloc` implements `GlobalAlloc` and behaves like `std::alloc::System` except for that
 /// `CAlloc` increases/decreases the caching byte size as allocate/deallocate heap memory.
 pub use mouse_cache_alloc::Alloc as CAlloc;
