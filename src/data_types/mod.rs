@@ -64,6 +64,10 @@ impl Environment {
     ///
     /// The default deserializer always returns an `Err` .
     ///
+    /// See also function [`deserialize_acid`] .
+    ///
+    /// [`deserialize_acid`]: fn.deserialize_acid.html
+    ///
     /// # Examples
     ///
     /// ```
@@ -84,6 +88,24 @@ pub type AcidDeserializer = fn(&[u8]) -> Result<CAcid, Box<dyn Error>>;
 
 fn default_acid_deserializer(_: &[u8]) -> Result<CAcid, Box<dyn Error>> {
     Err(Box::from("Not specified how to deserialize 'Acid'."))
+}
+
+/// Deserializes `bytes` using deserializer registored to `env` .
+///
+/// # Examples
+///
+/// ```
+/// use mouse::data_types::{deserialize_acid, Environment, AcidDeserializer};
+///
+/// let deserializer: AcidDeserializer = |_: &[u8]| Err(Box::from("test"));
+///
+/// let mut env = Environment::default();
+/// env.set_acid_deserializer(deserializer);
+///
+/// assert_eq!(true, deserialize_acid(&[], &env).is_err());
+/// ```
+pub fn deserialize_acid(bytes: &[u8], env: &Environment) -> Result<CAcid, Box<dyn Error>> {
+    (env.acid_deserializer)(bytes)
 }
 
 /// `CAlloc` implements `GlobalAlloc` and behaves like `std::alloc::System` except for that
