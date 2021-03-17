@@ -273,6 +273,22 @@ impl GlobalEnvironment {
 
         Ok(())
     }
+
+    /// Register `deserializer` to `self `.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::GlobalEnvironment;
+    /// use mouse::data_types::AcidDeserializer;
+    ///
+    /// let deserializer: AcidDeserializer = |_| Err(Box::from("foo"));
+    /// let mut env = GlobalEnvironment::default();
+    /// env.set_acid_deserializer(deserializer);
+    /// ```
+    pub fn set_acid_deserializer(&mut self, deserializer: data_types::AcidDeserializer) {
+        self.data_types.set_acid_deserializer(deserializer);
+    }
 }
 
 /// `NotImplementedError` implements `std::error::Error` for default functions and so on.
