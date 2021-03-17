@@ -23,6 +23,7 @@ extern crate log;
 
 pub mod cache;
 pub mod data_types;
+pub mod kvs;
 mod logger;
 #[cfg(test)]
 mod stub;
