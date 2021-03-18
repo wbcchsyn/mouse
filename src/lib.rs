@@ -227,6 +227,7 @@ pub trait ModuleEnvironment: Default {
 }
 
 /// A set of `ModuleEnvironment` instances for all the module.
+#[derive(Default)]
 pub struct GlobalEnvironment {
     // !!! Warnings
     // !! The order of the property is important, because they are dropped in this order.
@@ -236,15 +237,6 @@ pub struct GlobalEnvironment {
     // !! https://github.com/rust-lang/rfcs/blob/master/text/1857-stabilize-drop-order.md
     cache: cache::Environment,
     data_types: data_types::Environment,
-}
-
-impl Default for GlobalEnvironment {
-    fn default() -> Self {
-        Self {
-            cache: Default::default(),
-            data_types: Default::default(),
-        }
-    }
 }
 
 impl GlobalEnvironment {

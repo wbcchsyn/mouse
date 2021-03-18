@@ -24,8 +24,6 @@ mod resource;
 use crate::{Config, ModuleEnvironment};
 pub use acid::{Acid, CAcid, Id};
 use clap::App;
-use core::cmp::Ordering;
-use core::hash::{Hash, Hasher};
 use core::iter::IntoIterator;
 use core::ops::{Deref, DerefMut, Index, IndexMut};
 use core::slice::{Iter, IterMut, SliceIndex};
@@ -74,7 +72,7 @@ pub use mouse_cache_alloc::MmapAlloc as CMmapAlloc;
 /// - `CVec` uses [`CAlloc`] to allocate/deallocate heap memory.
 ///
 /// [`CAlloc`]: struct.CAlloc.html
-#[derive(Clone, Default)]
+#[derive(Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CVec<T> {
     buffer: mouse_containers::Vec<T, CAlloc>,
 }
@@ -154,47 +152,6 @@ impl<T> Deref for CVec<T> {
 impl<T> DerefMut for CVec<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         self.buffer.deref_mut()
-    }
-}
-
-impl<T> PartialEq<Self> for CVec<T>
-where
-    T: PartialEq,
-{
-    fn eq(&self, other: &Self) -> bool {
-        self.buffer.eq(&other.buffer)
-    }
-}
-
-impl<T> Eq for CVec<T> where T: Eq {}
-
-impl<T> PartialOrd<Self> for CVec<T>
-where
-    T: PartialOrd,
-{
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        self.buffer.partial_cmp(&other.buffer)
-    }
-}
-
-impl<T> Ord for CVec<T>
-where
-    T: Ord,
-{
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.buffer.cmp(&other.buffer)
-    }
-}
-
-impl<T> Hash for CVec<T>
-where
-    T: Hash,
-{
-    fn hash<H>(&self, hasher: &mut H)
-    where
-        H: Hasher,
-    {
-        self.buffer.hash(hasher)
     }
 }
 
