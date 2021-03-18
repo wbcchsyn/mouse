@@ -17,3 +17,5 @@
 //! 'kvs' module
 
 mod leveldb;
+
+pub use leveldb::Environment;
