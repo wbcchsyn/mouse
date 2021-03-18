@@ -15,9 +15,14 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::ModuleEnvironment;
+use clap::App;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
 pub struct Environment {}
 
-impl ModuleEnvironment for Environment {}
+impl ModuleEnvironment for Environment {
+    fn args(app: App<'static, 'static>) -> App<'static, 'static> {
+        app
+    }
+}
