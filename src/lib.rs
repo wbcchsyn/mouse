@@ -269,6 +269,7 @@ impl GlobalEnvironment {
     pub unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         self.data_types.init()?;
         self.cache.init()?;
+        self.kvs.init()?;
 
         Ok(())
     }
