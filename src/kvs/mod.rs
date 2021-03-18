@@ -19,6 +19,7 @@
 mod leveldb;
 
 pub use leveldb::Environment;
+use std::borrow::Cow;
 use std::error::Error;
 
 /// Trait for query to the KVS to insert or to update.
@@ -39,4 +40,12 @@ pub trait WriteQuery {
     ///
     /// This method does not block.
     fn error(&self) -> Option<&dyn Error>;
+}
+
+/// `Row` represents data stored in the KVS.
+pub struct Row<'a> {
+    /// Intrinsic data
+    pub intrinsic: Cow<'a, [u8]>,
+    /// Extrinsic data
+    pub extrinsic: Cow<'a, [u8]>,
 }
