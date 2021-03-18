@@ -19,3 +19,24 @@
 mod leveldb;
 
 pub use leveldb::Environment;
+use std::error::Error;
+
+/// Trait for query to the KVS to insert or to update.
+///
+/// It depends on the implementation whether the constructor starts the query or not.
+pub trait WriteQuery {
+    /// Returns `true` if the query has already finished, or `false` .
+    ///
+    /// This method does not block.
+    fn is_finished(&self) -> bool;
+
+    /// Starts query if not yet, and blocks till the query finished.
+    /// If the query has already finished, returns immediately.
+    fn wait(&mut self) -> Result<(), &dyn Error>;
+
+    /// Returns error if `self` has finished, and if the query was failed; otherwise, returns
+    /// `None`
+    ///
+    /// This method does not block.
+    fn error(&self) -> Option<&dyn Error>;
+}
