@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::ModuleEnvironment;
+
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
 pub struct Environment {}
+
+impl ModuleEnvironment for Environment {}
