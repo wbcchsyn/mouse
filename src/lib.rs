@@ -254,6 +254,7 @@ impl GlobalEnvironment {
     pub unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
         self.data_types.check(config)?;
         self.cache.check(config)?;
+        self.kvs.check(config)?;
 
         Ok(())
     }
