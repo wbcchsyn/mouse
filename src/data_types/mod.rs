@@ -33,11 +33,15 @@ use std::borrow::{Borrow, BorrowMut};
 use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` .
-pub struct Environment {}
+pub struct Environment {
+    acid_deserializer: AcidDeserializer,
+}
 
 impl Default for Environment {
     fn default() -> Self {
-        Self {}
+        Self {
+            acid_deserializer: default_acid_deserializer,
+        }
     }
 }
 
@@ -53,6 +57,55 @@ impl ModuleEnvironment for Environment {
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
+}
+
+impl Environment {
+    /// Registor `deserializer` to `self` .
+    ///
+    /// The default deserializer always returns an `Err` .
+    ///
+    /// See also function [`deserialize_acid`] .
+    ///
+    /// [`deserialize_acid`]: fn.deserialize_acid.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{Environment, AcidDeserializer};
+    ///
+    /// let deserializer: AcidDeserializer = |_: &[u8]| Err(Box::from("test"));
+    ///
+    /// let mut env = Environment::default();
+    /// env.set_acid_deserializer(deserializer);
+    /// ```
+    pub fn set_acid_deserializer(&mut self, deserializer: AcidDeserializer) {
+        self.acid_deserializer = deserializer;
+    }
+}
+
+/// Function type to deserialize `Acid` .
+pub type AcidDeserializer = fn(&[u8]) -> Result<CAcid, Box<dyn Error>>;
+
+fn default_acid_deserializer(_: &[u8]) -> Result<CAcid, Box<dyn Error>> {
+    Err(Box::from("Not specified how to deserialize 'Acid'."))
+}
+
+/// Deserializes `bytes` using deserializer registored to `env` .
+///
+/// # Examples
+///
+/// ```
+/// use mouse::data_types::{deserialize_acid, Environment, AcidDeserializer};
+///
+/// let deserializer: AcidDeserializer = |_: &[u8]| Err(Box::from("test"));
+///
+/// let mut env = Environment::default();
+/// env.set_acid_deserializer(deserializer);
+///
+/// assert_eq!(true, deserialize_acid(&[], &env).is_err());
+/// ```
+pub fn deserialize_acid(bytes: &[u8], env: &Environment) -> Result<CAcid, Box<dyn Error>> {
+    (env.acid_deserializer)(bytes)
 }
 
 /// `CAlloc` implements `GlobalAlloc` and behaves like `std::alloc::System` except for that
