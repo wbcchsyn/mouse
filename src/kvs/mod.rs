@@ -49,3 +49,26 @@ pub struct Row<'a> {
     /// Extrinsic data
     pub extrinsic: Cow<'a, [u8]>,
 }
+
+/// Trait for query to the KVS to fetch.
+///
+/// It depends on the implementation whether the constructor starts the query or not.
+pub trait ReadQuery {
+    /// Returns `true` if the query has already finished, or `false` .
+    ///
+    /// This method does not block.
+    fn is_finished(&self) -> bool;
+
+    /// Starts query if not yet, and blocks till the query finished.
+    /// If the query has already finished, returns immediately.
+    ///
+    /// This method returns `Row` if the data is found, or `None` if the query succeeded but no
+    /// such data is stored in the KVS.
+    fn wait(&mut self) -> Result<Option<Row>, &dyn Error>;
+
+    /// Returns error if `self` has finished, and if the query was failed; otherwise, returns
+    /// `None`
+    ///
+    /// This method does not block.
+    fn error(&self) -> Option<&dyn Error>;
+}
