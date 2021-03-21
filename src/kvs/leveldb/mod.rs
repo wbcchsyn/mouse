@@ -37,6 +37,7 @@ impl Default for Db {
 #[derive(Default)]
 pub struct Environment {
     db_path: PathBuf,
+    db: Db,
 }
 
 impl ModuleEnvironment for Environment {
