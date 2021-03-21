@@ -17,10 +17,13 @@
 use crate::{Config, ModuleEnvironment};
 use clap::App;
 use std::error::Error;
+use std::path::PathBuf;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
-pub struct Environment {}
+pub struct Environment {
+    db_path: PathBuf,
+}
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
