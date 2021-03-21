@@ -17,6 +17,7 @@
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use std::error::Error;
+use std::ffi::CString;
 use std::path::PathBuf;
 
 struct Db {
@@ -30,6 +31,34 @@ impl Default for Db {
             intrinsic: mouse_leveldb::Database::new(),
             extrinsic: mouse_leveldb::Database::new(),
         }
+    }
+}
+
+impl Db {
+    pub fn open(&mut self, path: &PathBuf) -> Result<(), Box<dyn Error>> {
+        let mut path = path.clone();
+        {
+            path.push("intrinsic");
+            let path = path.to_string_lossy().into_owned().into_bytes();
+            let path = CString::new(path).or_else(|e| {
+                let err: Box<dyn Error> = Box::from(format!("Failed to open KVS: {}", e));
+                Err(err)
+            })?;
+            self.intrinsic.open(&path)?;
+        }
+
+        {
+            path.pop();
+            path.push("extrinsic");
+            let path = path.to_string_lossy().into_owned().into_bytes();
+            let path = CString::new(path).or_else(|e| {
+                let err: Box<dyn Error> = Box::from(format!("Failed to open KVS: {}", e));
+                Err(err)
+            })?;
+            self.extrinsic.open(&path)?;
+        }
+
+        Ok(())
     }
 }
 
