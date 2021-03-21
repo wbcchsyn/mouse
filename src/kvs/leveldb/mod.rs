@@ -34,7 +34,10 @@ impl ModuleEnvironment for Environment {
             .takes_value(true)])
     }
 
-    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+    unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
+        let db_path = config.args().value_of("PATH_TO_KVS_DB_DIR").unwrap();
+        self.db_path = PathBuf::from(db_path);
+
         Ok(())
     }
 
