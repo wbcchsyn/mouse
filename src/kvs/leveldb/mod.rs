@@ -86,6 +86,8 @@ impl ModuleEnvironment for Environment {
     }
 
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+        self.db.open(&self.db_path)?;
+
         Ok(())
     }
 }
