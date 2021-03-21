@@ -15,7 +15,7 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{Config, ModuleEnvironment};
-use clap::App;
+use clap::{App, Arg};
 use std::error::Error;
 use std::path::PathBuf;
 
@@ -27,7 +27,11 @@ pub struct Environment {
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
-        app
+        app.args(&[Arg::with_name("PATH_TO_KVS_DB_DIR")
+            .help("Path to the KVS Database directory.")
+            .long("--kvs-db-path")
+            .required(true)
+            .takes_value(true)])
     }
 
     unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
