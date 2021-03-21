@@ -19,6 +19,11 @@ use clap::{App, Arg};
 use std::error::Error;
 use std::path::PathBuf;
 
+struct Db {
+    intrinsic: mouse_leveldb::Database,
+    extrinsic: mouse_leveldb::Database,
+}
+
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
 pub struct Environment {
