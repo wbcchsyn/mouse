@@ -24,6 +24,15 @@ struct Db {
     extrinsic: mouse_leveldb::Database,
 }
 
+impl Default for Db {
+    fn default() -> Self {
+        Self {
+            intrinsic: mouse_leveldb::Database::new(),
+            extrinsic: mouse_leveldb::Database::new(),
+        }
+    }
+}
+
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
 pub struct Environment {
