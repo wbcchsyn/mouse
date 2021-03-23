@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use crate::data_types::Id;
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use std::error::Error;
@@ -97,4 +98,10 @@ enum FetchResult {
     NotFound,
     Found(mouse_leveldb::Octets, mouse_leveldb::Octets),
     Err(mouse_leveldb::Error),
+}
+
+struct FetchQuery<'a> {
+    env: &'a Environment,
+    id: Id,
+    result: FetchResult,
 }
