@@ -91,3 +91,10 @@ impl ModuleEnvironment for Environment {
         Ok(())
     }
 }
+
+enum FetchResult {
+    NotYet,
+    NotFound,
+    Found(mouse_leveldb::Octets, mouse_leveldb::Octets),
+    Err(mouse_leveldb::Error),
+}
