@@ -97,6 +97,10 @@ impl WriteBatch {
         self.extrinsic.init();
     }
 
+    pub fn len(&self) -> usize {
+        self.results.len()
+    }
+
     pub fn put(&mut self, id: &Id, intrinsic: &[u8], extrinsic: &[u8]) -> Asc<Mutex<PutResult>> {
         if !intrinsic.is_empty() {
             self.intrinsic.put(id.as_ref(), intrinsic);
