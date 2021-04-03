@@ -174,3 +174,8 @@ impl ReadQuery for FetchQuery<'_> {
         }
     }
 }
+
+/// Returns a new `ReadQuery`
+pub fn fetch<'a>(id: &Id, env: &'a Environment) -> impl ReadQuery + 'a {
+    FetchQuery::new(id, env)
+}
