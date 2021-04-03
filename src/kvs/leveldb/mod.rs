@@ -309,3 +309,16 @@ struct PutQuery<'a> {
     env: &'a Environment,
     result: Asc<Mutex<PutResult>>,
 }
+
+impl<'a> PutQuery<'a> {
+    pub fn new(id: &Id, intrinsic: &[u8], extrinsic: &[u8], env: &'a Environment) -> Self {
+        let mut batch = env.write_batch.lock().unwrap();
+        let result = batch.put(id, intrinsic, extrinsic);
+
+        if batch.len() == env.max_write_queries {
+            batch.flush(&env.db);
+        }
+
+        Self { env, result }
+    }
+}
