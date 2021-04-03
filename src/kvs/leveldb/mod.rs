@@ -94,6 +94,14 @@ impl ModuleEnvironment for Environment {
         let db_path = config.args().value_of("PATH_TO_KVS_DB_DIR").unwrap();
         self.db_path = PathBuf::from(db_path);
 
+        let max_write_queries = config.args().value_of("MAX_WRITE_KVS_QUERIES").unwrap();
+        self.max_write_queries = max_write_queries.parse().map_err(|e| {
+            Box::<dyn Error>::from(format!(
+                "Failed to parse argument '--max-write-kvs-queries': {}",
+                e
+            ))
+        })?;
+
         Ok(())
     }
 
