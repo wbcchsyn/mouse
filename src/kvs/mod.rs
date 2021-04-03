@@ -72,3 +72,5 @@ pub trait ReadQuery {
     /// This method does not block.
     fn error(&self) -> Option<&dyn Error>;
 }
+
+pub use leveldb::fetch;
