@@ -14,10 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::{ReadQuery, Row};
-use crate::data_types::Id;
+use super::{ReadQuery, Row, WriteQuery};
+use crate::data_types::{Acid, Id};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
+use counting_pointer::Asc;
+use spin_sync::Mutex;
 use std::borrow::Cow;
 use std::error::Error;
 use std::ffi::CString;
@@ -65,31 +67,148 @@ impl Db {
     }
 }
 
+struct WriteBatch {
+    results: Vec<Asc<Mutex<PutResult>>>,
+    intrinsic: mouse_leveldb::WriteBatch,
+    extrinsic: mouse_leveldb::WriteBatch,
+}
+
+impl Default for WriteBatch {
+    fn default() -> Self {
+        Self {
+            results: Vec::new(),
+            intrinsic: mouse_leveldb::WriteBatch::new(),
+            extrinsic: mouse_leveldb::WriteBatch::new(),
+        }
+    }
+}
+
+impl WriteBatch {
+    /// Initializes `self` .
+    ///
+    /// # Panics
+    ///
+    /// Panics if `self` has already initialized.
+    pub fn init(&mut self, max_write_queries: usize) {
+        assert_eq!(true, self.results.is_empty());
+        self.results.reserve(max_write_queries);
+
+        self.intrinsic.init();
+        self.extrinsic.init();
+    }
+
+    pub fn len(&self) -> usize {
+        self.results.len()
+    }
+
+    pub fn put(&mut self, id: &Id, intrinsic: &[u8], extrinsic: &[u8]) -> Asc<Mutex<PutResult>> {
+        if !intrinsic.is_empty() {
+            self.intrinsic.put(id.as_ref(), intrinsic);
+        }
+        if !extrinsic.is_empty() {
+            self.extrinsic.put(id.as_ref(), extrinsic);
+        }
+
+        let result = Asc::from(Mutex::new(PutResult::NotYet));
+        self.results.push(result.clone());
+
+        result
+    }
+
+    pub fn flush(&mut self, db: &Db) {
+        // Flush extrinsic batch
+        {
+            let db = &db.extrinsic;
+            let res = mouse_leveldb::write(db, &mut self.extrinsic);
+            if let Err(e) = res {
+                self.set_error(e);
+                self.clear();
+                return;
+            }
+        }
+
+        // Flush intrinsic batch
+        {
+            let db = &db.intrinsic;
+            let res = mouse_leveldb::write(db, &mut self.intrinsic);
+            if let Err(e) = res {
+                self.set_error(e);
+                self.clear();
+                return;
+            }
+        }
+
+        // Set the results
+        for r in &self.results {
+            let mut r = r.lock().unwrap();
+            *r = PutResult::Succeeded;
+        }
+
+        self.clear();
+    }
+
+    fn set_error(&mut self, e: mouse_leveldb::Error) {
+        let e = Asc::from(e);
+
+        for r in &self.results {
+            let mut r = r.lock().unwrap();
+            *r = PutResult::Error(e.clone());
+        }
+    }
+
+    fn clear(&mut self) {
+        self.results.clear();
+        self.intrinsic.clear();
+        self.extrinsic.clear();
+    }
+}
+
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
 pub struct Environment {
     db_path: PathBuf,
     db: Db,
+
+    max_write_queries: usize,
+    write_batch: std::sync::Mutex<WriteBatch>,
 }
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
-        app.args(&[Arg::with_name("PATH_TO_KVS_DB_DIR")
-            .help("Path to the KVS Database directory.")
-            .long("--kvs-db-path")
-            .required(true)
-            .takes_value(true)])
+        app.args(&[
+            Arg::with_name("PATH_TO_KVS_DB_DIR")
+                .help("Path to the KVS Database directory.")
+                .long("--kvs-db-path")
+                .required(true)
+                .takes_value(true),
+            Arg::with_name("MAX_WRITE_KVS_QUERIES")
+                .help("The max number of writing kvs queries.")
+                .long("--max-write-kvs-queries")
+                .default_value("128")
+                .takes_value(true),
+        ])
     }
 
     unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
         let db_path = config.args().value_of("PATH_TO_KVS_DB_DIR").unwrap();
         self.db_path = PathBuf::from(db_path);
 
+        let max_write_queries = config.args().value_of("MAX_WRITE_KVS_QUERIES").unwrap();
+        self.max_write_queries = max_write_queries.parse().map_err(|e| {
+            Box::<dyn Error>::from(format!(
+                "Failed to parse argument '--max-write-kvs-queries': {}",
+                e
+            ))
+        })?;
+
         Ok(())
     }
 
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         self.db.open(&self.db_path)?;
+
+        let mut write_batch = self.write_batch.lock().unwrap();
+        write_batch.init(self.max_write_queries);
 
         Ok(())
     }
@@ -178,4 +297,78 @@ impl ReadQuery for FetchQuery<'_> {
 /// Returns a new `ReadQuery`
 pub fn fetch<'a>(id: &Id, env: &'a Environment) -> impl ReadQuery + 'a {
     FetchQuery::new(id, env)
+}
+
+enum PutResult {
+    NotYet,
+    Succeeded,
+    Error(Asc<mouse_leveldb::Error>),
+}
+
+struct PutQuery<'a> {
+    env: &'a Environment,
+    result: Asc<Mutex<PutResult>>,
+}
+
+impl<'a> PutQuery<'a> {
+    pub fn new(id: &Id, intrinsic: &[u8], extrinsic: &[u8], env: &'a Environment) -> Self {
+        let mut batch = env.write_batch.lock().unwrap();
+        let result = batch.put(id, intrinsic, extrinsic);
+
+        if batch.len() == env.max_write_queries {
+            batch.flush(&env.db);
+        }
+
+        Self { env, result }
+    }
+}
+
+impl WriteQuery for PutQuery<'_> {
+    fn is_finished(&self) -> bool {
+        match &*self.result.lock().unwrap() {
+            PutResult::NotYet => false,
+            _ => true,
+        }
+    }
+
+    fn wait(&mut self) -> Result<(), &dyn Error> {
+        if !self.is_finished() {
+            let mut batch = self.env.write_batch.lock().unwrap();
+            if !self.is_finished() {
+                batch.flush(&self.env.db);
+            }
+        }
+
+        match &*self.result.lock().unwrap() {
+            PutResult::NotYet => panic!("Never comes here."),
+            PutResult::Succeeded => Ok(()),
+            PutResult::Error(e) => unsafe { Err(&*Asc::as_ptr(e)) },
+        }
+    }
+
+    fn error(&self) -> Option<&dyn Error> {
+        match &*self.result.lock().unwrap() {
+            PutResult::Error(e) => unsafe { Some(&*Asc::as_ptr(e)) },
+            _ => None,
+        }
+    }
+}
+
+/// Returns a new `WriteQuery` to put both the intrinsic data and extrinsic data of `acid` .
+pub fn insert<'a>(acid: &dyn Acid, env: &'a Environment) -> impl WriteQuery + 'a {
+    PutQuery::new(
+        acid.id(),
+        acid.intrinsic().as_ref(),
+        acid.extrinsic().as_ref(),
+        env,
+    )
+}
+
+/// Returns a new `WriteQuery` to put only extrinsic data of `acid` .
+///
+/// Note that the acid cannot be fetched before the intrinsic data is stored, too.
+/// This method is called only when the user is sure that the intrinsic data is already stored
+/// to the KVS, and when the user want to update the extrinsic data.
+pub fn update<'a>(acid: &dyn Acid, env: &'a Environment) -> impl WriteQuery + 'a {
+    PutQuery::new(acid.id(), &[], acid.extrinsic().as_ref(), env)
 }

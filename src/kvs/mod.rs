@@ -18,7 +18,7 @@
 
 mod leveldb;
 
-pub use leveldb::Environment;
+pub use leveldb::{fetch, insert, update, Environment};
 use std::borrow::Cow;
 use std::error::Error;
 
@@ -72,5 +72,3 @@ pub trait ReadQuery {
     /// This method does not block.
     fn error(&self) -> Option<&dyn Error>;
 }
-
-pub use leveldb::fetch;
