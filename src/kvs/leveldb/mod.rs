@@ -14,8 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use super::{ReadQuery, Row};
+use crate::data_types::Id;
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
+use std::borrow::Cow;
 use std::error::Error;
 use std::ffi::CString;
 use std::path::PathBuf;
@@ -90,4 +93,89 @@ impl ModuleEnvironment for Environment {
 
         Ok(())
     }
+}
+
+enum FetchResult {
+    NotYet,
+    NotFound,
+    Found(mouse_leveldb::Octets, mouse_leveldb::Octets),
+    Err(mouse_leveldb::Error),
+}
+
+struct FetchQuery<'a> {
+    env: &'a Environment,
+    id: Id,
+    result: FetchResult,
+}
+
+impl<'a> FetchQuery<'a> {
+    pub fn new(id: &Id, env: &'a Environment) -> Self {
+        Self {
+            id: *id,
+            env,
+            result: FetchResult::NotYet,
+        }
+    }
+
+    fn do_fetch(&self) -> FetchResult {
+        let intrinsic_db = &self.env.db.intrinsic;
+        let intrinsic = match mouse_leveldb::get(intrinsic_db, self.id.as_ref()) {
+            Ok(octets) => octets,
+            Err(e) => return FetchResult::Err(e),
+        };
+
+        if intrinsic.as_ref().is_empty() {
+            return FetchResult::NotFound;
+        }
+
+        let extrinsic_db = &self.env.db.extrinsic;
+        let extrinsic = match mouse_leveldb::get(extrinsic_db, self.id.as_ref()) {
+            Ok(octets) => octets,
+            Err(e) => return FetchResult::Err(e),
+        };
+
+        FetchResult::Found(intrinsic, extrinsic)
+    }
+}
+
+impl ReadQuery for FetchQuery<'_> {
+    fn is_finished(&self) -> bool {
+        match self.result {
+            FetchResult::NotYet => false,
+            _ => true,
+        }
+    }
+
+    fn wait(&mut self) -> Result<Option<Row>, &dyn Error> {
+        if !self.is_finished() {
+            self.result = self.do_fetch();
+        }
+
+        match &self.result {
+            FetchResult::NotYet => panic!("Program never comes here."),
+            FetchResult::NotFound => Ok(None),
+            FetchResult::Found(intrinsic, extrinsic) => {
+                let intrinsic: &[u8] = intrinsic.as_ref();
+                let extrinsic: &[u8] = extrinsic.as_ref();
+                let row = Row {
+                    intrinsic: Cow::Borrowed(intrinsic),
+                    extrinsic: Cow::Borrowed(extrinsic),
+                };
+                Ok(Some(row))
+            }
+            FetchResult::Err(e) => Err(e),
+        }
+    }
+
+    fn error(&self) -> Option<&dyn Error> {
+        match &self.result {
+            FetchResult::Err(e) => Some(e),
+            _ => None,
+        }
+    }
+}
+
+/// Returns a new `ReadQuery`
+pub fn fetch<'a>(id: &Id, env: &'a Environment) -> impl ReadQuery + 'a {
+    FetchQuery::new(id, env)
 }
