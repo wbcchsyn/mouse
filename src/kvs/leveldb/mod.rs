@@ -96,6 +96,53 @@ impl WriteBatch {
         self.intrinsic.init();
         self.extrinsic.init();
     }
+
+    pub fn flush(&mut self, db: &Db) {
+        // Flush extrinsic batch
+        {
+            let db = &db.extrinsic;
+            let res = mouse_leveldb::write(db, &mut self.extrinsic);
+            if let Err(e) = res {
+                self.set_error(e);
+                self.clear();
+                return;
+            }
+        }
+
+        // Flush intrinsic batch
+        {
+            let db = &db.intrinsic;
+            let res = mouse_leveldb::write(db, &mut self.intrinsic);
+            if let Err(e) = res {
+                self.set_error(e);
+                self.clear();
+                return;
+            }
+        }
+
+        // Set the results
+        for r in &self.results {
+            let mut r = r.lock().unwrap();
+            *r = PutResult::Succeeded;
+        }
+
+        self.clear();
+    }
+
+    fn set_error(&mut self, e: mouse_leveldb::Error) {
+        let e = Asc::from(e);
+
+        for r in &self.results {
+            let mut r = r.lock().unwrap();
+            *r = PutResult::Error(e.clone());
+        }
+    }
+
+    fn clear(&mut self) {
+        self.results.clear();
+        self.intrinsic.clear();
+        self.extrinsic.clear();
+    }
 }
 
 /// `Environment` implements `ModuleEnvironment` for this module.
