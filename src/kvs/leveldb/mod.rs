@@ -83,6 +83,21 @@ impl Default for WriteBatch {
     }
 }
 
+impl WriteBatch {
+    /// Initializes `self` .
+    ///
+    /// # Panics
+    ///
+    /// Panics if `self` has already initialized.
+    pub fn init(&mut self, max_write_queries: usize) {
+        assert_eq!(true, self.results.is_empty());
+        self.results.reserve(max_write_queries);
+
+        self.intrinsic.init();
+        self.extrinsic.init();
+    }
+}
+
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
 pub struct Environment {
