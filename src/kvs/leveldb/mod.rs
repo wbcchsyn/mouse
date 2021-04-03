@@ -105,6 +105,7 @@ pub struct Environment {
     db: Db,
 
     max_write_queries: usize,
+    write_batch: std::sync::Mutex<WriteBatch>,
 }
 
 impl ModuleEnvironment for Environment {
