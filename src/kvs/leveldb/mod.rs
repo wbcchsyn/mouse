@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::{ReadQuery, Row};
+use super::{ReadQuery, Row, WriteQuery};
 use crate::data_types::Id;
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
@@ -320,5 +320,36 @@ impl<'a> PutQuery<'a> {
         }
 
         Self { env, result }
+    }
+}
+
+impl WriteQuery for PutQuery<'_> {
+    fn is_finished(&self) -> bool {
+        match &*self.result.lock().unwrap() {
+            PutResult::NotYet => false,
+            _ => true,
+        }
+    }
+
+    fn wait(&mut self) -> Result<(), &dyn Error> {
+        if !self.is_finished() {
+            let mut batch = self.env.write_batch.lock().unwrap();
+            if !self.is_finished() {
+                batch.flush(&self.env.db);
+            }
+        }
+
+        match &*self.result.lock().unwrap() {
+            PutResult::NotYet => panic!("Never comes here."),
+            PutResult::Succeeded => Ok(()),
+            PutResult::Error(e) => unsafe { Err(&*Asc::as_ptr(e)) },
+        }
+    }
+
+    fn error(&self) -> Option<&dyn Error> {
+        match &*self.result.lock().unwrap() {
+            PutResult::Error(e) => unsafe { Some(&*Asc::as_ptr(e)) },
+            _ => None,
+        }
     }
 }
