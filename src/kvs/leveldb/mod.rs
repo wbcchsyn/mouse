@@ -105,3 +105,13 @@ struct FetchQuery<'a> {
     id: Id,
     result: FetchResult,
 }
+
+impl<'a> FetchQuery<'a> {
+    pub fn new(id: &Id, env: &'a Environment) -> Self {
+        Self {
+            id: *id,
+            env,
+            result: FetchResult::NotYet,
+        }
+    }
+}
