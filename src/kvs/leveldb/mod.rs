@@ -142,6 +142,9 @@ impl ModuleEnvironment for Environment {
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         self.db.open(&self.db_path)?;
 
+        let mut write_batch = self.write_batch.lock().unwrap();
+        write_batch.init(self.max_write_queries);
+
         Ok(())
     }
 }
