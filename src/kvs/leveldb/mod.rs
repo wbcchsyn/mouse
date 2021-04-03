@@ -18,6 +18,7 @@ use super::{ReadQuery, Row};
 use crate::data_types::Id;
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
+use counting_pointer::Asc;
 use std::borrow::Cow;
 use std::error::Error;
 use std::ffi::CString;
@@ -195,4 +196,10 @@ impl ReadQuery for FetchQuery<'_> {
 /// Returns a new `ReadQuery`
 pub fn fetch<'a>(id: &Id, env: &'a Environment) -> impl ReadQuery + 'a {
     FetchQuery::new(id, env)
+}
+
+enum PutResult {
+    NotYet,
+    Succeeded,
+    Error(Asc<mouse_leveldb::Error>),
 }
