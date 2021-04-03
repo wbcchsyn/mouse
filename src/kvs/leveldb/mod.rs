@@ -114,4 +114,24 @@ impl<'a> FetchQuery<'a> {
             result: FetchResult::NotYet,
         }
     }
+
+    fn do_fetch(&self) -> FetchResult {
+        let intrinsic_db = &self.env.db.intrinsic;
+        let intrinsic = match mouse_leveldb::get(intrinsic_db, self.id.as_ref()) {
+            Ok(octets) => octets,
+            Err(e) => return FetchResult::Err(e),
+        };
+
+        if intrinsic.as_ref().is_empty() {
+            return FetchResult::NotFound;
+        }
+
+        let extrinsic_db = &self.env.db.extrinsic;
+        let extrinsic = match mouse_leveldb::get(extrinsic_db, self.id.as_ref()) {
+            Ok(octets) => octets,
+            Err(e) => return FetchResult::Err(e),
+        };
+
+        FetchResult::Found(intrinsic, extrinsic)
+    }
 }
