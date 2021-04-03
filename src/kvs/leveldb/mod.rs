@@ -73,6 +73,16 @@ struct WriteBatch {
     extrinsic: mouse_leveldb::WriteBatch,
 }
 
+impl Default for WriteBatch {
+    fn default() -> Self {
+        Self {
+            results: Vec::new(),
+            intrinsic: mouse_leveldb::WriteBatch::new(),
+            extrinsic: mouse_leveldb::WriteBatch::new(),
+        }
+    }
+}
+
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
 pub struct Environment {
