@@ -74,11 +74,18 @@ pub struct Environment {
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
-        app.args(&[Arg::with_name("PATH_TO_KVS_DB_DIR")
-            .help("Path to the KVS Database directory.")
-            .long("--kvs-db-path")
-            .required(true)
-            .takes_value(true)])
+        app.args(&[
+            Arg::with_name("PATH_TO_KVS_DB_DIR")
+                .help("Path to the KVS Database directory.")
+                .long("--kvs-db-path")
+                .required(true)
+                .takes_value(true),
+            Arg::with_name("MAX_WRITE_KVS_QUERIES")
+                .help("The max number of writing kvs queries.")
+                .long("--max-write-kvs-queries")
+                .default_value("128")
+                .takes_value(true),
+        ])
     }
 
     unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
