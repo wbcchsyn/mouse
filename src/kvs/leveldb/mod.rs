@@ -15,23 +15,79 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use crate::{Config, ModuleEnvironment};
-use clap::App;
+use clap::{App, Arg};
 use std::error::Error;
+use std::ffi::CString;
+use std::path::PathBuf;
+
+struct Db {
+    intrinsic: mouse_leveldb::Database,
+    extrinsic: mouse_leveldb::Database,
+}
+
+impl Default for Db {
+    fn default() -> Self {
+        Self {
+            intrinsic: mouse_leveldb::Database::new(),
+            extrinsic: mouse_leveldb::Database::new(),
+        }
+    }
+}
+
+impl Db {
+    pub fn open(&mut self, path: &PathBuf) -> Result<(), Box<dyn Error>> {
+        let mut path = path.clone();
+        {
+            path.push("intrinsic");
+            let path = path.to_string_lossy().into_owned().into_bytes();
+            let path = CString::new(path).or_else(|e| {
+                let err: Box<dyn Error> = Box::from(format!("Failed to open KVS: {}", e));
+                Err(err)
+            })?;
+            self.intrinsic.open(&path)?;
+        }
+
+        {
+            path.pop();
+            path.push("extrinsic");
+            let path = path.to_string_lossy().into_owned().into_bytes();
+            let path = CString::new(path).or_else(|e| {
+                let err: Box<dyn Error> = Box::from(format!("Failed to open KVS: {}", e));
+                Err(err)
+            })?;
+            self.extrinsic.open(&path)?;
+        }
+
+        Ok(())
+    }
+}
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
-pub struct Environment {}
+pub struct Environment {
+    db_path: PathBuf,
+    db: Db,
+}
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
-        app
+        app.args(&[Arg::with_name("PATH_TO_KVS_DB_DIR")
+            .help("Path to the KVS Database directory.")
+            .long("--kvs-db-path")
+            .required(true)
+            .takes_value(true)])
     }
 
-    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+    unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
+        let db_path = config.args().value_of("PATH_TO_KVS_DB_DIR").unwrap();
+        self.db_path = PathBuf::from(db_path);
+
         Ok(())
     }
 
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+        self.db.open(&self.db_path)?;
+
         Ok(())
     }
 }
