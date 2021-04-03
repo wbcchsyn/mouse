@@ -29,6 +29,7 @@ mod logger;
 mod stub;
 
 use clap::{App, ArgMatches};
+use data_types::CAcid;
 use std::error::Error;
 use std::fmt::{self, Display};
 use std::os::raw::c_int;
@@ -273,6 +274,45 @@ impl GlobalEnvironment {
 
         Ok(())
     }
+
+    /// Register `deserializer` to `self `.
+    ///
+    /// See also function [`deserialize_acid`] .
+    ///
+    /// [`deserialize_acid`]: fn.deserialize_acid.html
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::GlobalEnvironment;
+    /// use mouse::data_types::AcidDeserializer;
+    ///
+    /// let deserializer: AcidDeserializer = |_| Err(Box::from("foo"));
+    /// let mut env = GlobalEnvironment::default();
+    /// env.set_acid_deserializer(deserializer);
+    /// ```
+    pub fn set_acid_deserializer(&mut self, deserializer: data_types::AcidDeserializer) {
+        self.data_types.set_acid_deserializer(deserializer);
+    }
+}
+
+/// Deserializes `bytes` using deserializer registored to `env` .
+///
+/// # Examples
+///
+/// ```
+/// use mouse::GlobalEnvironment;
+/// use mouse::data_types::AcidDeserializer;
+///
+/// let deserializer: AcidDeserializer = |_: &[u8]| Err(Box::from("test"));
+///
+/// let mut env = GlobalEnvironment::default();
+/// env.set_acid_deserializer(deserializer);
+///
+/// assert_eq!(true, mouse::deserialize_acid(&[], &env).is_err());
+/// ```
+pub fn deserialize_acid(bytes: &[u8], env: &GlobalEnvironment) -> Result<CAcid, Box<dyn Error>> {
+    data_types::deserialize_acid(bytes, &env.data_types)
 }
 
 /// `NotImplementedError` implements `std::error::Error` for default functions and so on.
