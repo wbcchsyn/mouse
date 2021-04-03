@@ -14,9 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use super::{ReadQuery, Row};
 use crate::data_types::Id;
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
+use std::borrow::Cow;
 use std::error::Error;
 use std::ffi::CString;
 use std::path::PathBuf;
@@ -133,5 +135,42 @@ impl<'a> FetchQuery<'a> {
         };
 
         FetchResult::Found(intrinsic, extrinsic)
+    }
+}
+
+impl ReadQuery for FetchQuery<'_> {
+    fn is_finished(&self) -> bool {
+        match self.result {
+            FetchResult::NotYet => false,
+            _ => true,
+        }
+    }
+
+    fn wait(&mut self) -> Result<Option<Row>, &dyn Error> {
+        if !self.is_finished() {
+            self.result = self.do_fetch();
+        }
+
+        match &self.result {
+            FetchResult::NotYet => panic!("Program never comes here."),
+            FetchResult::NotFound => Ok(None),
+            FetchResult::Found(intrinsic, extrinsic) => {
+                let intrinsic: &[u8] = intrinsic.as_ref();
+                let extrinsic: &[u8] = extrinsic.as_ref();
+                let row = Row {
+                    intrinsic: Cow::Borrowed(intrinsic),
+                    extrinsic: Cow::Borrowed(extrinsic),
+                };
+                Ok(Some(row))
+            }
+            FetchResult::Err(e) => Err(e),
+        }
+    }
+
+    fn error(&self) -> Option<&dyn Error> {
+        match &self.result {
+            FetchResult::Err(e) => Some(e),
+            _ => None,
+        }
     }
 }
