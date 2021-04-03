@@ -300,3 +300,8 @@ enum PutResult {
     Succeeded,
     Error(Asc<mouse_leveldb::Error>),
 }
+
+struct PutQuery<'a> {
+    env: &'a Environment,
+    result: Asc<Mutex<PutResult>>,
+}
