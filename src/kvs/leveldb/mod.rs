@@ -363,3 +363,12 @@ pub fn insert<'a>(acid: &dyn Acid, env: &'a Environment) -> impl WriteQuery + 'a
         env,
     )
 }
+
+/// Returns a new `WriteQuery` to put only extrinsic data of `acid` .
+///
+/// Note that the acid cannot be fetched before the intrinsic data is stored, too.
+/// This method is called only when the user is sure that the intrinsic data is already stored
+/// to the KVS, and when the user want to update the extrinsic data.
+pub fn update<'a>(acid: &dyn Acid, env: &'a Environment) -> impl WriteQuery + 'a {
+    PutQuery::new(acid.id(), &[], acid.extrinsic().as_ref(), env)
+}
