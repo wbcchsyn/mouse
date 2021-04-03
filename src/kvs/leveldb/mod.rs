@@ -70,6 +70,8 @@ impl Db {
 pub struct Environment {
     db_path: PathBuf,
     db: Db,
+
+    max_write_queries: usize,
 }
 
 impl ModuleEnvironment for Environment {
