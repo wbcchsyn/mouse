@@ -19,6 +19,7 @@ use crate::data_types::Id;
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use counting_pointer::Asc;
+use spin_sync::Mutex;
 use std::borrow::Cow;
 use std::error::Error;
 use std::ffi::CString;
@@ -64,6 +65,12 @@ impl Db {
 
         Ok(())
     }
+}
+
+struct WriteBatch {
+    results: Vec<Asc<Mutex<PutResult>>>,
+    intrinsic: mouse_leveldb::WriteBatch,
+    extrinsic: mouse_leveldb::WriteBatch,
 }
 
 /// `Environment` implements `ModuleEnvironment` for this module.
