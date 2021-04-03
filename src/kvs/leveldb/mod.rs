@@ -97,6 +97,20 @@ impl WriteBatch {
         self.extrinsic.init();
     }
 
+    pub fn put(&mut self, id: &Id, intrinsic: &[u8], extrinsic: &[u8]) -> Asc<Mutex<PutResult>> {
+        if !intrinsic.is_empty() {
+            self.intrinsic.put(id.as_ref(), intrinsic);
+        }
+        if !extrinsic.is_empty() {
+            self.extrinsic.put(id.as_ref(), extrinsic);
+        }
+
+        let result = Asc::from(Mutex::new(PutResult::NotYet));
+        self.results.push(result.clone());
+
+        result
+    }
+
     pub fn flush(&mut self, db: &Db) {
         // Flush extrinsic batch
         {
