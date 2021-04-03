@@ -15,7 +15,7 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use super::{ReadQuery, Row, WriteQuery};
-use crate::data_types::Id;
+use crate::data_types::{Acid, Id};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use counting_pointer::Asc;
@@ -352,4 +352,14 @@ impl WriteQuery for PutQuery<'_> {
             _ => None,
         }
     }
+}
+
+/// Returns a new `WriteQuery` to put both the intrinsic data and extrinsic data of `acid` .
+pub fn insert<'a>(acid: &dyn Acid, env: &'a Environment) -> impl WriteQuery + 'a {
+    PutQuery::new(
+        acid.id(),
+        acid.intrinsic().as_ref(),
+        acid.extrinsic().as_ref(),
+        env,
+    )
 }
