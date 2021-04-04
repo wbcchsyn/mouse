@@ -25,6 +25,7 @@ pub mod cache;
 pub mod data_types;
 pub mod kvs;
 mod logger;
+pub mod rdb;
 #[cfg(test)]
 mod stub;
 
