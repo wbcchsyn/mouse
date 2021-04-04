@@ -275,6 +275,7 @@ impl GlobalEnvironment {
         self.data_types.init()?;
         self.cache.init()?;
         self.kvs.init()?;
+        self.rdb.init()?;
 
         Ok(())
     }
