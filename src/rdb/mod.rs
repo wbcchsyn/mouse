@@ -17,3 +17,5 @@
 //! 'rdb' module
 
 mod sqlite3;
+
+pub use sqlite3::Environment;
