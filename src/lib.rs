@@ -25,6 +25,7 @@ pub mod cache;
 pub mod data_types;
 pub mod kvs;
 mod logger;
+pub mod rdb;
 #[cfg(test)]
 mod stub;
 
@@ -83,6 +84,7 @@ impl Config {
         let app = data_types::Environment::args(app);
         let app = cache::Environment::args(app);
         let app = kvs::Environment::args(app);
+        let app = rdb::Environment::args(app);
 
         Config {
             args_: app.get_matches(),
@@ -238,6 +240,7 @@ pub struct GlobalEnvironment {
     // !!
     // !! See Rust-RFC 1857 for details.
     // !! https://github.com/rust-lang/rfcs/blob/master/text/1857-stabilize-drop-order.md
+    rdb: rdb::Environment,
     kvs: kvs::Environment,
     cache: cache::Environment,
     data_types: data_types::Environment,
@@ -256,6 +259,7 @@ impl GlobalEnvironment {
         self.data_types.check(config)?;
         self.cache.check(config)?;
         self.kvs.check(config)?;
+        self.rdb.check(config)?;
 
         Ok(())
     }
@@ -271,6 +275,7 @@ impl GlobalEnvironment {
         self.data_types.init()?;
         self.cache.init()?;
         self.kvs.init()?;
+        self.rdb.init()?;
 
         Ok(())
     }
