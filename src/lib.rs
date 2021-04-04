@@ -259,6 +259,7 @@ impl GlobalEnvironment {
         self.data_types.check(config)?;
         self.cache.check(config)?;
         self.kvs.check(config)?;
+        self.rdb.check(config)?;
 
         Ok(())
     }
