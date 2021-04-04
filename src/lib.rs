@@ -84,6 +84,7 @@ impl Config {
         let app = data_types::Environment::args(app);
         let app = cache::Environment::args(app);
         let app = kvs::Environment::args(app);
+        let app = rdb::Environment::args(app);
 
         Config {
             args_: app.get_matches(),
