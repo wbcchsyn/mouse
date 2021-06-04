@@ -9,7 +9,8 @@
 # Because 'max_width' of rustfmt is 100 (= default), alert if "$path" includes line longer than 100.
 check_line_length() {
     local path="$1"
-    local len=$(awk 'BEGIN { max = 0 } { if (max < length($0)) { max = length($0) } } END {print max}' "$path")
+
+    local len=$(awk 'BEGIN { max = 0 } /^[ ]*\/\//{ if (max < length($0)) { max = length($0) } } END {print max}' "$path")
 
     if [ "$len" -gt 100 ]; then
         echo "The max line length of" "$path" "is greater than 100." >&2
