@@ -24,7 +24,9 @@ use core::mem::MaybeUninit;
 pub use sha256::{Sha256, Sha256Hasher};
 
 /// Traits for wrapper of `[u8]` indicates crypto hash like 'sha256'.
-pub trait CryptoHash: Sized + Clone + Copy + PartialOrd + Ord + PartialEq + Eq + Hash {
+pub trait CryptoHash:
+    Sized + Clone + Copy + PartialOrd + Ord + PartialEq + Eq + Hash + AsRef<[u8]> + AsMut<[u8]>
+{
     /// Type of CryptoHasher to calculate this type.
     type Hasher: CryptoHasher<Hash = Self>;
 
