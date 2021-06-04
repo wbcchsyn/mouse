@@ -18,12 +18,13 @@
 
 mod sha256;
 
+use core::hash::Hash;
 use core::mem::MaybeUninit;
 
 pub use sha256::{Sha256, Sha256Hasher};
 
 /// Traits for wrapper of `[u8]` indicates crypto hash like 'sha256'.
-pub trait CryptoHash: Sized + Clone + Copy + PartialOrd + Ord + PartialEq + Eq {
+pub trait CryptoHash: Sized + Clone + Copy + PartialOrd + Ord + PartialEq + Eq + Hash {
     /// Type of CryptoHasher to calculate this type.
     type Hasher: CryptoHasher<Hash = Self>;
 
