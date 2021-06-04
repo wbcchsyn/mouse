@@ -17,6 +17,9 @@
 use super::Id;
 
 /// Represents height and id of the [`Acid`] instance which constitutes a Blockchain.
+///
+/// The height of the genesis block (= the first block of the Blockchain) is 1, not 0.
+/// (This is because some database treat '0' as a special value.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ChainIndex {
     height_: i64,

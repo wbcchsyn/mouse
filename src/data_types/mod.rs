@@ -24,6 +24,7 @@ mod resource;
 
 use crate::{Config, ModuleEnvironment};
 pub use acid::{Acid, CAcid, Id};
+pub use chain_index::ChainIndex;
 use clap::App;
 use core::iter::IntoIterator;
 use core::ops::{Deref, DerefMut, Index, IndexMut};
