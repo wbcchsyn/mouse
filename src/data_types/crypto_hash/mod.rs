@@ -101,7 +101,7 @@ pub trait CryptoHash:
 }
 
 /// Trait for CryptoHash Calculator.
-pub trait CryptoHasher: Default {
+pub trait CryptoHasher: Clone + Default {
     /// Type of CryptoHash to be calculated.
     type Hash: CryptoHash;
 
