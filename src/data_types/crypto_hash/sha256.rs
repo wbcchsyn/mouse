@@ -18,6 +18,7 @@
 
 use super::{CryptoHash, CryptoHasher};
 use core::mem::MaybeUninit;
+use core::ops::Deref;
 use crypto::digest::Digest;
 use std::borrow::Borrow;
 
@@ -46,6 +47,14 @@ impl AsMut<[u8]> for Sha256 {
 impl Borrow<[u8]> for Sha256 {
     #[inline]
     fn borrow(&self) -> &[u8] {
+        &self.0
+    }
+}
+
+impl Deref for Sha256 {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
         &self.0
     }
 }
