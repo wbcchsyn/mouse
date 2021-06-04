@@ -16,6 +16,7 @@
 
 use crate::{Config, ModuleEnvironment};
 use clap::App;
+use mouse_sqlite3::Connection;
 use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
@@ -34,4 +35,10 @@ impl ModuleEnvironment for Environment {
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
+}
+
+/// Implementation for trait `data_types::rdb::Session` .
+pub struct Sqlite3Session<'a> {
+    connection: &'a mut Connection,
+    is_transaction: bool,
 }
