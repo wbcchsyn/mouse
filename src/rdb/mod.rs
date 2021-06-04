@@ -47,3 +47,9 @@ pub trait Session {
     /// Panics if `self` is not in transaction.
     fn rollback(&mut self) -> Result<(), Box<dyn Error>>;
 }
+
+/// Represents a session to a slave RDB.
+pub trait Slave: Session {}
+
+/// Represents a session to a master RDB.
+pub trait Master: Session + Slave {}
