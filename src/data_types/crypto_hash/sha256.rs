@@ -18,7 +18,7 @@
 
 use super::{CryptoHash, CryptoHasher};
 use core::mem::MaybeUninit;
-use core::ops::Deref;
+use core::ops::{Deref, DerefMut};
 use crypto::digest::Digest;
 use std::borrow::Borrow;
 
@@ -56,6 +56,12 @@ impl Deref for Sha256 {
 
     fn deref(&self) -> &Self::Target {
         &self.0
+    }
+}
+
+impl DerefMut for Sha256 {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
     }
 }
 
