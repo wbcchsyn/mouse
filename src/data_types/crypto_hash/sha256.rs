@@ -18,6 +18,7 @@
 
 use super::{CryptoHash, CryptoHasher};
 use core::mem::MaybeUninit;
+use core::ops::{Deref, DerefMut};
 use crypto::digest::Digest;
 use std::borrow::Borrow;
 
@@ -50,6 +51,20 @@ impl Borrow<[u8]> for Sha256 {
     }
 }
 
+impl Deref for Sha256 {
+    type Target = [u8];
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+
+impl DerefMut for Sha256 {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+
 impl CryptoHash for Sha256 {
     type Hasher = Sha256Hasher;
     const LEN: usize = HASH_LEN;
@@ -78,7 +93,7 @@ impl CryptoHasher for Sha256Hasher {
     }
 
     #[inline]
-    fn finish(&self) -> Self::Hash {
+    fn finish(self) -> Self::Hash {
         let mut buffer: [u8; Self::Hash::LEN] = unsafe { MaybeUninit::uninit().assume_init() };
         let mut hasher = self.0.clone();
         hasher.result(&mut buffer);
