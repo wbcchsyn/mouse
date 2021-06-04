@@ -63,4 +63,18 @@ impl ChainIndex {
     pub fn height(&self) -> u64 {
         self.height_ as u64
     }
+
+    /// Returns the height of `self` .
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{ChainIndex, CryptoHash, Id};
+    ///
+    /// let chain_index = ChainIndex::new(35, &Id::zeroed());
+    /// assert_eq!(&Id::zeroed(), chain_index.id());
+    /// ```
+    pub fn id(&self) -> &Id {
+        &self.id_
+    }
 }
