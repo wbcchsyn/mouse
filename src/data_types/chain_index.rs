@@ -13,3 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+use super::Id;
+
+/// Represents height and id of the [`Acid`] instance which constitutes a Blockchain.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct ChainIndex {
+    height_: i64,
+    id_: Id,
+}
