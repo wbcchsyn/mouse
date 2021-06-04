@@ -19,3 +19,31 @@
 mod sqlite3;
 
 pub use sqlite3::Environment;
+use std::error::Error;
+
+/// `Session` represents a session to the RDB.
+pub trait Session {
+    /// Returns `true` if the current session is in transaction.
+    fn is_transaction(&self) -> bool;
+
+    /// Starts transaction if not started.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `self` is in transaction.
+    fn begin_transaction(&mut self) -> Result<(), Box<dyn Error>>;
+
+    /// Commits transaction.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `self` is not in transaction.
+    fn commit(&mut self) -> Result<(), Box<dyn Error>>;
+
+    /// Rollback transaction.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `self` is not in transaction.
+    fn rollback(&mut self) -> Result<(), Box<dyn Error>>;
+}
