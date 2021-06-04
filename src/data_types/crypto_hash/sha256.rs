@@ -93,7 +93,7 @@ impl CryptoHasher for Sha256Hasher {
     }
 
     #[inline]
-    fn finish(&self) -> Self::Hash {
+    fn finish(self) -> Self::Hash {
         let mut buffer: [u8; Self::Hash::LEN] = unsafe { MaybeUninit::uninit().assume_init() };
         let mut hasher = self.0.clone();
         hasher.result(&mut buffer);

@@ -109,7 +109,7 @@ pub trait CryptoHasher: Clone + Default {
     fn write(&mut self, bytes: &[u8]);
 
     /// Calculates the inputs and creates hash.
-    fn finish(&self) -> Self::Hash;
+    fn finish(self) -> Self::Hash;
 
     /// Calculates the crypto hash of `bytes` and returns the result.
     fn calculate(bytes: &[u8]) -> Self::Hash {
