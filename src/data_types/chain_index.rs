@@ -25,3 +25,26 @@ pub struct ChainIndex {
     height_: i64,
     id_: Id,
 }
+
+impl ChainIndex {
+    /// Creates a new instance.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `height` is less than or equals to 0.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// use mouse::data_types::{ChainIndex, CryptoHash, Id};
+    ///
+    /// let _chain_index = ChainIndex::new(35, &Id::zeroed());
+    /// ```
+    pub fn new(height: i64, id: &Id) -> Self {
+        assert_eq!(true, 0 < height);
+        Self {
+            height_: height as i64,
+            id_: id.clone(),
+        }
+    }
+}
