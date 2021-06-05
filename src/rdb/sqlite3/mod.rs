@@ -46,7 +46,7 @@ pub struct Sqlite3Session<'a> {
 
 impl Session for Sqlite3Session<'_> {
     fn is_transaction(&self) -> bool {
-        panic!("Not implemented yet");
+        self.is_transaction
     }
 
     fn begin_transaction(&mut self) -> Result<(), Box<dyn Error>> {
