@@ -50,7 +50,8 @@ impl Session for Sqlite3Session<'_> {
     }
 
     fn begin_transaction(&mut self) -> Result<(), Box<dyn Error>> {
-        panic!("Not implemented yet");
+        assert_eq!(false, self.is_transaction);
+        self.do_begin_transaction()
     }
 
     fn commit(&mut self) -> Result<(), Box<dyn Error>> {
@@ -59,5 +60,16 @@ impl Session for Sqlite3Session<'_> {
 
     fn rollback(&mut self) -> Result<(), Box<dyn Error>> {
         panic!("Not implemented yet");
+    }
+}
+
+impl Sqlite3Session<'_> {
+    fn do_begin_transaction(&mut self) -> Result<(), Box<dyn Error>> {
+        const SQL: &'static str = "BEGIN";
+        let stmt = self.connection.stmt(SQL).map_err(Box::new)?;
+        stmt.step().map_err(Box::new)?;
+
+        self.is_transaction = true;
+        Ok(())
     }
 }
