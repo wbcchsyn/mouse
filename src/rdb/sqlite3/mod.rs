@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::Session;
+use super::{Master, Session, Slave};
 use crate::{Config, ModuleEnvironment};
 use clap::App;
 use mouse_sqlite3::Connection;
@@ -64,6 +64,10 @@ impl Session for Sqlite3Session<'_> {
         self.do_rollback()
     }
 }
+
+impl Slave for Sqlite3Session<'_> {}
+
+impl Master for Sqlite3Session<'_> {}
 
 impl Sqlite3Session<'_> {
     fn do_begin_transaction(&mut self) -> Result<(), Box<dyn Error>> {
