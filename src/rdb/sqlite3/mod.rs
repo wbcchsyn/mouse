@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use super::Session;
 use crate::{Config, ModuleEnvironment};
 use clap::App;
 use mouse_sqlite3::Connection;
@@ -41,4 +42,22 @@ impl ModuleEnvironment for Environment {
 pub struct Sqlite3Session<'a> {
     connection: &'a mut Connection,
     is_transaction: bool,
+}
+
+impl Session for Sqlite3Session<'_> {
+    fn is_transaction(&self) -> bool {
+        panic!("Not implemented yet");
+    }
+
+    fn begin_transaction(&mut self) -> Result<(), Box<dyn Error>> {
+        panic!("Not implemented yet");
+    }
+
+    fn commit(&mut self) -> Result<(), Box<dyn Error>> {
+        panic!("Not implemented yet");
+    }
+
+    fn rollback(&mut self) -> Result<(), Box<dyn Error>> {
+        panic!("Not implemented yet");
+    }
 }
