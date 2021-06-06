@@ -21,6 +21,20 @@ mod sqlite3;
 pub use sqlite3::Environment;
 use std::error::Error;
 
+/// Waits if another thread is using the connection, and creates a new session to master rdb.
+///
+/// # Panics
+///
+/// Panic if the current thread is using the connection.
+pub use sqlite3::master;
+
+/// Waits if another thread is using the connection, and creates a new session to slave rdb.
+///
+/// # Panics
+///
+/// Panic if the current thread is using the connection.
+pub use sqlite3::slave;
+
 /// `Session` represents a session to the RDB.
 pub trait Session {
     /// Returns `true` if the current session is in transaction.
