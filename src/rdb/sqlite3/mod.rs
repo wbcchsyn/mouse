@@ -59,6 +59,21 @@ pub struct Sqlite3Session<'a> {
     is_transaction: bool,
 }
 
+impl Drop for Sqlite3Session<'_> {
+    fn drop(&mut self) {
+        // For just in case.
+        // This method returns `Err` if not in transaction.
+        // Ignore the error.
+        let _ = self.do_rollback();
+
+        // Release the ownership
+        let (mtx, cond) = &self.env.session_owner;
+        let mut guard = mtx.lock().unwrap();
+        *guard = None;
+        cond.notify_one()
+    }
+}
+
 impl Session for Sqlite3Session<'_> {
     fn is_transaction(&self) -> bool {
         self.is_transaction
