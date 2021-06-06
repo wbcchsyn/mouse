@@ -20,15 +20,19 @@ use clap::App;
 use core::cell::RefCell;
 use mouse_sqlite3::Connection;
 use std::error::Error;
+use std::sync::{Condvar, Mutex};
+use std::thread::ThreadId;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 pub struct Environment {
+    session_owner: (Mutex<Option<ThreadId>>, Condvar),
     connection: RefCell<Connection>,
 }
 
 impl Default for Environment {
     fn default() -> Self {
         Self {
+            session_owner: (Mutex::new(None), Condvar::new()),
             connection: RefCell::new(Connection::open_memory_db().unwrap()),
         }
     }
