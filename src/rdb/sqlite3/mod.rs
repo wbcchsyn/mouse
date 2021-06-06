@@ -165,3 +165,12 @@ impl Sqlite3Session<'_> {
         Ok(())
     }
 }
+
+/// Waits if another thread is using the connection, and creates a new session to master rdb.
+///
+/// # Panics
+///
+/// Panic if the current thread is using the connection.
+pub fn master<'a>(env: &'a Environment) -> impl 'a + Master + Slave + Session {
+    Sqlite3Session::new(env)
+}
