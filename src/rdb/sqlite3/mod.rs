@@ -14,13 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use super::{Master, Session, Slave};
 use crate::{Config, ModuleEnvironment};
 use clap::App;
+use core::cell::RefCell;
+use mouse_sqlite3::Connection;
 use std::error::Error;
+use std::sync::{Condvar, Mutex};
+use std::thread::{self, ThreadId};
 
 /// `Environment` implements `ModuleEnvironment` for this module.
-#[derive(Default)]
-pub struct Environment {}
+pub struct Environment {
+    session_owner: (Mutex<Option<ThreadId>>, Condvar),
+    connection: RefCell<Connection>,
+}
+
+impl Default for Environment {
+    fn default() -> Self {
+        Self {
+            session_owner: (Mutex::new(None), Condvar::new()),
+            connection: RefCell::new(Connection::open_memory_db().unwrap()),
+        }
+    }
+}
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
@@ -34,4 +50,136 @@ impl ModuleEnvironment for Environment {
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         Ok(())
     }
+}
+
+/// Implementation for trait `data_types::rdb::Session` .
+pub struct Sqlite3Session<'a> {
+    env: &'a Environment,
+    connection: &'a mut Connection,
+    is_transaction: bool,
+}
+
+impl Drop for Sqlite3Session<'_> {
+    fn drop(&mut self) {
+        // For just in case.
+        let _ = self.do_rollback();
+
+        // Release the ownership
+        let (mtx, cond) = &self.env.session_owner;
+        let mut guard = mtx.lock().unwrap();
+        *guard = None;
+        cond.notify_one()
+    }
+}
+
+impl<'a> Sqlite3Session<'a> {
+    /// Waits if another thread is using the connection, and creates a new session.
+    ///
+    /// # Panics
+    ///
+    /// Panic if the current thread is using the connection.
+    fn new(env: &'a Environment) -> Self {
+        let current_id = thread::current().id();
+        let (mtx, cond) = &env.session_owner;
+        let mut guard = mtx.lock().unwrap();
+
+        // Wait for the ownership
+        loop {
+            if *guard == None {
+                // No other thread is using the connection
+
+                let connection = unsafe { &mut *env.connection.as_ptr() };
+                let mut ret = Self {
+                    env,
+                    connection,
+                    is_transaction: false,
+                };
+                if let Err(e) = ret.do_rollback() {
+                    drop(guard);
+                    panic!("{}", e);
+                }
+
+                *guard = Some(current_id);
+                return ret;
+            } else if *guard == Some(current_id) {
+                // The current thread itself is using the connection.
+                drop(guard); // Don't poison the mutex.
+                panic!("Current thread tries to acquire 2 RDB connections at the same time.");
+            } else {
+                guard = cond.wait(guard).unwrap();
+            }
+        }
+    }
+}
+
+impl Session for Sqlite3Session<'_> {
+    fn is_transaction(&self) -> bool {
+        self.is_transaction
+    }
+
+    fn begin_transaction(&mut self) -> Result<(), Box<dyn Error>> {
+        assert_eq!(false, self.is_transaction);
+        self.do_begin_transaction()
+    }
+
+    fn commit(&mut self) -> Result<(), Box<dyn Error>> {
+        assert_eq!(true, self.is_transaction);
+        self.do_commit()
+    }
+
+    fn rollback(&mut self) -> Result<(), Box<dyn Error>> {
+        assert_eq!(true, self.is_transaction);
+        self.do_rollback()
+    }
+}
+
+impl Slave for Sqlite3Session<'_> {}
+
+impl Master for Sqlite3Session<'_> {}
+
+impl Sqlite3Session<'_> {
+    fn do_begin_transaction(&mut self) -> Result<(), Box<dyn Error>> {
+        const SQL: &'static str = "BEGIN";
+        let stmt = self.connection.stmt(SQL).map_err(Box::new)?;
+        stmt.step().map_err(Box::new)?;
+
+        self.is_transaction = true;
+        Ok(())
+    }
+
+    fn do_commit(&mut self) -> Result<(), Box<dyn Error>> {
+        const SQL: &'static str = "COMMIT";
+        let stmt = self.connection.stmt(SQL).map_err(Box::new)?;
+        stmt.step().map_err(Box::new)?;
+
+        self.is_transaction = false;
+        Ok(())
+    }
+
+    fn do_rollback(&mut self) -> Result<(), Box<dyn Error>> {
+        const SQL: &'static str = "ROLLBACK";
+        let stmt = self.connection.stmt(SQL).map_err(Box::new)?;
+        stmt.step().map_err(Box::new)?;
+
+        self.is_transaction = false;
+        Ok(())
+    }
+}
+
+/// Waits if another thread is using the connection, and creates a new session to master rdb.
+///
+/// # Panics
+///
+/// Panic if the current thread is using the connection.
+pub fn master<'a>(env: &'a Environment) -> impl 'a + Master + Slave + Session {
+    Sqlite3Session::new(env)
+}
+
+/// Waits if another thread is using the connection, and creates a new session to slave rdb.
+///
+/// # Panics
+///
+/// Panic if the current thread is using the connection.
+pub fn slave<'a>(env: &'a Environment) -> impl 'a + Slave + Session {
+    Sqlite3Session::new(env)
 }

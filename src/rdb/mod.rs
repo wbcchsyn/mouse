@@ -19,3 +19,51 @@
 mod sqlite3;
 
 pub use sqlite3::Environment;
+use std::error::Error;
+
+/// Waits if another thread is using the connection, and creates a new session to master rdb.
+///
+/// # Panics
+///
+/// Panic if the current thread is using the connection.
+pub use sqlite3::master;
+
+/// Waits if another thread is using the connection, and creates a new session to slave rdb.
+///
+/// # Panics
+///
+/// Panic if the current thread is using the connection.
+pub use sqlite3::slave;
+
+/// `Session` represents a session to the RDB.
+pub trait Session {
+    /// Returns `true` if the current session is in transaction.
+    fn is_transaction(&self) -> bool;
+
+    /// Starts transaction if not started.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `self` is in transaction.
+    fn begin_transaction(&mut self) -> Result<(), Box<dyn Error>>;
+
+    /// Commits transaction.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `self` is not in transaction.
+    fn commit(&mut self) -> Result<(), Box<dyn Error>>;
+
+    /// Rollback transaction.
+    ///
+    /// # Panics
+    ///
+    /// Panics if `self` is not in transaction.
+    fn rollback(&mut self) -> Result<(), Box<dyn Error>>;
+}
+
+/// Represents a session to a slave RDB.
+pub trait Slave: Session {}
+
+/// Represents a session to a master RDB.
+pub trait Master: Session + Slave {}
