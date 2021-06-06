@@ -18,8 +18,10 @@ use super::{Master, Session, Slave};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use core::cell::RefCell;
+use core::convert::TryFrom;
 use mouse_sqlite3::Connection;
 use std::error::Error;
+use std::path::PathBuf;
 use std::sync::{Condvar, Mutex};
 use std::thread::{self, ThreadId};
 
@@ -49,7 +51,12 @@ impl ModuleEnvironment for Environment {
         )
     }
 
-    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+    unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
+        let data_path = config.args().value_of("PATH_TO_SQLITE3_DATA_DIR").unwrap();
+        let data_path = PathBuf::from(data_path).join("rdb");
+        let connection = Connection::try_from(data_path.as_ref())?;
+        self.connection = RefCell::new(connection);
+
         Ok(())
     }
 
