@@ -174,3 +174,12 @@ impl Sqlite3Session<'_> {
 pub fn master<'a>(env: &'a Environment) -> impl 'a + Master + Slave + Session {
     Sqlite3Session::new(env)
 }
+
+/// Waits if another thread is using the connection, and creates a new session to slave rdb.
+///
+/// # Panics
+///
+/// Panic if the current thread is using the connection.
+pub fn slave<'a>(env: &'a Environment) -> impl 'a + Slave + Session {
+    Sqlite3Session::new(env)
+}
