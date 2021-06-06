@@ -17,12 +17,22 @@
 use super::{Master, Session, Slave};
 use crate::{Config, ModuleEnvironment};
 use clap::App;
+use core::cell::RefCell;
 use mouse_sqlite3::Connection;
 use std::error::Error;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
-#[derive(Default)]
-pub struct Environment {}
+pub struct Environment {
+    connection: RefCell<Connection>,
+}
+
+impl Default for Environment {
+    fn default() -> Self {
+        Self {
+            connection: RefCell::new(Connection::open_memory_db().unwrap()),
+        }
+    }
+}
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
