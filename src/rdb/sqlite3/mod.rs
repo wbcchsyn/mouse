@@ -21,7 +21,7 @@ use core::cell::RefCell;
 use mouse_sqlite3::Connection;
 use std::error::Error;
 use std::sync::{Condvar, Mutex};
-use std::thread::ThreadId;
+use std::thread::{self, ThreadId};
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 pub struct Environment {
@@ -69,6 +69,46 @@ impl Drop for Sqlite3Session<'_> {
         let mut guard = mtx.lock().unwrap();
         *guard = None;
         cond.notify_one()
+    }
+}
+
+impl<'a> Sqlite3Session<'a> {
+    /// Waits if another thread is using the connection, and creates a new session.
+    ///
+    /// # Panics
+    ///
+    /// Panic if the current thread is using the connection.
+    fn new(env: &'a Environment) -> Self {
+        let current_id = thread::current().id();
+        let (mtx, cond) = &env.session_owner;
+        let mut guard = mtx.lock().unwrap();
+
+        // Wait for the ownership
+        loop {
+            if *guard == None {
+                // No other thread is using the connection
+
+                let connection = unsafe { &mut *env.connection.as_ptr() };
+                let mut ret = Self {
+                    env,
+                    connection,
+                    is_transaction: false,
+                };
+                if let Err(e) = ret.do_rollback() {
+                    drop(guard);
+                    panic!("{}", e);
+                }
+
+                *guard = Some(current_id);
+                return ret;
+            } else if *guard == Some(current_id) {
+                // The current thread itself is using the connection.
+                drop(guard); // Don't poison the mutex.
+                panic!("Current thread tries to acquire 2 RDB connections at the same time.");
+            } else {
+                guard = cond.wait(guard).unwrap();
+            }
+        }
     }
 }
 
