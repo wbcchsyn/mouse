@@ -54,6 +54,7 @@ impl ModuleEnvironment for Environment {
 
 /// Implementation for trait `data_types::rdb::Session` .
 pub struct Sqlite3Session<'a> {
+    env: &'a Environment,
     connection: &'a mut Connection,
     is_transaction: bool,
 }
