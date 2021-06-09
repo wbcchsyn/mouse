@@ -1,0 +1,9 @@
+#!/bin/sh
+
+(
+    cd `git rev-parse --show-toplevel`
+    cargo fmt -- --check || exit "$?"
+    cargo test || exit "$?"
+
+    exit 0
+)
