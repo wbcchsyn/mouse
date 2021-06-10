@@ -63,4 +63,12 @@ impl AcidChainRelation {
     pub const fn id(&self) -> &Id {
         &self.id_
     }
+
+    /// Provides a reference to the [`ChainIndex`] including the [`Acid`] , or `None` if the
+    /// [`Acid`] does not belong to any Block in "main_chain" yet.
+    /// [`Acid`]: trait.Acid.html
+    /// [`ChainIndex`]: struct.ChainIndex.html
+    pub const fn chain_index(&self) -> Option<&ChainIndex> {
+        (&self.chain_index_).as_ref()
+    }
 }
