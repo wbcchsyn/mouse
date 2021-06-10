@@ -28,3 +28,31 @@ pub struct AcidChainRelation {
     id_: Id,
     chain_index_: Option<ChainIndex>,
 }
+
+impl AcidChainRelation {
+    /// Creates a new instance.
+    ///
+    /// # Arguments
+    ///
+    /// ## `id`
+    ///
+    /// The id of the [`Acid`] .
+    ///
+    /// ## `chain_index`
+    ///
+    /// [`ChainIndex`] including the [`Acid`] , or `None` if not belongs to any block in the
+    /// "main_chain" .
+    ///
+    /// [`Id`]: type.Id.html
+    /// [`Acid`]: trait.Acid.html
+    /// [`ChainIndex`]: struct.ChainIndex.html
+    pub const fn new(id: &Id, chain_index: Option<&ChainIndex>) -> Self {
+        Self {
+            id_: *id,
+            chain_index_: match chain_index {
+                None => None,
+                Some(&c) => Some(c),
+            },
+        }
+    }
+}
