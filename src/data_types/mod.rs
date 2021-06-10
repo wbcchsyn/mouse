@@ -18,6 +18,7 @@
 //! This module is independent from other modules.
 
 mod acid;
+mod acid_chain_relation;
 mod chain_index;
 pub mod crypto_hash;
 mod resource;
