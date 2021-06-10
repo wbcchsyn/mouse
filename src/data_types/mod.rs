@@ -34,6 +34,11 @@ pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::borrow::{Borrow, BorrowMut};
 use std::error::Error;
 
+/// `BlockHeight` represents the height of Blockchain.
+///
+/// The height of genesis block (The first block) is 1, and that of the next block is 2.
+pub type BlockHeight = i64;
+
 /// `Environment` implements `ModuleEnvironment` .
 pub struct Environment {
     acid_deserializer: AcidDeserializer,
