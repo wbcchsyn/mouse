@@ -13,3 +13,18 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+use super::{ChainIndex, Id};
+
+/// `AcidChainRelation` represents a record in RDB table "acids".
+///
+/// This struct is constituted of [`Id`] of the [`Acid`], and the [`ChainIndex`] including the
+/// [`Acid`].
+///
+/// [`Id`]: type.Id.html
+/// [`Acid`]: trait.Acid.html
+/// [`ChainIndex`]: struct.ChainIndex.html
+pub struct AcidChainRelation {
+    id_: Id,
+    chain_index_: Option<ChainIndex>,
+}
