@@ -55,4 +55,12 @@ impl AcidChainRelation {
             },
         }
     }
+
+    /// Provides a reference to the [`Id`] of the [`Acid`] .
+    ///
+    /// [`Id`]: type.Id.html
+    /// [`Acid`]: trait.Acid.html
+    pub const fn id(&self) -> &Id {
+        &self.id_
+    }
 }
