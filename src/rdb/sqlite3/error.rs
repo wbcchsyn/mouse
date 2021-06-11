@@ -15,7 +15,9 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use super::{SQLITE_DONE, SQLITE_OK, SQLITE_ROW};
-use std::os::raw::c_int;
+use std::ffi::CStr;
+use std::fmt;
+use std::os::raw::{c_char, c_int};
 
 /// `Error` is a wrapper of libsqlite3 error code.
 pub struct Error {
@@ -34,4 +36,19 @@ impl Error {
     pub const fn new(code: c_int) -> Self {
         Self { code }
     }
+}
+
+impl fmt::Display for Error {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        unsafe {
+            let c_msg = sqlite3_errstr(self.code);
+            let msg = CStr::from_ptr(c_msg);
+            f.write_str(msg.to_string_lossy().as_ref())
+        }
+    }
+}
+
+#[link(name = "sqlite3")]
+extern "C" {
+    fn sqlite3_errstr(code: c_int) -> *const c_char;
 }
