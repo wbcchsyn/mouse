@@ -13,3 +13,15 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+use super::sqlite3_stmt;
+use std::os::raw::c_int;
+
+/// Wrapper of C [`sqlite3_stmt`] .
+///
+/// [`sqlite3_stmt`]: https://www.sqlite.org/c3ref/stmt.html
+pub struct Stmt {
+    raw: *mut sqlite3_stmt,
+    column_count: c_int,
+    is_row: bool,
+}
