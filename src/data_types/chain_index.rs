@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::Id;
+use super::{BlockHeight, Id};
 
 /// Represents height and id of the [`Acid`] instance which constitutes a Blockchain.
 ///
@@ -22,7 +22,7 @@ use super::Id;
 /// (This is because some database treat '0' as a special value.)
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ChainIndex {
-    height_: i64,
+    height_: BlockHeight,
     id_: Id,
 }
 
@@ -40,7 +40,7 @@ impl ChainIndex {
     ///
     /// let _chain_index = ChainIndex::new(35, &Id::zeroed());
     /// ```
-    pub fn new(height: i64, id: &Id) -> Self {
+    pub fn new(height: BlockHeight, id: &Id) -> Self {
         assert_eq!(true, 0 < height);
         Self {
             height_: height as i64,
@@ -58,8 +58,8 @@ impl ChainIndex {
     /// let chain_index = ChainIndex::new(35, &Id::zeroed());
     /// assert_eq!(35, chain_index.height());
     /// ```
-    pub fn height(&self) -> i64 {
-        self.height_ as i64
+    pub fn height(&self) -> BlockHeight {
+        self.height_
     }
 
     /// Returns the height of `self` .
