@@ -40,10 +40,11 @@ impl ChainIndex {
     ///
     /// let _chain_index = ChainIndex::new(35, &Id::zeroed());
     /// ```
+    #[inline]
     pub fn new(height: BlockHeight, id: &Id) -> Self {
         assert_eq!(true, 0 < height);
         Self {
-            height_: height as i64,
+            height_: height,
             id_: id.clone(),
         }
     }
@@ -58,6 +59,7 @@ impl ChainIndex {
     /// let chain_index = ChainIndex::new(35, &Id::zeroed());
     /// assert_eq!(35, chain_index.height());
     /// ```
+    #[inline]
     pub fn height(&self) -> BlockHeight {
         self.height_
     }
@@ -72,6 +74,7 @@ impl ChainIndex {
     /// let chain_index = ChainIndex::new(35, &Id::zeroed());
     /// assert_eq!(&Id::zeroed(), chain_index.id());
     /// ```
+    #[inline]
     pub fn id(&self) -> &Id {
         &self.id_
     }
