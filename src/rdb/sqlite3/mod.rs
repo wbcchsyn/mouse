@@ -18,8 +18,15 @@ mod error;
 
 use crate::{Config, ModuleEnvironment};
 use clap::App;
+use std::os::raw::c_int;
 
 pub use error::Error;
+
+// libsqlite3 error constants
+// https://www.sqlite.org/draft/rescode.html
+const SQLITE_OK: c_int = 0;
+const SQLITE_DONE: c_int = 101;
+const SQLITE_ROW: c_int = 100;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
