@@ -13,27 +13,3 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
-
-mod error;
-
-use crate::{Config, ModuleEnvironment};
-use clap::App;
-use std::error::Error;
-
-/// `Environment` implements `ModuleEnvironment` for this module.
-#[derive(Default)]
-pub struct Environment {}
-
-impl ModuleEnvironment for Environment {
-    fn args(app: App<'static, 'static>) -> App<'static, 'static> {
-        app
-    }
-
-    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
-        Ok(())
-    }
-
-    unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
-        Ok(())
-    }
-}
