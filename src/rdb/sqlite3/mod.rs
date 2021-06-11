@@ -18,7 +18,8 @@ mod error;
 
 use crate::{Config, ModuleEnvironment};
 use clap::App;
-use std::error::Error;
+
+pub use error::Error;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
@@ -29,11 +30,11 @@ impl ModuleEnvironment for Environment {
         app
     }
 
-    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 
-    unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+    unsafe fn init(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 }
