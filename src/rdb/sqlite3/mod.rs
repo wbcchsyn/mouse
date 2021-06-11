@@ -22,6 +22,7 @@ use clap::App;
 use std::os::raw::c_int;
 
 pub use error::Error;
+use stmt::Stmt;
 
 // libsqlite3 error constants
 // https://www.sqlite.org/draft/rescode.html
