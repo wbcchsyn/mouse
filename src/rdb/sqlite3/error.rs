@@ -13,3 +13,10 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+use std::os::raw::c_int;
+
+/// `Error` is a wrapper of libsqlite3 error code.
+pub struct Error {
+    code: c_int,
+}
