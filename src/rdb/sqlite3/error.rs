@@ -20,6 +20,7 @@ use std::fmt;
 use std::os::raw::{c_char, c_int};
 
 /// `Error` is a wrapper of libsqlite3 error code.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct Error {
     code: c_int,
 }
