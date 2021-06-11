@@ -46,3 +46,6 @@ impl ModuleEnvironment for Environment {
         Ok(())
     }
 }
+
+#[allow(non_camel_case_types)]
+enum sqlite3_stmt {}
