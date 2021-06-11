@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::sqlite3_stmt;
+use super::{sqlite3_finalize, sqlite3_stmt};
 use std::os::raw::c_int;
 
 /// Wrapper of C [`sqlite3_stmt`] .
@@ -24,4 +24,11 @@ pub struct Stmt {
     raw: *mut sqlite3_stmt,
     column_count: c_int,
     is_row: bool,
+}
+
+impl Drop for Stmt {
+    #[inline]
+    fn drop(&mut self) {
+        unsafe { sqlite3_finalize(self.raw) };
+    }
 }
