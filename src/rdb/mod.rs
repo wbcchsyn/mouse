@@ -18,8 +18,7 @@
 
 mod sqlite3;
 
-pub use sqlite3::Environment;
-use std::error::Error;
+pub use sqlite3::{Environment, Error};
 
 /// `Session` represents a session to the RDB.
 pub trait Session {
@@ -31,21 +30,21 @@ pub trait Session {
     /// # Panics
     ///
     /// Panics if `self` is in transaction.
-    fn begin_transaction(&mut self) -> Result<(), Box<dyn Error>>;
+    fn begin_transaction(&mut self) -> Result<(), Box<dyn std::error::Error>>;
 
     /// Commits transaction.
     ///
     /// # Panics
     ///
     /// Panics if `self` is not in transaction.
-    fn commit(&mut self) -> Result<(), Box<dyn Error>>;
+    fn commit(&mut self) -> Result<(), Box<dyn std::error::Error>>;
 
     /// Rollback transaction.
     ///
     /// # Panics
     ///
     /// Panics if `self` is not in transaction.
-    fn rollback(&mut self) -> Result<(), Box<dyn Error>>;
+    fn rollback(&mut self) -> Result<(), Box<dyn std::error::Error>>;
 }
 
 /// Represents a session to a slave RDB.

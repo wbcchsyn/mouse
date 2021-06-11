@@ -14,9 +14,19 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+mod error;
+
 use crate::{Config, ModuleEnvironment};
 use clap::App;
-use std::error::Error;
+use std::os::raw::c_int;
+
+pub use error::Error;
+
+// libsqlite3 error constants
+// https://www.sqlite.org/draft/rescode.html
+const SQLITE_OK: c_int = 0;
+const SQLITE_DONE: c_int = 101;
+const SQLITE_ROW: c_int = 100;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
@@ -27,11 +37,11 @@ impl ModuleEnvironment for Environment {
         app
     }
 
-    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
+    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 
-    unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
+    unsafe fn init(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         Ok(())
     }
 }
