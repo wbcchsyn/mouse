@@ -20,3 +20,10 @@ use std::os::raw::c_int;
 pub struct Error {
     code: c_int,
 }
+
+impl Error {
+    /// Creates a new instance.
+    pub const fn new(code: c_int) -> Self {
+        Self { code }
+    }
+}
