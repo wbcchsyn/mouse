@@ -49,6 +49,8 @@ impl fmt::Display for Error {
     }
 }
 
+impl std::error::Error for Error {}
+
 #[link(name = "sqlite3")]
 extern "C" {
     fn sqlite3_errstr(code: c_int) -> *const c_char;
