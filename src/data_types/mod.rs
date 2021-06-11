@@ -18,12 +18,14 @@
 //! This module is independent from other modules.
 
 mod acid;
+mod acid_chain_relation;
 mod chain_index;
 pub mod crypto_hash;
 mod resource;
 
 use crate::{Config, ModuleEnvironment};
 pub use acid::{Acid, CAcid, Id};
+pub use acid_chain_relation::AcidChainRelation;
 pub use chain_index::ChainIndex;
 use clap::App;
 use core::iter::IntoIterator;
