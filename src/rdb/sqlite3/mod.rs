@@ -15,6 +15,7 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 mod error;
+mod stmt;
 
 use crate::{Config, ModuleEnvironment};
 use clap::App;
