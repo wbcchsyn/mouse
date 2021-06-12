@@ -51,6 +51,9 @@ impl ModuleEnvironment for Environment {
 #[allow(non_camel_case_types)]
 enum sqlite3_stmt {}
 
+#[allow(non_camel_case_types)]
+enum sqlite3 {}
+
 #[link(name = "sqlite3")]
 extern "C" {
     fn sqlite3_finalize(pstmt: *mut sqlite3_stmt) -> c_int;
