@@ -52,7 +52,7 @@ impl ModuleEnvironment for Environment {
 enum sqlite3_stmt {}
 
 #[allow(non_camel_case_types)]
-enum sqlite3 {}
+pub enum sqlite3 {}
 
 #[link(name = "sqlite3")]
 extern "C" {
