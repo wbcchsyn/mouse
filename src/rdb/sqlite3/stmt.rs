@@ -16,8 +16,9 @@
 
 use super::{
     sqlite3, sqlite3_bind_blob, sqlite3_bind_int64, sqlite3_bind_null, sqlite3_clear_bindings,
-    sqlite3_column_count, sqlite3_finalize, sqlite3_prepare_v2, sqlite3_reset, sqlite3_step,
-    sqlite3_stmt, Error, SQLITE_RANGE, SQLITE_TOOBIG,
+    sqlite3_column_count, sqlite3_column_int64, sqlite3_column_type, sqlite3_finalize,
+    sqlite3_prepare_v2, sqlite3_reset, sqlite3_step, sqlite3_stmt, Error, SQLITE_INTEGER,
+    SQLITE_NULL, SQLITE_RANGE, SQLITE_TOOBIG,
 };
 use core::convert::TryFrom;
 use core::marker::PhantomData;
@@ -206,6 +207,41 @@ impl Stmt<'_> {
         match Error::new(code) {
             Error::OK => Ok(()),
             e => Err(e),
+        }
+    }
+
+    /// Wrapper of C function [`sqlite3_column_type`] and [`sqlite3_column_int64`] .
+    ///
+    /// This method calls [`sqlite3_column_type`] first.
+    ///
+    /// If the value type is Null, returns `None` , or if the value type is Integer, calls
+    /// [`sqlite3_column_int64`] and returns the result.
+    ///
+    /// Note that `index` starts at 0, not 1.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the previous [`step`] did not returns `true` or [`step`] did not called.
+    ///
+    /// Panics if `index` is out of range.
+    ///
+    /// Panics if the column value type is neither Null nor Integer.
+    ///
+    /// [`step`]: #method.step
+    /// [`sqlite3_column_type`]: https://www.sqlite.org/c3ref/column_blob.html
+    /// [`sqlite3_column_int64`]: https://www.sqlite.org/c3ref/column_blob.html
+    #[inline]
+    pub fn column_int(&mut self, index: usize) -> Option<i64> {
+        assert_eq!(true, self.is_row);
+        assert!(index < (self.column_count as usize));
+
+        let index = index as c_int;
+        unsafe {
+            match sqlite3_column_type(self.raw, index) {
+                SQLITE_NULL => None,
+                SQLITE_INTEGER => Some(sqlite3_column_int64(self.raw, index)),
+                _ => panic!("Bad column type"),
+            }
         }
     }
 }

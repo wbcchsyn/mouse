@@ -32,6 +32,11 @@ const SQLITE_RANGE: c_int = 25;
 const SQLITE_DONE: c_int = 101;
 const SQLITE_ROW: c_int = 100;
 
+// Constants for column type
+// https://www.sqlite.org/draft/c3ref/c_blob.html
+const SQLITE_INTEGER: c_int = 1;
+const SQLITE_NULL: c_int = 5;
+
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
 pub struct Environment {}
@@ -82,4 +87,7 @@ extern "C" {
         destructor: *const c_void,
     ) -> c_int;
     fn sqlite3_bind_null(pstmt: *mut sqlite3_stmt, index: c_int) -> c_int;
+
+    fn sqlite3_column_type(pstmt: *mut sqlite3_stmt, icol: c_int) -> c_int;
+    fn sqlite3_column_int64(pstmt: *mut sqlite3_stmt, icol: c_int) -> i64;
 }
