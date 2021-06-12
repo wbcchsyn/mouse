@@ -19,7 +19,7 @@ mod stmt;
 
 use crate::{Config, ModuleEnvironment};
 use clap::App;
-use std::os::raw::c_int;
+use std::os::raw::{c_char, c_int};
 
 pub use error::Error;
 use stmt::Stmt;
@@ -57,5 +57,13 @@ pub enum sqlite3 {}
 
 #[link(name = "sqlite3")]
 extern "C" {
+    fn sqlite3_prepare_v2(
+        pdb: *mut sqlite3,
+        zsql: *const c_char,
+        nbyte: c_int,
+        ppstmt: *mut *mut sqlite3_stmt,
+        pztail: *mut *const c_char,
+    ) -> c_int;
     fn sqlite3_finalize(pstmt: *mut sqlite3_stmt) -> c_int;
+    fn sqlite3_column_count(pstmt: *mut sqlite3_stmt) -> c_int;
 }

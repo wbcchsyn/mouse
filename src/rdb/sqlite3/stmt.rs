@@ -14,9 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::{sqlite3, sqlite3_finalize, sqlite3_stmt};
+use super::{
+    sqlite3, sqlite3_column_count, sqlite3_finalize, sqlite3_prepare_v2, sqlite3_stmt, Error,
+    SQLITE_TOOBIG,
+};
+use core::convert::TryFrom;
 use core::marker::PhantomData;
-use std::os::raw::c_int;
+use core::ptr;
+use std::os::raw::{c_char, c_int};
 
 /// Wrapper of C [`sqlite3_stmt`] .
 ///
@@ -33,5 +38,31 @@ impl Drop for Stmt<'_> {
     #[inline]
     fn drop(&mut self) {
         unsafe { sqlite3_finalize(self.raw) };
+    }
+}
+
+impl<'a> Stmt<'a> {
+    /// Creates a new instance.
+    pub fn new(sql: &'a str, connection: &'a mut sqlite3) -> Result<Self, Error> {
+        let con = connection as *mut sqlite3;
+        let zsql = sql.as_ptr() as *const c_char;
+        let nbytes = c_int::try_from(sql.len()).or(Err(Error::new(SQLITE_TOOBIG)))?;
+        let mut raw: *mut sqlite3_stmt = ptr::null_mut();
+        let mut pztail: *const c_char = ptr::null();
+
+        let code = unsafe { sqlite3_prepare_v2(con, zsql, nbytes, &mut raw, &mut pztail) };
+        match Error::new(code) {
+            Error::OK => {
+                let column_count = unsafe { sqlite3_column_count(raw) };
+                Ok(Stmt {
+                    raw,
+                    column_count,
+                    is_row: false,
+                    _con: PhantomData,
+                    _sql: PhantomData,
+                })
+            }
+            e => Err(e),
+        }
     }
 }
