@@ -14,8 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::{sqlite3, sqlite3_close, Stmt};
+use super::{
+    sqlite3, sqlite3_close, sqlite3_open_v2, Error, Stmt, SQLITE_OPEN_MEMORY, SQLITE_OPEN_NOMUTEX,
+    SQLITE_OPEN_READWRITE,
+};
+use core::ptr;
 use std::collections::HashMap;
+use std::os::raw::{c_char, c_int};
 
 /// New type of `&'static str` , which is compared by the address.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -52,5 +57,36 @@ impl Drop for Connection {
     fn drop(&mut self) {
         self.stmts.clear(); // All the Stmt instances must be finalized before close.
         unsafe { sqlite3_close(self.raw) };
+    }
+}
+
+impl Connection {
+    /// Opens in-memory database and returns a new instance.
+    #[inline]
+    pub fn open_memory_db() -> Result<Self, Error> {
+        let filename: *const c_char = "memory_db".as_ptr() as *const c_char;
+        let mut raw: *mut sqlite3 = ptr::null_mut();
+        const FLAGS: c_int = SQLITE_OPEN_MEMORY | SQLITE_OPEN_READWRITE | SQLITE_OPEN_NOMUTEX;
+        const ZVFS: *const c_char = ptr::null();
+
+        let code = unsafe { sqlite3_open_v2(filename, &mut raw, FLAGS, ZVFS) };
+        match Error::new(code) {
+            Error::OK => Ok(Self {
+                raw,
+                stmts: Default::default(),
+                is_transaction: false,
+            }),
+            e => Err(e),
+        }
+    }
+}
+
+#[cfg(test)]
+mod connection_tests {
+    use super::*;
+
+    #[test]
+    fn memory_db_constructor() {
+        assert_eq!(true, Connection::open_memory_db().is_ok());
     }
 }
