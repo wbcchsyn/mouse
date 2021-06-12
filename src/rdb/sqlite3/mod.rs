@@ -81,4 +81,5 @@ extern "C" {
         vlen: c_int,
         destructor: *const c_void,
     ) -> c_int;
+    fn sqlite3_bind_null(pstmt: *mut sqlite3_stmt, index: c_int) -> c_int;
 }
