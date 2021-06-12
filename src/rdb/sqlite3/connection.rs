@@ -18,9 +18,12 @@ use super::{
     sqlite3, sqlite3_close, sqlite3_open_v2, Error, Stmt, SQLITE_OPEN_MEMORY, SQLITE_OPEN_NOMUTEX,
     SQLITE_OPEN_READWRITE,
 };
+use core::convert::TryFrom;
 use core::ptr;
 use std::collections::HashMap;
+use std::ffi::CString;
 use std::os::raw::{c_char, c_int};
+use std::path::Path;
 
 /// New type of `&'static str` , which is compared by the address.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
@@ -57,6 +60,28 @@ impl Drop for Connection {
     fn drop(&mut self) {
         self.stmts.clear(); // All the Stmt instances must be finalized before close.
         unsafe { sqlite3_close(self.raw) };
+    }
+}
+
+impl TryFrom<&Path> for Connection {
+    type Error = Box<dyn std::error::Error>;
+
+    #[inline]
+    fn try_from(filename: &Path) -> Result<Self, Self::Error> {
+        let filename = CString::new(filename.to_string_lossy().as_bytes()).map_err(Box::new)?;
+        let mut raw: *mut sqlite3 = ptr::null_mut();
+        const FLAGS: c_int = SQLITE_OPEN_READWRITE | SQLITE_OPEN_MEMORY | SQLITE_OPEN_NOMUTEX;
+        const ZVFS: *const c_char = ptr::null();
+
+        let code = unsafe { sqlite3_open_v2(filename.as_ptr(), &mut raw, FLAGS, ZVFS) };
+        match Error::new(code) {
+            Error::OK => Ok(Self {
+                raw,
+                stmts: Default::default(),
+                is_transaction: false,
+            }),
+            e => Err(Box::new(e)),
+        }
     }
 }
 
