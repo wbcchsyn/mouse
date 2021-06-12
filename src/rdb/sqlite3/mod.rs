@@ -68,4 +68,5 @@ extern "C" {
     fn sqlite3_column_count(pstmt: *mut sqlite3_stmt) -> c_int;
 
     fn sqlite3_reset(pstmt: *mut sqlite3_stmt) -> c_int;
+    fn sqlite3_clear_bindings(pstmt: *mut sqlite3_stmt) -> c_int;
 }

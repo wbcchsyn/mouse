@@ -15,8 +15,8 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use super::{
-    sqlite3, sqlite3_column_count, sqlite3_finalize, sqlite3_prepare_v2, sqlite3_reset,
-    sqlite3_stmt, Error, SQLITE_TOOBIG,
+    sqlite3, sqlite3_clear_bindings, sqlite3_column_count, sqlite3_finalize, sqlite3_prepare_v2,
+    sqlite3_reset, sqlite3_stmt, Error, SQLITE_TOOBIG,
 };
 use core::convert::TryFrom;
 use core::marker::PhantomData;
@@ -78,5 +78,19 @@ impl Stmt<'_> {
     pub fn reset(&mut self) {
         unsafe { sqlite3_reset(self.raw) };
         self.is_row = false;
+    }
+
+    /// Calls C function [`sqlite3_reset`] and [`sqlite3_clear_bindings`] to reset all the
+    /// parameters.
+    ///
+    /// Because the document of [`sqlite3_clear_bindings`] is ambiguous, this method calls
+    /// [`sqlite3_reset`] at the same time.
+    ///
+    /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
+    /// [`sqlite3_clear_bindings`]: https://www.sqlite.org/c3ref/clear_bindings.html
+    #[inline]
+    pub fn clear(&mut self) {
+        self.reset();
+        unsafe { sqlite3_clear_bindings(self.raw) };
     }
 }
