@@ -14,6 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+use super::{sqlite3, Stmt};
+use std::collections::HashMap;
+
 /// New type of `&'static str` , which is compared by the address.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 struct Sql(*const u8);
@@ -31,4 +34,13 @@ mod sql_tests {
         assert_ne!(Sql(A.as_ptr()), Sql(B.as_ptr()));
         assert_ne!(Sql(A.as_ptr()), Sql(C.as_ptr()));
     }
+}
+
+/// Wrapper of C struct [`sqlite3`]
+///
+/// [`sqlite3`]: https://www.sqlite.org/c3ref/sqlite3.html
+pub struct Connection {
+    raw: *mut sqlite3,
+    stmts: HashMap<Sql, Stmt<'static>>,
+    is_transaction: bool,
 }
