@@ -13,3 +13,22 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+/// New type of `&'static str` , which is compared by the address.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+struct Sql(*const u8);
+
+#[cfg(test)]
+mod sql_tests {
+    use super::*;
+
+    #[test]
+    fn equality() {
+        const A: &'static str = "aa";
+        const B: &'static str = "ab";
+        const C: &'static str = "a";
+
+        assert_ne!(Sql(A.as_ptr()), Sql(B.as_ptr()));
+        assert_ne!(Sql(A.as_ptr()), Sql(C.as_ptr()));
+    }
+}
