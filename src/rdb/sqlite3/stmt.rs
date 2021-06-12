@@ -16,7 +16,7 @@
 
 use super::{
     sqlite3, sqlite3_clear_bindings, sqlite3_column_count, sqlite3_finalize, sqlite3_prepare_v2,
-    sqlite3_reset, sqlite3_stmt, Error, SQLITE_TOOBIG,
+    sqlite3_reset, sqlite3_step, sqlite3_stmt, Error, SQLITE_TOOBIG,
 };
 use core::convert::TryFrom;
 use core::marker::PhantomData;
@@ -92,5 +92,37 @@ impl Stmt<'_> {
     pub fn clear(&mut self) {
         self.reset();
         unsafe { sqlite3_clear_bindings(self.raw) };
+    }
+
+    /// Calls C function [`sqlite3_step`] and returns whether the SQL statement returns any
+    /// data to be fetched.
+    ///
+    /// Returns `true` if the SQL statement being executed returns any data (i.e. [`sqlite3_step`]
+    /// returned `SQLITE_ROW`.)
+    ///
+    /// Calls [`reset`] and returns `false` if the SQL statement has finished (i.e.
+    /// [`sqlite3_step`] returned `SQLITE_DONE` . Then no data was returned.)
+    ///
+    /// Otherwise, i.e. [`sqlite3_step`] failed, calls [`reset`] and returns `Err` .
+    ///
+    /// [`reset`]: #method.reset
+    /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
+    #[inline]
+    pub fn step(&mut self) -> Result<bool, Error> {
+        let code = unsafe { sqlite3_step(self.raw) };
+        match Error::new(code) {
+            Error::DONE => {
+                self.reset();
+                Ok(false)
+            }
+            Error::ROW => {
+                self.is_row = true;
+                Ok(true)
+            }
+            e => {
+                self.reset();
+                Err(e)
+            }
+        }
     }
 }
