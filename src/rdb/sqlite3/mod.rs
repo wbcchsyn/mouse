@@ -22,6 +22,7 @@ use crate::{Config, ModuleEnvironment};
 use clap::App;
 use std::os::raw::{c_char, c_int, c_void};
 
+use connection::Connection;
 pub use error::Error;
 use stmt::Stmt;
 
