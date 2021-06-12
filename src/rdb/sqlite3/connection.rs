@@ -44,3 +44,5 @@ pub struct Connection {
     stmts: HashMap<Sql, Stmt<'static>>,
     is_transaction: bool,
 }
+
+unsafe impl Send for Connection {}
