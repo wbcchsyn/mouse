@@ -15,8 +15,9 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use super::{
-    sqlite3, sqlite3_clear_bindings, sqlite3_column_count, sqlite3_finalize, sqlite3_prepare_v2,
-    sqlite3_reset, sqlite3_step, sqlite3_stmt, Error, SQLITE_TOOBIG,
+    sqlite3, sqlite3_bind_int64, sqlite3_clear_bindings, sqlite3_column_count, sqlite3_finalize,
+    sqlite3_prepare_v2, sqlite3_reset, sqlite3_step, sqlite3_stmt, Error, SQLITE_RANGE,
+    SQLITE_TOOBIG,
 };
 use core::convert::TryFrom;
 use core::marker::PhantomData;
@@ -123,6 +124,31 @@ impl Stmt<'_> {
                 self.reset();
                 Err(e)
             }
+        }
+    }
+
+    /// Wrapper of C function [`sqlite3_bind_int64`] .
+    ///
+    /// Calls method [`reset`] if necessary, and calls [`sqlite3_bind_int64`] .
+    /// Note that `index` starts at 1, not 0.
+    ///
+    /// [`reset`]: #method.reset
+    /// [`step`]: #method.step
+    /// [`sqlite3_bind_int64`]: https://www.sqlite.org/c3ref/bind_blob.html
+    /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
+    /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
+    #[inline]
+    pub fn bind_int(&mut self, index: usize, val: i64) -> Result<(), Error> {
+        // self.reset() was not called after self.step() returns true.
+        if self.is_row {
+            self.reset();
+        }
+
+        let index = c_int::try_from(index).or(Err(Error::new(SQLITE_RANGE)))?;
+        let code = unsafe { sqlite3_bind_int64(self.raw, index, val) };
+        match Error::new(code) {
+            Error::OK => Ok(()),
+            e => Err(e),
         }
     }
 }

@@ -28,6 +28,7 @@ use stmt::Stmt;
 // https://www.sqlite.org/draft/rescode.html
 const SQLITE_OK: c_int = 0;
 const SQLITE_TOOBIG: c_int = 18;
+const SQLITE_RANGE: c_int = 25;
 const SQLITE_DONE: c_int = 101;
 const SQLITE_ROW: c_int = 100;
 
@@ -71,4 +72,6 @@ extern "C" {
     fn sqlite3_clear_bindings(pstmt: *mut sqlite3_stmt) -> c_int;
 
     fn sqlite3_step(pstmt: *mut sqlite3_stmt) -> c_int;
+
+    fn sqlite3_bind_int64(pstmt: *mut sqlite3_stmt, index: c_int, val: i64) -> c_int;
 }
