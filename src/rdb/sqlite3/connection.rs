@@ -104,6 +104,14 @@ impl Connection {
             e => Err(e),
         }
     }
+
+    /// Creates [`Stmt`] instance.
+    ///
+    /// [`Stmt`]: struct.Stmt.html
+    #[inline]
+    pub fn stmt_once<'a>(&'a mut self, sql: &'a str) -> Result<Stmt<'a>, Error> {
+        Stmt::new(sql, unsafe { &mut *self.raw })
+    }
 }
 
 #[cfg(test)]
