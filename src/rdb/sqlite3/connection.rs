@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::{sqlite3, Stmt};
+use super::{sqlite3, sqlite3_close, Stmt};
 use std::collections::HashMap;
 
 /// New type of `&'static str` , which is compared by the address.
@@ -46,3 +46,11 @@ pub struct Connection {
 }
 
 unsafe impl Send for Connection {}
+
+impl Drop for Connection {
+    #[inline]
+    fn drop(&mut self) {
+        self.stmts.clear(); // All the Stmt instances must be finalized before close.
+        unsafe { sqlite3_close(self.raw) };
+    }
+}

@@ -66,6 +66,8 @@ pub enum sqlite3 {}
 
 #[link(name = "sqlite3")]
 extern "C" {
+    fn sqlite3_close(pdb: *mut sqlite3) -> c_int;
+
     fn sqlite3_prepare_v2(
         pdb: *mut sqlite3,
         zsql: *const c_char,
