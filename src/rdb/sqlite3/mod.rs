@@ -19,7 +19,7 @@ mod stmt;
 
 use crate::{Config, ModuleEnvironment};
 use clap::App;
-use std::os::raw::{c_char, c_int};
+use std::os::raw::{c_char, c_int, c_void};
 
 pub use error::Error;
 use stmt::Stmt;
@@ -74,4 +74,11 @@ extern "C" {
     fn sqlite3_step(pstmt: *mut sqlite3_stmt) -> c_int;
 
     fn sqlite3_bind_int64(pstmt: *mut sqlite3_stmt, index: c_int, val: i64) -> c_int;
+    fn sqlite3_bind_blob(
+        pstmt: *mut sqlite3_stmt,
+        index: c_int,
+        pval: *const c_void,
+        vlen: c_int,
+        destructor: *const c_void,
+    ) -> c_int;
 }

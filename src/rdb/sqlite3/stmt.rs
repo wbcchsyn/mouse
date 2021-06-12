@@ -15,14 +15,14 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use super::{
-    sqlite3, sqlite3_bind_int64, sqlite3_clear_bindings, sqlite3_column_count, sqlite3_finalize,
-    sqlite3_prepare_v2, sqlite3_reset, sqlite3_step, sqlite3_stmt, Error, SQLITE_RANGE,
-    SQLITE_TOOBIG,
+    sqlite3, sqlite3_bind_blob, sqlite3_bind_int64, sqlite3_clear_bindings, sqlite3_column_count,
+    sqlite3_finalize, sqlite3_prepare_v2, sqlite3_reset, sqlite3_step, sqlite3_stmt, Error,
+    SQLITE_RANGE, SQLITE_TOOBIG,
 };
 use core::convert::TryFrom;
 use core::marker::PhantomData;
 use core::ptr;
-use std::os::raw::{c_char, c_int};
+use std::os::raw::{c_char, c_int, c_void};
 
 /// Wrapper of C [`sqlite3_stmt`] .
 ///
@@ -146,6 +146,38 @@ impl Stmt<'_> {
 
         let index = c_int::try_from(index).or(Err(Error::new(SQLITE_RANGE)))?;
         let code = unsafe { sqlite3_bind_int64(self.raw, index, val) };
+        match Error::new(code) {
+            Error::OK => Ok(()),
+            e => Err(e),
+        }
+    }
+
+    /// Wrapper of C function [`sqlite3_bind_blob`] .
+    ///
+    /// Calls method [`reset`] if necessary, and calls [`sqlite3_bind_blob`] .
+    /// Note that `index` starts at 1, not 0.
+    ///
+    /// [`reset`]: #method.reset
+    /// [`step`]: #method.step
+    /// [`sqlite3_bind_blob`]: https://www.sqlite.org/c3ref/bind_blob.html
+    /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
+    /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
+    #[inline]
+    pub fn bind_blob<'a, 'b>(&'a mut self, index: usize, val: &'b [u8]) -> Result<(), Error>
+    where
+        'b: 'a,
+    {
+        // self.reset() was not called after self.step() returns true.
+        if self.is_row {
+            self.reset();
+        }
+
+        let index = c_int::try_from(index).or(Err(Error::new(SQLITE_RANGE)))?;
+        let ptr = val.as_ptr() as *const c_void;
+        let len = c_int::try_from(val.len()).or(Err(Error::new(SQLITE_TOOBIG)))?;
+        const DESTRUCTOR: *const c_void = core::ptr::null();
+
+        let code = unsafe { sqlite3_bind_blob(self.raw, index, ptr, len, DESTRUCTOR) };
         match Error::new(code) {
             Error::OK => Ok(()),
             e => Err(e),
