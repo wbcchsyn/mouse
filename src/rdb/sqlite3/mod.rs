@@ -35,6 +35,7 @@ const SQLITE_ROW: c_int = 100;
 // Constants for column type
 // https://www.sqlite.org/draft/c3ref/c_blob.html
 const SQLITE_INTEGER: c_int = 1;
+const SQLITE_BLOB: c_int = 4;
 const SQLITE_NULL: c_int = 5;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
@@ -90,4 +91,6 @@ extern "C" {
 
     fn sqlite3_column_type(pstmt: *mut sqlite3_stmt, icol: c_int) -> c_int;
     fn sqlite3_column_int64(pstmt: *mut sqlite3_stmt, icol: c_int) -> i64;
+    fn sqlite3_column_blob(pstmt: *mut sqlite3_stmt, icol: c_int) -> *const c_void;
+    fn sqlite3_column_bytes(pstmt: *mut sqlite3_stmt, icol: c_int) -> c_int;
 }
