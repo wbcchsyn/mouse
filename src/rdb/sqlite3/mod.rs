@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+mod connection;
 mod error;
 mod stmt;
 
@@ -21,6 +22,7 @@ use crate::{Config, ModuleEnvironment};
 use clap::App;
 use std::os::raw::{c_char, c_int, c_void};
 
+use connection::Connection;
 pub use error::Error;
 use stmt::Stmt;
 
@@ -37,6 +39,12 @@ const SQLITE_ROW: c_int = 100;
 const SQLITE_INTEGER: c_int = 1;
 const SQLITE_BLOB: c_int = 4;
 const SQLITE_NULL: c_int = 5;
+
+// Constants for sqlite3_open_v2()
+// https://www.sqlite.org/draft/c3ref/c_open_autoproxy.html
+const SQLITE_OPEN_READWRITE: c_int = 0x00000002;
+const SQLITE_OPEN_MEMORY: c_int = 0x00000080;
+const SQLITE_OPEN_NOMUTEX: c_int = 0x00008000;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
@@ -64,6 +72,14 @@ pub enum sqlite3 {}
 
 #[link(name = "sqlite3")]
 extern "C" {
+    fn sqlite3_open_v2(
+        filename: *const c_char,
+        ppdb: *mut *mut sqlite3,
+        flags: c_int,
+        zvfs: *const c_char,
+    ) -> c_int;
+    fn sqlite3_close(pdb: *mut sqlite3) -> c_int;
+
     fn sqlite3_prepare_v2(
         pdb: *mut sqlite3,
         zsql: *const c_char,
