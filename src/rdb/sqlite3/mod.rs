@@ -123,6 +123,15 @@ impl Sqlite3Session<'_> {
         self.is_transaction_ = false;
         Ok(())
     }
+
+    fn do_rollback(&mut self) -> Result<(), Error> {
+        const SQL: &'static str = "ROLLBACK";
+        let stmt = self.con.stmt(SQL)?;
+        stmt.step()?;
+
+        self.is_transaction_ = false;
+        Ok(())
+    }
 }
 
 #[link(name = "sqlite3")]
