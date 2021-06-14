@@ -99,6 +99,12 @@ enum sqlite3_stmt {}
 #[allow(non_camel_case_types)]
 pub enum sqlite3 {}
 
+struct Sqlite3Session<'a> {
+    env: &'a Environment,
+    con: &'a mut Connection,
+    is_transaction_: bool,
+}
+
 #[link(name = "sqlite3")]
 extern "C" {
     fn sqlite3_open_v2(
