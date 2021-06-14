@@ -19,7 +19,7 @@ mod error;
 mod stmt;
 
 use crate::{Config, ModuleEnvironment};
-use clap::App;
+use clap::{App, Arg};
 use core::cell::Cell;
 use std::os::raw::{c_char, c_int, c_void};
 use std::sync::{Condvar, Mutex};
@@ -66,7 +66,13 @@ impl Default for Environment {
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
-        app
+        app.arg(
+            Arg::with_name("PATH_TO_RDB_DATA_DIR")
+                .help("Path to the RDB database directory.")
+                .long("--rdb-data-path")
+                .required(true)
+                .takes_value(true),
+        )
     }
 
     unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn std::error::Error>> {
