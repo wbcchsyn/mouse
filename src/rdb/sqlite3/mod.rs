@@ -21,6 +21,8 @@ mod stmt;
 use crate::{Config, ModuleEnvironment};
 use clap::App;
 use std::os::raw::{c_char, c_int, c_void};
+use std::sync::{Condvar, Mutex};
+use std::thread::ThreadId;
 
 use connection::Connection;
 pub use error::Error;
@@ -48,7 +50,9 @@ const SQLITE_OPEN_NOMUTEX: c_int = 0x00008000;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
 #[derive(Default)]
-pub struct Environment {}
+pub struct Environment {
+    session_owner: (Mutex<Option<ThreadId>>, Condvar),
+}
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
