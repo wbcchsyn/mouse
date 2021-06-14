@@ -114,6 +114,15 @@ impl Sqlite3Session<'_> {
         self.is_transaction_ = true;
         Ok(())
     }
+
+    fn do_commit(&mut self) -> Result<(), Error> {
+        const SQL: &'static str = "COMMIT";
+        let stmt = self.con.stmt(SQL)?;
+        stmt.step()?;
+
+        self.is_transaction_ = false;
+        Ok(())
+    }
 }
 
 #[link(name = "sqlite3")]
