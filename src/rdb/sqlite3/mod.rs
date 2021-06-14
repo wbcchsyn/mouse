@@ -78,7 +78,10 @@ impl ModuleEnvironment for Environment {
         )
     }
 
-    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+        let data_path = config.args().value_of("PATH_TO_RDB_DATA_DIR").unwrap();
+        self.data_path = PathBuf::from(data_path);
+
         Ok(())
     }
 
