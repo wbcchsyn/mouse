@@ -105,6 +105,20 @@ struct Sqlite3Session<'a> {
     is_transaction_: bool,
 }
 
+impl Drop for Sqlite3Session<'_> {
+    fn drop(&mut self) {
+        // Rollback for just in case.
+        // do_rollback() returns an error if transaction is not started.
+        // Ignore the error.
+        let _ = self.do_rollback();
+
+        let (mtx, cond) = &self.env.session_owner;
+        let mut guard = mtx.lock().unwrap();
+        *guard = None;
+        cond.notify_one();
+    }
+}
+
 impl Sqlite3Session<'_> {
     fn do_begin_transaction(&mut self) -> Result<(), Error> {
         const SQL: &'static str = "BEGIN";
