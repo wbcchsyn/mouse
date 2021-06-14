@@ -21,6 +21,7 @@ mod stmt;
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use core::cell::Cell;
+use core::convert::TryFrom;
 use std::os::raw::{c_char, c_int, c_void};
 use std::path::PathBuf;
 use std::sync::{Condvar, Mutex};
@@ -86,6 +87,8 @@ impl ModuleEnvironment for Environment {
     }
 
     unsafe fn init(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        self.connection = Cell::new(Connection::try_from(self.data_path.as_ref())?);
+
         Ok(())
     }
 }
