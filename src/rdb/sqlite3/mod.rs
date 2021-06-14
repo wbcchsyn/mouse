@@ -105,6 +105,17 @@ struct Sqlite3Session<'a> {
     is_transaction_: bool,
 }
 
+impl Sqlite3Session<'_> {
+    fn do_begin_transaction(&mut self) -> Result<(), Error> {
+        const SQL: &'static str = "BEGIN";
+        let stmt = self.con.stmt(SQL)?;
+        stmt.step()?;
+
+        self.is_transaction_ = true;
+        Ok(())
+    }
+}
+
 #[link(name = "sqlite3")]
 extern "C" {
     fn sqlite3_open_v2(
