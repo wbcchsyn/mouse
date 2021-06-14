@@ -19,8 +19,13 @@ mod error;
 mod stmt;
 
 use crate::{Config, ModuleEnvironment};
-use clap::App;
+use clap::{App, Arg};
+use core::cell::Cell;
+use core::convert::TryFrom;
 use std::os::raw::{c_char, c_int, c_void};
+use std::path::PathBuf;
+use std::sync::{Condvar, Mutex};
+use std::thread::ThreadId;
 
 use connection::Connection;
 pub use error::Error;
@@ -47,19 +52,43 @@ const SQLITE_OPEN_MEMORY: c_int = 0x00000080;
 const SQLITE_OPEN_NOMUTEX: c_int = 0x00008000;
 
 /// `Environment` implements `ModuleEnvironment` for this module.
-#[derive(Default)]
-pub struct Environment {}
+pub struct Environment {
+    data_path: PathBuf,
+    session_owner: (Mutex<Option<ThreadId>>, Condvar),
+    connection: Cell<Connection>,
+}
+
+impl Default for Environment {
+    fn default() -> Self {
+        Self {
+            data_path: PathBuf::default(),
+            session_owner: Default::default(),
+            connection: Cell::new(Connection::open_memory_db().unwrap()),
+        }
+    }
+}
 
 impl ModuleEnvironment for Environment {
     fn args(app: App<'static, 'static>) -> App<'static, 'static> {
-        app
+        app.arg(
+            Arg::with_name("PATH_TO_RDB_DATA_DIR")
+                .help("Path to the RDB database directory.")
+                .long("--rdb-data-path")
+                .required(true)
+                .takes_value(true),
+        )
     }
 
-    unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+    unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn std::error::Error>> {
+        let data_path = config.args().value_of("PATH_TO_RDB_DATA_DIR").unwrap();
+        self.data_path = PathBuf::from(data_path);
+
         Ok(())
     }
 
     unsafe fn init(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        self.connection = Cell::new(Connection::try_from(self.data_path.as_ref())?);
+
         Ok(())
     }
 }
