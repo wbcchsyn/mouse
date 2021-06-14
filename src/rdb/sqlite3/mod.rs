@@ -18,6 +18,7 @@ mod connection;
 mod error;
 mod stmt;
 
+use super::Session;
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use core::cell::Cell;
@@ -116,6 +117,39 @@ impl Drop for Sqlite3Session<'_> {
         let mut guard = mtx.lock().unwrap();
         *guard = None;
         cond.notify_one();
+    }
+}
+
+impl Session for Sqlite3Session<'_> {
+    fn is_transaction(&self) -> bool {
+        self.is_transaction_
+    }
+
+    fn begin_transaction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        assert_eq!(false, self.is_transaction_);
+        // The compiler can't assume the type to use map_err().
+        match self.do_begin_transaction() {
+            Ok(()) => Ok(()),
+            Err(e) => Err(Box::new(e)),
+        }
+    }
+
+    fn commit(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        assert_eq!(true, self.is_transaction_);
+        // The compiler can't assume the type to use map_err().
+        match self.do_commit() {
+            Ok(()) => Ok(()),
+            Err(e) => Err(Box::new(e)),
+        }
+    }
+
+    fn rollback(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        assert_eq!(true, self.is_transaction_);
+        // The compiler can't assume the type to use map_err().
+        match self.do_rollback() {
+            Ok(()) => Ok(()),
+            Err(e) => Err(Box::new(e)),
+        }
     }
 }
 
