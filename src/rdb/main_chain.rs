@@ -48,3 +48,18 @@ where
     sqlite3::main_chain::push(chain_index, session)?;
     Ok(())
 }
+
+/// Delete the heighest record in the "main_chain" if "main_chain" is not empty;
+/// otherwise, does nothing.
+///
+/// This function execute like the following SQL.
+/// (It depends on the implementation. The real SQL may be different.)
+///
+/// DELETE FROM main_chain ORDER BY height DESC LIMIT 1
+pub fn pop<S>(session: &mut S) -> Result<(), Box<dyn Error>>
+where
+    S: Master,
+{
+    sqlite3::main_chain::pop(session)?;
+    Ok(())
+}
