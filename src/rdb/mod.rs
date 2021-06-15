@@ -52,3 +52,16 @@ pub trait Slave: Session {}
 
 /// Represents a session to a master RDB.
 pub trait Master: Session + Slave {}
+
+/// Creates a new instance implementing [`Master`] .
+///
+/// # Panics
+///
+/// Panics if the current thread owns another [`Session`] instance.
+/// This feature is to escape a dead lock.
+///
+/// [`Master`]: trait.Master.html
+/// [`Session`]: trait.Session.html
+pub fn master<'a>(env: &'a Environment) -> impl 'a + Master {
+    sqlite3::master(env)
+}
