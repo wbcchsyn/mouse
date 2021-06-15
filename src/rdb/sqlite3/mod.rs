@@ -224,6 +224,16 @@ impl Master for Sqlite3Session<'_> {}
 impl Slave for Sqlite3Session<'_> {}
 
 impl Sqlite3Session<'_> {
+    /// Converts [`Session`] into `Self` and provides a reference to it.
+    pub fn as_sqlite3_session<S>(session: &mut S) -> &mut Self
+    where
+        S: Session,
+    {
+        let ptr: *mut S = session;
+        let ptr = ptr as *mut Self;
+        unsafe { &mut *ptr }
+    }
+
     fn do_begin_transaction(&mut self) -> Result<(), Error> {
         const SQL: &'static str = "BEGIN";
         let stmt = self.con.stmt(SQL)?;
