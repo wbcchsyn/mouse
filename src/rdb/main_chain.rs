@@ -87,6 +87,23 @@ where
     }
 }
 
+/// Fetches a record corresponding to `height` from "main_chain" and returns the id if found, or
+/// `None` .
+///
+/// This function execute like the following SQL.
+/// (It depends on the implementation. The real SQL may be different.)
+///
+/// SELECT id FROM main_chain WHERE height = `height`
+pub fn fetch_one<S>(height: BlockHeight, session: &mut S) -> Result<Option<Id>, Box<dyn Error>>
+where
+    S: Slave,
+{
+    match sqlite3::main_chain::fetch_one(height, session) {
+        Ok(id) => Ok(id),
+        Err(e) => Err(Box::new(e)),
+    }
+}
+
 /// Fetches at most `limit` records, whose height is greater than or equals to `min_height` order
 /// by the height from RDB table "main_chain".
 ///
