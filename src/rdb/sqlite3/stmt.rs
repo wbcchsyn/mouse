@@ -37,7 +37,6 @@ pub struct Stmt<'a> {
 }
 
 impl Drop for Stmt<'_> {
-    #[inline]
     fn drop(&mut self) {
         unsafe { sqlite3_finalize(self.raw) };
     }
@@ -76,7 +75,6 @@ impl Stmt<'_> {
     /// Note this method does not change the binding parameters at all.
     ///
     /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
-    #[inline]
     pub fn reset(&mut self) {
         unsafe { sqlite3_reset(self.raw) };
         self.is_row = false;
@@ -90,7 +88,6 @@ impl Stmt<'_> {
     ///
     /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
     /// [`sqlite3_clear_bindings`]: https://www.sqlite.org/c3ref/clear_bindings.html
-    #[inline]
     pub fn clear(&mut self) {
         self.reset();
         unsafe { sqlite3_clear_bindings(self.raw) };
@@ -109,7 +106,6 @@ impl Stmt<'_> {
     ///
     /// [`reset`]: #method.reset
     /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
-    #[inline]
     pub fn step(&mut self) -> Result<bool, Error> {
         let code = unsafe { sqlite3_step(self.raw) };
         match Error::new(code) {
@@ -138,7 +134,6 @@ impl Stmt<'_> {
     /// [`sqlite3_bind_int64`]: https://www.sqlite.org/c3ref/bind_blob.html
     /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
     /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
-    #[inline]
     pub fn bind_int(&mut self, index: usize, val: i64) -> Result<(), Error> {
         // self.reset() was not called after self.step() returns true.
         if self.is_row {
@@ -163,7 +158,6 @@ impl Stmt<'_> {
     /// [`sqlite3_bind_blob`]: https://www.sqlite.org/c3ref/bind_blob.html
     /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
     /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
-    #[inline]
     pub fn bind_blob<'a, 'b>(&'a mut self, index: usize, val: &'b [u8]) -> Result<(), Error>
     where
         'b: 'a,
@@ -195,7 +189,6 @@ impl Stmt<'_> {
     /// [`sqlite3_bind_null`]: https://www.sqlite.org/c3ref/bind_blob.html
     /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
     /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
-    #[inline]
     pub fn bind_null(&mut self, index: usize) -> Result<(), Error> {
         // self.reset() was not called after self.step() returns true.
         if self.is_row {
@@ -230,7 +223,6 @@ impl Stmt<'_> {
     /// [`step`]: #method.step
     /// [`sqlite3_column_type`]: https://www.sqlite.org/c3ref/column_blob.html
     /// [`sqlite3_column_int64`]: https://www.sqlite.org/c3ref/column_blob.html
-    #[inline]
     pub fn column_int(&mut self, index: usize) -> Option<i64> {
         assert_eq!(true, self.is_row);
         assert!(index < (self.column_count as usize));
@@ -267,7 +259,6 @@ impl Stmt<'_> {
     /// [`sqlite3_column_type`]: https://www.sqlite.org/c3ref/column_blob.html
     /// [`sqlite3_column_blob`]: https://www.sqlite.org/c3ref/column_blob.html
     /// [`sqlite3_column_bytes`]: https://www.sqlite.org/c3ref/column_blob.html
-    #[inline]
     pub fn column_blob(&mut self, index: usize) -> Option<&[u8]> {
         assert_eq!(true, self.is_row);
         assert!(index < (self.column_count as usize));

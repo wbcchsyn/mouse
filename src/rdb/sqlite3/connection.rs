@@ -55,7 +55,6 @@ pub struct Connection {
 unsafe impl Send for Connection {}
 
 impl Drop for Connection {
-    #[inline]
     fn drop(&mut self) {
         self.stmts.clear(); // All the Stmt instances must be finalized before close.
         unsafe { sqlite3_close(self.raw) };
@@ -65,7 +64,6 @@ impl Drop for Connection {
 impl TryFrom<&Path> for Connection {
     type Error = Box<dyn std::error::Error>;
 
-    #[inline]
     fn try_from(filename: &Path) -> Result<Self, Self::Error> {
         let filename = CString::new(filename.to_string_lossy().as_bytes()).map_err(Box::new)?;
         let mut raw: *mut sqlite3 = ptr::null_mut();
@@ -85,7 +83,6 @@ impl TryFrom<&Path> for Connection {
 
 impl Connection {
     /// Opens in-memory database and returns a new instance.
-    #[inline]
     pub fn open_memory_db() -> Result<Self, Error> {
         let filename: *const c_char = "memory_db".as_ptr() as *const c_char;
         let mut raw: *mut sqlite3 = ptr::null_mut();
@@ -105,7 +102,6 @@ impl Connection {
     /// Creates [`Stmt`] instance.
     ///
     /// [`Stmt`]: struct.Stmt.html
-    #[inline]
     pub fn stmt_once<'a>(&'a mut self, sql: &'a str) -> Result<Stmt<'a>, Error> {
         Stmt::new(sql, unsafe { &mut *self.raw })
     }
@@ -113,7 +109,6 @@ impl Connection {
     /// Creates and caches [`Stmt`] if not cached and provides a reference to the cached instance.
     ///
     /// [`Stmt`]: struct.Stmt.html
-    #[inline]
     pub fn stmt(&mut self, sql: &'static str) -> Result<&mut Stmt<'static>, Error> {
         match self.stmts.entry(Sql(sql.as_ptr())) {
             Entry::Occupied(o) => {
