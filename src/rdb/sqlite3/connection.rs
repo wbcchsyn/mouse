@@ -50,7 +50,6 @@ mod sql_tests {
 pub struct Connection {
     raw: *mut sqlite3,
     stmts: HashMap<Sql, Stmt<'static>>,
-    is_transaction: bool,
 }
 
 unsafe impl Send for Connection {}
@@ -78,7 +77,6 @@ impl TryFrom<&Path> for Connection {
             Error::OK => Ok(Self {
                 raw,
                 stmts: Default::default(),
-                is_transaction: false,
             }),
             e => Err(Box::new(e)),
         }
@@ -99,7 +97,6 @@ impl Connection {
             Error::OK => Ok(Self {
                 raw,
                 stmts: Default::default(),
-                is_transaction: false,
             }),
             e => Err(e),
         }
