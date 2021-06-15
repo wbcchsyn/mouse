@@ -13,3 +13,40 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
+
+use super::{Error, Master, Sqlite3Session};
+
+/// Make sure to create table "main_chain".
+///
+/// This method does nothing if the table is.
+pub fn create_table<S>(session: &mut S) -> Result<(), Error>
+where
+    S: Master,
+{
+    const SQL: &'static str = r#"CREATE TABLE IF NOT EXISTS main_chain(
+        height INTEGER PRIMARY KEY,
+        id BLOB UNIQUE NOT NULL
+    )"#;
+
+    let session = Sqlite3Session::as_sqlite3_session(session);
+    let mut stmt = session.con.stmt_once(SQL)?;
+    stmt.step()?;
+
+    Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::rdb::sqlite3::{master, Environment};
+
+    #[test]
+    fn create_table_() {
+        let env = Environment::default();
+        let mut session = master(&env);
+        let session = Sqlite3Session::as_sqlite3_session(&mut session);
+
+        assert_eq!(true, create_table(session).is_ok());
+        assert_eq!(true, create_table(session).is_ok());
+    }
+}
