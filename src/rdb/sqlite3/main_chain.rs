@@ -166,8 +166,15 @@ mod tests {
         let mut session = master(&env);
 
         for c in main_chain() {
+            let heights: &[BlockHeight] = &[c.height()];
+            let fetched = fetch(heights.iter(), &mut session);
+            assert_eq!(0, fetched.unwrap().len());
+
             assert_eq!(true, push(&c, &mut session).is_ok());
             assert_eq!(false, push(&c, &mut session).is_ok());
+
+            let fetched = fetch(heights.iter(), &mut session);
+            assert_eq!(1, fetched.unwrap().len());
         }
 
         for c in main_chain() {
@@ -180,8 +187,15 @@ mod tests {
         let env = filled_table();
         let mut session = master(&env);
 
-        for _ in 0..CHAIN_LEN {
+        for i in 0..MAX_CHAIN_HEIGHT {
+            let heights: &[BlockHeight] = &[MAX_CHAIN_HEIGHT - i];
+            let fetched = fetch(heights.iter(), &mut session);
+            assert_eq!(1, fetched.unwrap().len());
+
             assert_eq!(true, pop(&mut session).is_ok());
+
+            let fetched = fetch(heights.iter(), &mut session);
+            assert_eq!(0, fetched.unwrap().len());
         }
 
         assert_eq!(true, pop(&mut session).is_ok());

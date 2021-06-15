@@ -25,8 +25,10 @@
 //! [`ChainIndex`]: crate::data_types::ChainIndex
 //! [`Id`]: crate::data_types::Id
 
-use super::{sqlite3, Master};
-use crate::data_types::ChainIndex;
+use super::{sqlite3, Master, Slave};
+use crate::data_types::{BlockHeight, ChainIndex, Id};
+use std::borrow::Borrow;
+use std::collections::BTreeMap;
 use std::error::Error;
 
 /// Insert `chain_index` into RDB table "main_chain".
@@ -62,4 +64,25 @@ where
 {
     sqlite3::main_chain::pop(session)?;
     Ok(())
+}
+
+/// Fetches records corresponding to `heights` from "main_chain".
+///
+/// This function execute like the following SQL for each `h` in `heights`.
+/// (It depends on the implementation. The real SQL may be different.)
+///
+/// SELECT id FROM main_chain WHERE height = `h`
+pub fn fetch<I, S, H>(
+    heights: I,
+    session: &mut S,
+) -> Result<BTreeMap<BlockHeight, Id>, Box<dyn Error>>
+where
+    I: Iterator<Item = H>,
+    H: Borrow<BlockHeight>,
+    S: Slave,
+{
+    match sqlite3::main_chain::fetch(heights, session) {
+        Ok(m) => Ok(m),
+        Err(e) => Err(Box::new(e)),
+    }
 }
