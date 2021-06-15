@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
+pub mod acids;
 mod connection;
 mod error;
 pub mod main_chain;
