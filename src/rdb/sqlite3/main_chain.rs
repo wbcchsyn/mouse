@@ -98,6 +98,26 @@ where
     Ok(ret)
 }
 
+/// Fetches a record corresponding to `height` from "main_chain" and returns the id if found, or
+/// `None` .
+pub fn fetch_one<S>(height: BlockHeight, session: &mut S) -> Result<Option<Id>, Error>
+where
+    S: Slave,
+{
+    const SQL: &'static str = r#"SELECT id FROM main_chain WHERE height = ?1"#;
+    let session = Sqlite3Session::as_sqlite3_session(session);
+    let stmt = session.con.stmt(SQL)?;
+
+    stmt.bind_int(1, height)?;
+
+    if stmt.step()? {
+        let id = unsafe { Id::copy_bytes(stmt.column_blob(0).unwrap()) };
+        Ok(Some(id))
+    } else {
+        Ok(None)
+    }
+}
+
 /// Fetches at most `limit` records, whose height is greater than or equals to `min_height` order
 /// by the height from RDB table "main_chain".
 ///
@@ -367,6 +387,38 @@ mod tests {
                     // fault j
                     assert_eq!(false, fetched.contains_key(&j));
                 }
+            }
+        }
+    }
+
+    #[test]
+    fn fetch_one_from_empty() {
+        let env = empty_table();
+        let mut session = slave(&env);
+
+        for height in &[-1, 0, 1] {
+            let fetched = fetch_one(*height, &mut session);
+            assert_eq!(true, fetched.is_ok());
+
+            let fetched = fetched.unwrap();
+            assert_eq!(None, fetched);
+        }
+    }
+
+    #[test]
+    fn fetch_one_from_filled_table() {
+        let env = filled_table();
+        let mut session = slave(&env);
+
+        for height in -1..=(MAX_CHAIN_HEIGHT + 1) {
+            let fetched = fetch_one(height, &mut session);
+            assert_eq!(true, fetched.is_ok());
+
+            let fetched = fetched.unwrap();
+            if 0 < height && height <= MAX_CHAIN_HEIGHT {
+                assert_eq!(Some(ids()[height as usize - 1]), fetched);
+            } else {
+                assert_eq!(None, fetched);
             }
         }
     }
