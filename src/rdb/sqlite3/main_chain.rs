@@ -244,15 +244,15 @@ mod tests {
         let mut session = master(&env);
 
         for c in main_chain() {
-            let heights: &[BlockHeight] = &[c.height()];
-            let fetched = fetch(heights.iter(), &mut session);
-            assert_eq!(0, fetched.unwrap().len());
+            let height = c.height();
+            let fetched = fetch_one(height, &mut session);
+            assert_eq!(true, fetched.unwrap().is_none());
 
             assert_eq!(true, push(&c, &mut session).is_ok());
             assert_eq!(false, push(&c, &mut session).is_ok());
 
-            let fetched = fetch(heights.iter(), &mut session);
-            assert_eq!(1, fetched.unwrap().len());
+            let fetched = fetch_one(height, &mut session);
+            assert_eq!(true, fetched.unwrap().is_some());
         }
 
         for c in main_chain() {
@@ -266,14 +266,14 @@ mod tests {
         let mut session = master(&env);
 
         for i in 0..MAX_CHAIN_HEIGHT {
-            let heights: &[BlockHeight] = &[MAX_CHAIN_HEIGHT - i];
-            let fetched = fetch(heights.iter(), &mut session);
-            assert_eq!(1, fetched.unwrap().len());
+            let height = MAX_CHAIN_HEIGHT - i;
+            let fetched = fetch_one(height, &mut session);
+            assert_eq!(true, fetched.unwrap().is_some());
 
             assert_eq!(true, pop(&mut session).is_ok());
 
-            let fetched = fetch(heights.iter(), &mut session);
-            assert_eq!(0, fetched.unwrap().len());
+            let fetched = fetch_one(height, &mut session);
+            assert_eq!(true, fetched.unwrap().is_none());
         }
 
         assert_eq!(true, pop(&mut session).is_ok());
