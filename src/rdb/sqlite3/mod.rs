@@ -18,6 +18,7 @@ mod connection;
 mod error;
 mod stmt;
 
+use super::{Master, Session, Slave};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use core::cell::Cell;
@@ -25,7 +26,7 @@ use core::convert::TryFrom;
 use std::os::raw::{c_char, c_int, c_void};
 use std::path::PathBuf;
 use std::sync::{Condvar, Mutex};
-use std::thread::ThreadId;
+use std::thread::{self, ThreadId};
 
 use connection::Connection;
 pub use error::Error;
@@ -93,11 +94,173 @@ impl ModuleEnvironment for Environment {
     }
 }
 
+/// Blocks while another thread is using the connection, and creates a new [`Master`] session.
+///
+/// # Panics
+///
+/// Panics if the current thread owns another `Session` instance.
+///
+/// [`Master`]: ../trait.Master.html
+pub fn master<'a>(env: &'a Environment) -> impl 'a + Master {
+    Sqlite3Session::new(env)
+}
+
+/// Blocks while another thread is using the connection, and creates a new [`Slave`] session.
+///
+/// # Panics
+///
+/// Panics if the current thread owns another `Session` instance.
+///
+/// [`Slave`]: ../trait.Slave.html
+pub fn slave<'a>(env: &'a Environment) -> impl 'a + Slave {
+    Sqlite3Session::new(env)
+}
+
 #[allow(non_camel_case_types)]
 enum sqlite3_stmt {}
 
 #[allow(non_camel_case_types)]
 pub enum sqlite3 {}
+
+struct Sqlite3Session<'a> {
+    env: &'a Environment,
+    con: &'a mut Connection,
+    is_transaction_: bool,
+}
+
+impl Drop for Sqlite3Session<'_> {
+    fn drop(&mut self) {
+        // Rollback for just in case.
+        // do_rollback() returns an error if transaction is not started.
+        // Ignore the error.
+        let _ = self.do_rollback();
+
+        let (mtx, cond) = &self.env.session_owner;
+        let mut guard = mtx.lock().unwrap();
+        *guard = None;
+        cond.notify_one();
+    }
+}
+
+impl<'a> Sqlite3Session<'a> {
+    /// Blocks while another thread is using the connection, and creates a new instance.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the current thread is using another instance.
+    pub fn new(env: &'a Environment) -> Self {
+        // Acquiring the ownership of the session.
+        {
+            let (mtx, cond) = &env.session_owner;
+            let mut guard = mtx.lock().unwrap();
+            let current_id = Some(thread::current().id());
+
+            // Some thread is using the connection.
+            if guard.is_some() {
+                if *guard == current_id {
+                    // It is the current thread itself that is using the connection.
+                    drop(guard);
+                    panic!("One thread tries to acqiure 2 RDB sessions.");
+                } else {
+                    // Another thread is using the connection.
+                    while {
+                        guard = cond.wait(guard).unwrap();
+                        guard.is_some()
+                    } {}
+                }
+            }
+            *guard = current_id;
+        }
+
+        let mut ret = Self {
+            env,
+            con: unsafe { &mut *env.connection.as_ptr() },
+            is_transaction_: false,
+        };
+
+        // For just in case.
+        // do_rollback() returns an error if no transaction is not started.
+        // ignore the error.
+        let _ = ret.do_rollback();
+        ret
+    }
+}
+
+impl Session for Sqlite3Session<'_> {
+    fn is_transaction(&self) -> bool {
+        self.is_transaction_
+    }
+
+    fn begin_transaction(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        assert_eq!(false, self.is_transaction_);
+        // The compiler can't assume the type to use map_err().
+        match self.do_begin_transaction() {
+            Ok(()) => Ok(()),
+            Err(e) => Err(Box::new(e)),
+        }
+    }
+
+    fn commit(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        assert_eq!(true, self.is_transaction_);
+        // The compiler can't assume the type to use map_err().
+        match self.do_commit() {
+            Ok(()) => Ok(()),
+            Err(e) => Err(Box::new(e)),
+        }
+    }
+
+    fn rollback(&mut self) -> Result<(), Box<dyn std::error::Error>> {
+        assert_eq!(true, self.is_transaction_);
+        // The compiler can't assume the type to use map_err().
+        match self.do_rollback() {
+            Ok(()) => Ok(()),
+            Err(e) => Err(Box::new(e)),
+        }
+    }
+}
+
+impl Master for Sqlite3Session<'_> {}
+
+impl Slave for Sqlite3Session<'_> {}
+
+impl Sqlite3Session<'_> {
+    /// Converts [`Session`] into `Self` and provides a reference to it.
+    pub fn as_sqlite3_session<S>(session: &mut S) -> &mut Self
+    where
+        S: Session,
+    {
+        let ptr: *mut S = session;
+        let ptr = ptr as *mut Self;
+        unsafe { &mut *ptr }
+    }
+
+    fn do_begin_transaction(&mut self) -> Result<(), Error> {
+        const SQL: &'static str = "BEGIN";
+        let stmt = self.con.stmt(SQL)?;
+        stmt.step()?;
+
+        self.is_transaction_ = true;
+        Ok(())
+    }
+
+    fn do_commit(&mut self) -> Result<(), Error> {
+        const SQL: &'static str = "COMMIT";
+        let stmt = self.con.stmt(SQL)?;
+        stmt.step()?;
+
+        self.is_transaction_ = false;
+        Ok(())
+    }
+
+    fn do_rollback(&mut self) -> Result<(), Error> {
+        const SQL: &'static str = "ROLLBACK";
+        let stmt = self.con.stmt(SQL)?;
+        stmt.step()?;
+
+        self.is_transaction_ = false;
+        Ok(())
+    }
+}
 
 #[link(name = "sqlite3")]
 extern "C" {
@@ -138,4 +301,23 @@ extern "C" {
     fn sqlite3_column_int64(pstmt: *mut sqlite3_stmt, icol: c_int) -> i64;
     fn sqlite3_column_blob(pstmt: *mut sqlite3_stmt, icol: c_int) -> *const c_void;
     fn sqlite3_column_bytes(pstmt: *mut sqlite3_stmt, icol: c_int) -> c_int;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn constructor() {
+        let env = Environment::default();
+        let _ = Sqlite3Session::new(&env);
+    }
+
+    #[should_panic]
+    #[test]
+    fn construct_twice() {
+        let env = Environment::default();
+        let _1st = Sqlite3Session::new(&env);
+        let _2nd = Sqlite3Session::new(&env);
+    }
 }
