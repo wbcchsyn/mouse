@@ -16,6 +16,7 @@
 
 //! 'rdb' module
 
+pub mod main_chain;
 mod sqlite3;
 
 pub use sqlite3::{Environment, Error};
