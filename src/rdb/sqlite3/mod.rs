@@ -18,7 +18,7 @@ mod connection;
 mod error;
 mod stmt;
 
-use super::Session;
+use super::{Master, Session, Slave};
 use crate::{Config, ModuleEnvironment};
 use clap::{App, Arg};
 use core::cell::Cell;
@@ -196,6 +196,10 @@ impl Session for Sqlite3Session<'_> {
         }
     }
 }
+
+impl Master for Sqlite3Session<'_> {}
+
+impl Slave for Sqlite3Session<'_> {}
 
 impl Sqlite3Session<'_> {
     fn do_begin_transaction(&mut self) -> Result<(), Error> {
