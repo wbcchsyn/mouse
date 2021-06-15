@@ -86,3 +86,27 @@ where
         Err(e) => Err(Box::new(e)),
     }
 }
+
+/// Fetches at most `limit` records, whose height is greater than or equals to `min_height` order
+/// by the height from RDB table "main_chain".
+///
+/// This function execute like the following SQL.
+/// (It depends on the implementation. The real SQL may be different.)
+///
+/// SELECT height, id FROM main_chain WHERE height >= `min_height`
+/// ORDER BY height ASC LIMIT `limit`
+///
+/// The result is ordered by the height.
+pub fn fetch_asc<S>(
+    min_height: BlockHeight,
+    limit: u32,
+    session: &mut S,
+) -> Result<impl AsRef<[ChainIndex]>, Box<dyn Error>>
+where
+    S: Slave,
+{
+    match sqlite3::main_chain::fetch_asc(min_height, limit, session) {
+        Ok(r) => Ok(r),
+        Err(e) => Err(Box::new(e)),
+    }
+}
