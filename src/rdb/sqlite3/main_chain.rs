@@ -58,6 +58,20 @@ where
     Ok(())
 }
 
+/// Delete the heighest record in the "main_chain" if "main_chain" is not empty;
+/// otherwise, does nothing.
+pub fn pop<S>(session: &mut S) -> Result<(), Error>
+where
+    S: Master,
+{
+    const SQL: &'static str = r#"DELETE FROM main_chain ORDER BY height DESC LIMIT 1"#;
+    let session = Sqlite3Session::as_sqlite3_session(session);
+
+    let stmt = session.con.stmt(SQL)?;
+    stmt.step()?;
+    Ok(())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -98,6 +112,19 @@ mod tests {
         env
     }
 
+    fn filled_table() -> Environment {
+        let env = empty_table();
+        {
+            let mut session = master(&env);
+
+            for c in main_chain() {
+                let _ = push(&c, &mut session);
+            }
+        }
+
+        env
+    }
+
     #[test]
     fn create_table_() {
         let env = Environment::default();
@@ -121,5 +148,17 @@ mod tests {
         for c in main_chain() {
             assert_eq!(false, push(&c, &mut session).is_ok());
         }
+    }
+
+    #[test]
+    fn pop_() {
+        let env = filled_table();
+        let mut session = master(&env);
+
+        for _ in 0..CHAIN_LEN {
+            assert_eq!(true, pop(&mut session).is_ok());
+        }
+
+        assert_eq!(true, pop(&mut session).is_ok());
     }
 }
