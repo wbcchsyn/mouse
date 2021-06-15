@@ -94,6 +94,17 @@ impl ModuleEnvironment for Environment {
     }
 }
 
+/// Blocks while another thread is using the connection, and creates a new [`Master`] session.
+///
+/// # Panics
+///
+/// Panics if the current thread owns another `Session` instance.
+///
+/// [`Master`]: ../trait.Master.html
+pub fn master<'a>(env: &'a Environment) -> impl 'a + Master {
+    Sqlite3Session::new(env)
+}
+
 #[allow(non_camel_case_types)]
 enum sqlite3_stmt {}
 
