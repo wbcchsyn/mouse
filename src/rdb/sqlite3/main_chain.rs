@@ -127,6 +127,35 @@ where
     Ok(ret)
 }
 
+/// Fetches at most `limit` records, whose height is less than or equals to `max_height` order
+/// by the height desc from RDB table "main_chain".
+///
+/// The result is ordered by the height desc.
+pub fn fetch_desc<S>(
+    max_height: BlockHeight,
+    limit: u32,
+    session: &mut S,
+) -> Result<impl AsRef<[ChainIndex]>, Error>
+where
+    S: Slave,
+{
+    const SQL: &'static str =
+        r#"SELECT height, id FROM main_chain WHERE height <= ?1 ORDER BY height DESC LIMIT ?2"#;
+    let session = Sqlite3Session::as_sqlite3_session(session);
+
+    let stmt = session.con.stmt(SQL)?;
+    stmt.bind_int(1, max_height)?;
+    stmt.bind_int(2, limit as i64)?;
+
+    let mut ret = Vec::with_capacity(limit as usize);
+    while stmt.step()? {
+        let height = stmt.column_int(0).unwrap();
+        let id = unsafe { Id::copy_bytes(stmt.column_blob(1).unwrap()) };
+        ret.push(ChainIndex::new(height, &id));
+    }
+    Ok(ret)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -374,6 +403,46 @@ mod tests {
                 let end = std::cmp::min(MAX_CHAIN_HEIGHT as usize, start + limit);
                 let chain = main_chain();
                 let expected = &chain[start..end];
+
+                assert_eq!(expected, fetched.as_ref());
+            }
+        }
+    }
+
+    #[test]
+    fn fetch_desc_from_empty_table() {
+        let env = empty_table();
+        let mut session = slave(&env);
+
+        for max_height in &[-1, 0, 1] {
+            for limit in &[0, 1] {
+                let fetched = fetch_desc(*max_height, *limit, &mut session);
+                assert_eq!(true, fetched.is_ok());
+
+                let fetched = fetched.unwrap();
+                assert_eq!(0, fetched.as_ref().len());
+            }
+        }
+    }
+
+    #[test]
+    fn fetch_desc_from_filled_table() {
+        let env = filled_table();
+        let mut session = slave(&env);
+
+        for max_height in -1..=(MAX_CHAIN_HEIGHT + 1) {
+            for limit in 0..=(CHAIN_LEN + 1) {
+                let fetched = fetch_desc(max_height, limit as u32, &mut session);
+                assert_eq!(true, fetched.is_ok());
+
+                let fetched = fetched.unwrap();
+
+                let end = std::cmp::min(MAX_CHAIN_HEIGHT, max_height);
+                let start = std::cmp::max(0, end - (limit as i64)) as usize;
+                let end = std::cmp::max(0, end) as usize;
+                let mut chain = main_chain();
+                let expected = &mut chain[start..end];
+                expected.reverse();
 
                 assert_eq!(expected, fetched.as_ref());
             }
