@@ -14,8 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::{Error, Master, Sqlite3Session};
-use crate::data_types::ChainIndex;
+use super::{Error, Master, Slave, Sqlite3Session};
+use crate::data_types::{BlockHeight, ChainIndex, CryptoHash, Id};
+use std::borrow::Borrow;
+use std::collections::BTreeMap;
 
 /// Make sure to create table "main_chain".
 ///
@@ -72,11 +74,34 @@ where
     Ok(())
 }
 
+/// Fetches records corresponding to `heights` from "main_chain".
+pub fn fetch<I, S, H>(heights: I, session: &mut S) -> Result<BTreeMap<BlockHeight, Id>, Error>
+where
+    I: Iterator<Item = H>,
+    H: Borrow<BlockHeight>,
+    S: Slave,
+{
+    const SQL: &'static str = r#"SELECT id FROM main_chain WHERE height = ?1"#;
+    let session = Sqlite3Session::as_sqlite3_session(session);
+    let stmt = session.con.stmt(SQL)?;
+
+    let mut ret = BTreeMap::new();
+    for h in heights {
+        let h = *h.borrow();
+        stmt.bind_int(1, h)?;
+        if stmt.step()? {
+            let id = unsafe { Id::copy_bytes(stmt.column_blob(0).unwrap()) };
+            ret.insert(h, id);
+        }
+    }
+
+    Ok(ret)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::data_types::{BlockHeight, CryptoHash, Id};
-    use crate::rdb::sqlite3::{master, Environment};
+    use crate::rdb::sqlite3::{master, slave, Environment};
 
     const CHAIN_LEN: usize = 10;
     const MAX_CHAIN_HEIGHT: BlockHeight = 10;
@@ -160,5 +185,117 @@ mod tests {
         }
 
         assert_eq!(true, pop(&mut session).is_ok());
+    }
+
+    #[test]
+    fn fetch_from_empty() {
+        let env = empty_table();
+        let mut session = slave(&env);
+
+        // Empty height
+        {
+            let heights: &[BlockHeight] = &[];
+
+            let fetched = fetch(heights.iter(), &mut session);
+            assert_eq!(true, fetched.is_ok());
+
+            let fetched = fetched.unwrap();
+            assert_eq!(0, fetched.len());
+        }
+
+        // Single height
+        {
+            for i in [-1, 0, 1].iter() {
+                let heights: &[BlockHeight] = &[*i];
+
+                let fetched = fetch(heights.iter(), &mut session);
+                assert_eq!(true, fetched.is_ok());
+
+                let fetched = fetched.unwrap();
+                assert_eq!(0, fetched.len());
+            }
+        }
+
+        // 2 heights
+        {
+            for i in [-1, 0, 1].iter() {
+                for j in [-1, 0, 1].iter() {
+                    let heights: &[BlockHeight] = &[*i, *j];
+
+                    let fetched = fetch(heights.iter(), &mut session);
+                    assert_eq!(true, fetched.is_ok());
+
+                    let fetched = fetched.unwrap();
+                    assert_eq!(0, fetched.len());
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn fetch_from_filled() {
+        let env = filled_table();
+        let mut session = slave(&env);
+
+        // Empty height
+        {
+            let heights: &[BlockHeight] = &[];
+
+            let fetched = fetch(heights.iter(), &mut session);
+            assert_eq!(true, fetched.is_ok());
+
+            let fetched = fetched.unwrap();
+            assert_eq!(0, fetched.len());
+        }
+
+        // 1 height
+        for i in -1..=MAX_CHAIN_HEIGHT + 1 {
+            let heights: &[BlockHeight] = &[i];
+
+            let fetched = fetch(heights.iter(), &mut session);
+            assert_eq!(true, fetched.is_ok());
+
+            let fetched = fetched.unwrap();
+
+            if 0 < i && i <= MAX_CHAIN_HEIGHT {
+                // 1 hit
+                assert_eq!(1, fetched.len());
+                let expected = ids()[(i - 1) as usize];
+                assert_eq!(expected, fetched[&i]);
+            } else {
+                // 0 hit
+                assert_eq!(0, fetched.len());
+            }
+        }
+
+        // 2 heights
+        for i in -1..=MAX_CHAIN_HEIGHT + 1 {
+            for j in -1..=MAX_CHAIN_HEIGHT + 1 {
+                let heights: &[BlockHeight] = &[i, j];
+
+                let fetched = fetch(heights.iter(), &mut session);
+                assert_eq!(true, fetched.is_ok());
+
+                let fetched = fetched.unwrap();
+
+                if 0 < i && i <= MAX_CHAIN_HEIGHT {
+                    // hit i
+                    let expected = ids()[(i - 1) as usize];
+                    assert_eq!(expected, fetched[&i]);
+                } else {
+                    // fault i
+                    assert_eq!(false, fetched.contains_key(&i));
+                }
+
+                if 0 < j && j <= MAX_CHAIN_HEIGHT {
+                    // hit j
+                    let expected = ids()[(j - 1) as usize];
+                    assert_eq!(expected, fetched[&j]);
+                } else {
+                    // fault j
+                    assert_eq!(false, fetched.contains_key(&j));
+                }
+            }
+        }
     }
 }
