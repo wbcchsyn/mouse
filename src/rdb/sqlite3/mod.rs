@@ -16,6 +16,7 @@
 
 mod connection;
 mod error;
+pub mod main_chain;
 mod stmt;
 
 use super::{Master, Session, Slave};
