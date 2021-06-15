@@ -26,7 +26,7 @@ use core::convert::TryFrom;
 use std::os::raw::{c_char, c_int, c_void};
 use std::path::PathBuf;
 use std::sync::{Condvar, Mutex};
-use std::thread::ThreadId;
+use std::thread::{self, ThreadId};
 
 use connection::Connection;
 pub use error::Error;
@@ -117,6 +117,50 @@ impl Drop for Sqlite3Session<'_> {
         let mut guard = mtx.lock().unwrap();
         *guard = None;
         cond.notify_one();
+    }
+}
+
+impl<'a> Sqlite3Session<'a> {
+    /// Blocks while another thread is using the connection, and creates a new instance.
+    ///
+    /// # Panics
+    ///
+    /// Panics if the current thread is using another instance.
+    pub fn new(env: &'a Environment) -> Self {
+        // Acquiring the ownership of the session.
+        {
+            let (mtx, cond) = &env.session_owner;
+            let mut guard = mtx.lock().unwrap();
+            let current_id = Some(thread::current().id());
+
+            // Some thread is using the connection.
+            if guard.is_some() {
+                if *guard == current_id {
+                    // It is the current thread itself that is using the connection.
+                    drop(guard);
+                    panic!("One thread tries to acqiure 2 RDB sessions.");
+                } else {
+                    // Another thread is using the connection.
+                    while {
+                        guard = cond.wait(guard).unwrap();
+                        guard.is_some()
+                    } {}
+                }
+            }
+            *guard = current_id;
+        }
+
+        let mut ret = Self {
+            env,
+            con: unsafe { &mut *env.connection.as_ptr() },
+            is_transaction_: false,
+        };
+
+        // For just in case.
+        // do_rollback() returns an error if no transaction is not started.
+        // ignore the error.
+        let _ = ret.do_rollback();
+        ret
     }
 }
 
@@ -221,4 +265,23 @@ extern "C" {
     fn sqlite3_column_int64(pstmt: *mut sqlite3_stmt, icol: c_int) -> i64;
     fn sqlite3_column_blob(pstmt: *mut sqlite3_stmt, icol: c_int) -> *const c_void;
     fn sqlite3_column_bytes(pstmt: *mut sqlite3_stmt, icol: c_int) -> c_int;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn constructor() {
+        let env = Environment::default();
+        let _ = Sqlite3Session::new(&env);
+    }
+
+    #[should_panic]
+    #[test]
+    fn construct_twice() {
+        let env = Environment::default();
+        let _1st = Sqlite3Session::new(&env);
+        let _2nd = Sqlite3Session::new(&env);
+    }
 }
