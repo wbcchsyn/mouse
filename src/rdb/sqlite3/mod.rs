@@ -105,6 +105,17 @@ pub fn master<'a>(env: &'a Environment) -> impl 'a + Master {
     Sqlite3Session::new(env)
 }
 
+/// Blocks while another thread is using the connection, and creates a new [`Slave`] session.
+///
+/// # Panics
+///
+/// Panics if the current thread owns another `Session` instance.
+///
+/// [`Slave`]: ../trait.Slave.html
+pub fn slave<'a>(env: &'a Environment) -> impl 'a + Slave {
+    Sqlite3Session::new(env)
+}
+
 #[allow(non_camel_case_types)]
 enum sqlite3_stmt {}
 
