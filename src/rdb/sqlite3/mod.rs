@@ -127,6 +127,7 @@ where
     S: Master,
 {
     main_chain::create_table(session)?;
+    acids::create_table(session)?;
 
     Ok(())
 }
