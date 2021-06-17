@@ -18,6 +18,7 @@ pub mod acids;
 mod connection;
 mod error;
 pub mod main_chain;
+pub mod resources;
 mod stmt;
 
 use super::{Master, Session, Slave};
