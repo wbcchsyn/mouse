@@ -28,9 +28,10 @@
 //!
 //! [`Acid`]: crate::data_types::Acid
 
-use super::{sqlite3, Master};
+use super::{sqlite3, Master, Slave};
 use crate::data_types::{ChainIndex, Id};
 use std::borrow::Borrow;
+use std::collections::HashMap;
 use std::error::Error;
 
 /// Inserts each [`Id`] of `acids` with NULL "chain_height" into RDB table "acids" if the [`Id`] is
@@ -101,6 +102,39 @@ where
 {
     match sqlite3::acids::chain_to_mempool(chain_index, session) {
         Ok(n) => Ok(n),
+        Err(e) => Err(Box::new(e)),
+    }
+}
+
+/// Fetches the state of each acid in `acids` .
+///
+/// For each [`Id`] in `acids` ,
+///
+/// - If the acid with the [`Id`] is in mempool, the value with the key [`Id`] is `None` .
+/// - If the acid with the [`Id`] belongs to a Block in main chain, the value with the key [`Id`]
+///   is [`ChainIndex`] of the Block.
+/// - If the acid with the [`Id`] is neither in mempool nor in any Block in main chain, the return
+///   value does not have the key [`Id`] .
+///
+/// This function execute like the following SQL for each id in `acids` .
+/// (It depends on the implementation. The real SQL may be different.)
+///
+/// SELECT acids.chain_height, main_chain.id FROM acids
+///      LEFT OUTER JOIN main_chain ON acids.chain_height = main_chain.height
+///      WHERE acids.id = `id`
+///
+/// [`Id`]: crate::data_types::Id
+pub fn fetch_state<I, S, A>(
+    acids: I,
+    session: &mut S,
+) -> Result<HashMap<Id, Option<ChainIndex>>, Box<dyn Error>>
+where
+    I: Iterator<Item = A>,
+    S: Slave,
+    A: Borrow<Id>,
+{
+    match sqlite3::acids::fetch_state(acids, session) {
+        Ok(m) => Ok(m),
         Err(e) => Err(Box::new(e)),
     }
 }
