@@ -186,6 +186,42 @@ where
     Ok(ret)
 }
 
+/// Fetches at most `limit` number of [`Acid`] from mempool in order of the record sequence number,
+/// and returns a slice of `(record sequence number, the id of the acid)` .
+///
+/// If `min_seq` is not `None` , this method ignores [`Acid`] whose sequence number is less than
+/// `min_seq` .
+///
+/// [`Acid`]: crate::data_types::Acid
+pub fn fetch_mempool<S>(
+    min_seq: Option<i64>,
+    limit: u32,
+    session: &mut S,
+) -> Result<impl AsRef<[(i64, Id)]>, Error>
+where
+    S: Slave,
+{
+    let session = Sqlite3Session::as_sqlite3_session(session);
+
+    const SQL: &'static str = r#"SELECT seq, id FROM acids
+    WHERE chain_height IS NULL AND seq >= ?1 ORDER BY seq ASC LIMIT ?2"#;
+    let stmt = session.con.stmt(SQL)?;
+
+    let min_seq = min_seq.unwrap_or(0);
+    stmt.bind_int(1, min_seq)?;
+    stmt.bind_int(2, limit as i64)?;
+
+    let mut ret = Vec::with_capacity(limit as usize);
+
+    while stmt.step()? {
+        let seq = stmt.column_int(0).unwrap();
+        let id = unsafe { Id::copy_bytes(stmt.column_blob(1).unwrap()) };
+        ret.push((seq, id));
+    }
+
+    Ok(ret)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
