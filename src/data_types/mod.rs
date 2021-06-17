@@ -75,7 +75,7 @@ impl Environment {
     ///
     /// See also function [`deserialize_acid`] .
     ///
-    /// [`deserialize_acid`]: fn.deserialize_acid.html
+    /// [`deserialize_acid`]: crate::deserialize_acid
     ///
     /// # Examples
     ///
@@ -132,8 +132,6 @@ pub use mouse_cache_alloc::MmapAlloc as CMmapAlloc;
 ///
 /// - `CVec` does not implement methods to cost 'O(n)' CPU time on purpose.
 /// - `CVec` uses [`CAlloc`] to allocate/deallocate heap memory.
-///
-/// [`CAlloc`]: struct.CAlloc.html
 #[derive(Clone, Default, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct CVec<T> {
     buffer: mouse_containers::Vec<T, CAlloc>,
@@ -351,8 +349,8 @@ impl<T> CVec<T> {
     /// - `new_len` must be less than or equal to the capacity.
     /// - The elements at `old_len..new_len` must be initialized.
     ///
-    /// [`truncate`]: #method.truncate
-    /// [`clear`]: #method.clear
+    /// [`truncate`]: Self::truncate
+    /// [`clear`]: Self::clear
     ///
     /// # Examples
     ///

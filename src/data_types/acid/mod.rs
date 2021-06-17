@@ -27,8 +27,7 @@ use std::error::Error;
 #[cfg(feature = "sha256_id")]
 /// `Id` is an alias to [`CryptoHash`] and used as unique id of [`Acid`] .
 ///
-/// [`CryptoHash`]: crypto_hash/trait.CryptoHash.html
-/// [`Acid`]: trait.Acid.html
+/// [`CryptoHash`]: crate::data_types::CryptoHash
 pub type Id = super::crypto_hash::Sha256;
 
 /// `Acid` is an atomic manipulation.
@@ -108,8 +107,7 @@ pub type Id = super::crypto_hash::Sha256;
 ///
 /// `Validity` may depends on the extrinsic data.
 ///
-/// [`Id`]: type.Id.html
-/// [`Resource`]: struct.Resource.html
+/// [`Resource`]: crate::data_types::Resource
 pub trait Acid {
     /// Provides `Id` of `self` .
     ///

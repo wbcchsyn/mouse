@@ -104,7 +104,7 @@ impl Stmt<'_> {
     ///
     /// Otherwise, i.e. [`sqlite3_step`] failed, calls [`reset`] and returns `Err` .
     ///
-    /// [`reset`]: #method.reset
+    /// [`reset`]: Self::reset
     /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
     pub fn step(&mut self) -> Result<bool, Error> {
         let code = unsafe { sqlite3_step(self.raw) };
@@ -129,8 +129,8 @@ impl Stmt<'_> {
     /// Calls method [`reset`] if necessary, and calls [`sqlite3_bind_int64`] .
     /// Note that `index` starts at 1, not 0.
     ///
-    /// [`reset`]: #method.reset
-    /// [`step`]: #method.step
+    /// [`reset`]: Self::reset
+    /// [`step`]: Self::step
     /// [`sqlite3_bind_int64`]: https://www.sqlite.org/c3ref/bind_blob.html
     /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
     /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
@@ -153,8 +153,8 @@ impl Stmt<'_> {
     /// Calls method [`reset`] if necessary, and calls [`sqlite3_bind_blob`] .
     /// Note that `index` starts at 1, not 0.
     ///
-    /// [`reset`]: #method.reset
-    /// [`step`]: #method.step
+    /// [`reset`]: Self::reset
+    /// [`step`]: Self::step
     /// [`sqlite3_bind_blob`]: https://www.sqlite.org/c3ref/bind_blob.html
     /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
     /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
@@ -184,8 +184,8 @@ impl Stmt<'_> {
     /// Calls method [`reset`] if necessary, and calls [`sqlite3_bind_null`] .
     /// Note that `index` starts at 1, not 0.
     ///
-    /// [`reset`]: #method.reset
-    /// [`step`]: #method.step
+    /// [`reset`]: Self::reset
+    /// [`step`]: Self::step
     /// [`sqlite3_bind_null`]: https://www.sqlite.org/c3ref/bind_blob.html
     /// [`sqlite3_reset`]: https://www.sqlite.org/c3ref/reset.html
     /// [`sqlite3_step`]: https://www.sqlite.org/c3ref/step.html
@@ -220,7 +220,7 @@ impl Stmt<'_> {
     ///
     /// Panics if the column value type is neither Null nor Integer.
     ///
-    /// [`step`]: #method.step
+    /// [`step`]: Self::step
     /// [`sqlite3_column_type`]: https://www.sqlite.org/c3ref/column_blob.html
     /// [`sqlite3_column_int64`]: https://www.sqlite.org/c3ref/column_blob.html
     pub fn column_int(&mut self, index: usize) -> Option<i64> {
@@ -255,7 +255,7 @@ impl Stmt<'_> {
     ///
     /// Panics if the column value type is neither Null nor Blob.
     ///
-    /// [`step`]: #method.step
+    /// [`step`]: Self::step
     /// [`sqlite3_column_type`]: https://www.sqlite.org/c3ref/column_blob.html
     /// [`sqlite3_column_blob`]: https://www.sqlite.org/c3ref/column_blob.html
     /// [`sqlite3_column_bytes`]: https://www.sqlite.org/c3ref/column_blob.html

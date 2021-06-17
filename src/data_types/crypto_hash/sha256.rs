@@ -26,7 +26,7 @@ const HASH_LEN: usize = 32;
 
 /// `Sha256` is a wrapper of `[u8; 32]` and implements [`CryptoHash`] .
 ///
-/// [`CryptoHash`]: trait.CryptoHash.html
+/// [`CryptoHash`]: crate::data_types::CryptoHash
 #[derive(Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash)]
 pub struct Sha256([u8; HASH_LEN]);
 
@@ -72,8 +72,7 @@ impl CryptoHash for Sha256 {
 
 /// `Sha256Hasher` is an implementation for [`CryptoHasher`] for [`Sha256`] .
 ///
-/// [`Sha256`]: struct.Sha256.html
-/// [`CryptoHasher`]: trait.CryptoHasher.html
+/// [`CryptoHasher`]: crate::data_types::CryptoHasher
 #[derive(Clone)]
 pub struct Sha256Hasher(crypto::sha2::Sha256);
 

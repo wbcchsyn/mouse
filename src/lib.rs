@@ -40,8 +40,8 @@ use std::os::raw::c_int;
 /// `Mouse` uses [`clap`] for an argument parser.
 /// See also [`clap`] for details.
 ///
-/// [`clap`]: /clap/index.html
-/// [`clap::ArgMatches<'static>`]: /clap/struct.ArgMatches.html
+/// [`clap`]: clap
+/// [`clap::ArgMatches<'static>`]: clap::ArgMatches
 pub struct Config {
     args_: ArgMatches<'static>,
     name_: String,
@@ -215,7 +215,7 @@ pub trait ModuleEnvironment: Default {
     ///
     /// The behavior is undefined if called after method [`init`] is called.
     ///
-    /// [`init`]: #method.init
+    /// [`init`]: Self::init
     unsafe fn check(&mut self, _config: &Config) -> Result<(), Box<dyn Error>> {
         panic!("Not implemented yet.");
     }
@@ -253,8 +253,8 @@ impl GlobalEnvironment {
     ///
     /// The behavior is undefined if this method is called after method [`init`] is called.
     ///
-    /// [`init`]: #method.init
-    /// [`ModuleEnvironment.check`]: struct.ModuleEnvironment.html#method.check
+    /// [`init`]: Self::init
+    /// [`ModuleEnvironment.check`]: crate::ModuleEnvironment::check
     pub unsafe fn check(&mut self, config: &Config) -> Result<(), Box<dyn Error>> {
         self.data_types.check(config)?;
         self.cache.check(config)?;
@@ -270,7 +270,7 @@ impl GlobalEnvironment {
     ///
     /// The behavior is undefined if this method is called twice or more than twice.
     ///
-    /// [`ModuleEnvironment.init`]: struct.ModuleEnvironment.html#method.init
+    /// [`ModuleEnvironment.init`]: crate::ModuleEnvironment::init
     pub unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         self.data_types.init()?;
         self.cache.init()?;
@@ -284,7 +284,7 @@ impl GlobalEnvironment {
     ///
     /// See also function [`deserialize_acid`] .
     ///
-    /// [`deserialize_acid`]: fn.deserialize_acid.html
+    /// [`deserialize_acid`]: crate::deserialize_acid
     ///
     /// # Examples
     ///

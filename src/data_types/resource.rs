@@ -56,8 +56,7 @@ pub const RESOURCE_ID_BUFFER_CAPACITY: usize = 118; // The total size of 'Resour
 /// The length of the 'owner' and 'asset type' must be less than or equal to
 /// [`RESOURCE_ID_BUFFER_CAPACITY`] .
 ///
-/// [`Resource`]: struct.Resource.html
-/// [`RESOURCE_ID_BUFFER_CAPACITY`]: constant.RESOURCE_ID_BUFFER_CAPACITY.html
+/// [`RESOURCE_ID_BUFFER_CAPACITY`]: self::RESOURCE_ID_BUFFER_CAPACITY
 #[derive(Clone, Copy)]
 pub struct ResourceId {
     buffer: [u8; RESOURCE_ID_BUFFER_CAPACITY],
@@ -73,7 +72,7 @@ impl ResourceId {
     /// The behavior is undefined if `owner.len() + asset_type.len()` is greater than
     /// [`RESOURCE_ID_BUFFER_CAPACITY`] .
     ///
-    /// [`RESOURCE_ID_BUFFER_CAPACITY`]: constant.RESOURCE_ID_BUFFER_CAPACITY.html
+    /// [`RESOURCE_ID_BUFFER_CAPACITY`]: self::RESOURCE_ID_BUFFER_CAPACITY
     ///
     /// # Examples
     ///
@@ -190,7 +189,7 @@ impl ResourceId {
 /// `id` is a pair of the wallet address and the asset type.
 /// `value` represents how much the wallet has the asset.
 ///
-/// [`Acid`]: trait.Acid.html
+/// [`Acid`]: crate::data_types::Acid
 #[derive(Debug, Clone, Copy)]
 pub struct Resource {
     id_: ResourceId,
@@ -314,7 +313,7 @@ impl Resource {
     ///
     /// See also [`withdraw`] .
     ///
-    /// [`withdraw`]: method.withdraw
+    /// [`withdraw`]: Self::withdraw
     ///
     /// # Examples
     ///
@@ -346,7 +345,7 @@ impl Resource {
     ///
     /// See also [`deposit`] .
     ///
-    /// [`deposit`]: method.deposit
+    /// [`deposit`]: Self::deposit
     ///
     /// # Examples
     ///

@@ -100,15 +100,11 @@ impl Connection {
     }
 
     /// Creates [`Stmt`] instance.
-    ///
-    /// [`Stmt`]: struct.Stmt.html
     pub fn stmt_once<'a>(&'a mut self, sql: &'a str) -> Result<Stmt<'a>, Error> {
         Stmt::new(sql, unsafe { &mut *self.raw })
     }
 
     /// Creates and caches [`Stmt`] if not cached and provides a reference to the cached instance.
-    ///
-    /// [`Stmt`]: struct.Stmt.html
     pub fn stmt(&mut self, sql: &'static str) -> Result<&mut Stmt<'static>, Error> {
         match self.stmts.entry(Sql(sql.as_ptr())) {
             Entry::Occupied(o) => {

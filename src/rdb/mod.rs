@@ -59,9 +59,6 @@ pub trait Master: Session + Slave {}
 ///
 /// Panics if the current thread owns another [`Session`] instance.
 /// This feature is to escape a dead lock.
-///
-/// [`Master`]: trait.Master.html
-/// [`Session`]: trait.Session.html
 pub fn master<'a>(env: &'a Environment) -> impl 'a + Master {
     sqlite3::master(env)
 }
@@ -72,9 +69,6 @@ pub fn master<'a>(env: &'a Environment) -> impl 'a + Master {
 ///
 /// Panics if the current thread owns another [`Session`] instance.
 /// This feature is to escape a dead lock.
-///
-/// [`Slave`]: trait.Slave.html
-/// [`Session`]: trait.Session.html
 pub fn slave<'a>(env: &'a Environment) -> impl 'a + Slave {
     sqlite3::slave(env)
 }
