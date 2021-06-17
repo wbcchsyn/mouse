@@ -138,3 +138,30 @@ where
         Err(e) => Err(Box::new(e)),
     }
 }
+
+/// Fetches at most `limit` number of [`Acid`] from mempool in order of the record sequence number,
+/// and returns a slice of `(record sequence number, the id of the acid)` .
+///
+/// If `min_seq` is not `None` , this method ignores [`Acid`] whose sequence number is less than
+/// `min_seq` .
+///
+/// This function execute like the following SQL.
+/// (It depends on the implementation. The real SQL may be different.)
+///
+/// SELECT seq, id FROM acids
+///     WHERE chain_height IS NULL AND seq >= `min_seq` ORDER BY seq ASC LIMIT `limit`
+///
+/// [`Acid`]: crate::data_types::Acid
+pub fn fetch_mempool<S>(
+    min_seq: Option<i64>,
+    limit: u32,
+    session: &mut S,
+) -> Result<impl AsRef<[(i64, Id)]>, Box<dyn Error>>
+where
+    S: Slave,
+{
+    match sqlite3::acids::fetch_mempool(min_seq, limit, session) {
+        Ok(s) => Ok(s),
+        Err(e) => Err(Box::new(e)),
+    }
+}
