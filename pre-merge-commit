@@ -3,6 +3,7 @@
 (
     cd `git rev-parse --show-toplevel`
     cargo fmt -- --check || exit "$?"
+    RUSTDOCFLAGS="-Dwarnings" cargo doc --document-private-items --lib --no-deps || exit "$?"
     cargo test || exit "$?"
 
     exit 0
