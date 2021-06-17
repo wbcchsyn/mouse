@@ -271,6 +271,8 @@ impl<T> CVec<T> {
     /// cvec.extend_from_slice(&[0, 1, 2, 3]);
     /// assert_eq!(&[0, 1, 2, 3], cvec.as_ref());
     /// ```
+    ///
+    /// [`reserve`]: Self::reserve
     pub fn extend_from_slice(&mut self, vals: &[T])
     where
         T: Clone,
@@ -296,6 +298,7 @@ impl<T> CVec<T> {
     /// cvec.push(2);
     /// assert_eq!(&[1, 2], cvec.as_ref());
     /// ```
+    /// [`reserve`]: Self::reserve
     pub fn push(&mut self, val: T) {
         self.buffer.push(val);
     }
