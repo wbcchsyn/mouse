@@ -23,6 +23,9 @@ use std::fmt;
 /// The total buffer size of the `ResourceId` .
 pub const RESOURCE_ID_BUFFER_CAPACITY: usize = 118; // The total size of 'Resource' will be 128.
 
+/// Alias to estimate the Asset.
+pub type AssetValue = i64;
+
 /// `ResourceId` is constituted of 'owner' and 'asset type', and identifies unique [`Resource`] .
 ///
 /// # Owner
@@ -193,7 +196,7 @@ impl ResourceId {
 #[derive(Debug, Clone, Copy)]
 pub struct Resource {
     id_: ResourceId,
-    value_: i64,
+    value_: AssetValue,
 }
 
 impl Resource {
@@ -213,7 +216,7 @@ impl Resource {
     /// let _resource = Resource::new(&id, value);
     /// ```
     #[inline]
-    pub fn new(id: &ResourceId, value: i64) -> Self {
+    pub fn new(id: &ResourceId, value: AssetValue) -> Self {
         Self {
             id_: *id,
             value_: value,
@@ -300,7 +303,7 @@ impl Resource {
     /// assert_eq!(value, resource.value());
     /// ```
     #[inline]
-    pub fn value(&self) -> i64 {
+    pub fn value(&self) -> AssetValue {
         self.value_
     }
 
@@ -332,7 +335,7 @@ impl Resource {
     /// assert_eq!(value1 + value2, resource.value());
     /// ```
     #[inline]
-    pub fn deposit(&mut self, value: i64) {
+    pub fn deposit(&mut self, value: AssetValue) {
         self.value_ += value;
     }
 
@@ -364,7 +367,7 @@ impl Resource {
     /// assert_eq!(value1 - value2, resource.value());
     /// ```
     #[inline]
-    pub fn withdraw(&mut self, value: i64) {
+    pub fn withdraw(&mut self, value: AssetValue) {
         self.value_ -= value;
     }
 }
