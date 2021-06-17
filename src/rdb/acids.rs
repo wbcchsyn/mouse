@@ -29,7 +29,7 @@
 //! [`Acid`]: crate::data_types::Acid
 
 use super::{sqlite3, Master};
-use crate::data_types::Id;
+use crate::data_types::{ChainIndex, Id};
 use std::borrow::Borrow;
 use std::error::Error;
 
@@ -51,6 +51,33 @@ where
 {
     match sqlite3::acids::accept_to_mempool(acids, session) {
         Ok(()) => Ok(()),
+        Err(e) => Err(Box::new(e)),
+    }
+}
+
+/// Makes each element of `acids` belong to `chain_index` if it is in mempool or does nothing, and
+/// returns the number of changed acids.
+///
+/// This function execute like the following SQL for each id in `acids` .
+/// (It depends on the implementation. The real SQL may be different.)
+///
+/// UPDATE acids SET chain_height = `chain_index.height()` WHERE id = `id` AND chain_height IS NULL
+///
+/// # Safety
+///
+/// The behavior is undefined if `chain_index` is not in the "main_chain".
+pub unsafe fn mempool_to_chain<I, S, A>(
+    chain_index: &ChainIndex,
+    acids: I,
+    session: &mut S,
+) -> Result<usize, Box<dyn Error>>
+where
+    I: Iterator<Item = A>,
+    S: Master,
+    A: Borrow<Id>,
+{
+    match sqlite3::acids::mempool_to_chain(chain_index, acids, session) {
+        Ok(n) => Ok(n),
         Err(e) => Err(Box::new(e)),
     }
 }
