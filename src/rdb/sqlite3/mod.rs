@@ -42,6 +42,7 @@ const SQLITE_TOOBIG: c_int = 18;
 const SQLITE_RANGE: c_int = 25;
 const SQLITE_DONE: c_int = 101;
 const SQLITE_ROW: c_int = 100;
+const SQLITE_CONSTRAINT_CHECK: c_int = 275;
 
 // Constants for column type
 // https://www.sqlite.org/draft/c3ref/c_blob.html
