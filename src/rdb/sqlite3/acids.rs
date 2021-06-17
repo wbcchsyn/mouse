@@ -112,6 +112,26 @@ where
     Ok(ret)
 }
 
+/// Moves acids included in `chain_index` to mempool, and returns the number of acids to be moved.
+///
+/// # Safety
+///
+/// The behavior is undefined if `chain_index` is not in the "main_chain".
+pub unsafe fn chain_to_mempool<S>(chain_index: &ChainIndex, session: &mut S) -> Result<usize, Error>
+where
+    S: Master,
+{
+    let session = Sqlite3Session::as_sqlite3_session(session);
+
+    const SQL: &'static str = r#"UPDATE acids SET chain_height = NULL WHERE chain_height = ?1"#;
+    let stmt = session.con.stmt(SQL)?;
+
+    stmt.bind_int(1, chain_index.height())?;
+    stmt.step()?;
+
+    Ok(stmt.last_changes())
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -201,6 +221,22 @@ mod tests {
 
         assert_eq!(Ok(0), unsafe {
             mempool_to_chain(&chain_index, ids().iter(), &mut session)
+        });
+    }
+
+    #[test]
+    fn chain_to_mempool_() {
+        let env = filled_table();
+        let mut session = master(&env);
+        let chain_index = ChainIndex::new(1, &Id::zeroed());
+
+        assert_eq!(Ok(0), unsafe {
+            chain_to_mempool(&chain_index, &mut session)
+        });
+
+        unsafe { mempool_to_chain(&chain_index, ids().iter(), &mut session).unwrap() };
+        assert_eq!(Ok(ACID_COUNT), unsafe {
+            chain_to_mempool(&chain_index, &mut session)
         });
     }
 }
