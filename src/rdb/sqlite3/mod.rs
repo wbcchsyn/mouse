@@ -272,6 +272,8 @@ extern "C" {
     ) -> c_int;
     fn sqlite3_close(pdb: *mut sqlite3) -> c_int;
 
+    fn sqlite3_changes(pdb: *mut sqlite3) -> c_int;
+
     fn sqlite3_prepare_v2(
         pdb: *mut sqlite3,
         zsql: *const c_char,
@@ -281,6 +283,8 @@ extern "C" {
     ) -> c_int;
     fn sqlite3_finalize(pstmt: *mut sqlite3_stmt) -> c_int;
     fn sqlite3_column_count(pstmt: *mut sqlite3_stmt) -> c_int;
+
+    fn sqlite3_db_handle(pstmt: *mut sqlite3_stmt) -> *mut sqlite3;
 
     fn sqlite3_reset(pstmt: *mut sqlite3_stmt) -> c_int;
     fn sqlite3_clear_bindings(pstmt: *mut sqlite3_stmt) -> c_int;
