@@ -27,3 +27,30 @@
 //! If it is none, the [`Acid`] is not mined yet and in mempool.
 //!
 //! [`Acid`]: crate::data_types::Acid
+
+use super::{sqlite3, Master};
+use crate::data_types::Id;
+use std::borrow::Borrow;
+use std::error::Error;
+
+/// Inserts each [`Id`] of `acids` with NULL "chain_height" into RDB table "acids" if the [`Id`] is
+/// not in the table yet.
+/// (NULL "chain_height" represents mempool.)
+///
+/// This function execute like the following SQL for each id in `acids` .
+/// (It depends on the implementation. The real SQL may be different.)
+///
+/// INSERT INTO acids (id) VALUES (`id`) ON CONFLICT DO NOTHING
+///
+/// [`Id`]: crate::data_types::Id
+pub fn accept_to_mempool<I, S, A>(acids: I, session: &mut S) -> Result<(), Box<dyn Error>>
+where
+    I: Iterator<Item = A>,
+    S: Master,
+    A: Borrow<Id>,
+{
+    match sqlite3::acids::accept_to_mempool(acids, session) {
+        Ok(()) => Ok(()),
+        Err(e) => Err(Box::new(e)),
+    }
+}
