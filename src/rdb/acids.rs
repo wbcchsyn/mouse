@@ -81,3 +81,26 @@ where
         Err(e) => Err(Box::new(e)),
     }
 }
+
+/// Moves acids included in `chain_index` to mempool, and returns the number of acids to be moved.
+///
+/// This function execute like the following SQL for each id in `acids` .
+/// (It depends on the implementation. The real SQL may be different.)
+///
+/// UPDATE acids SET chain_height = NULL WHERE chain_height = `chain_index.height()`
+///
+/// # Safety
+///
+/// The behavior is undefined if `chain_index` is not in the "main_chain".
+pub unsafe fn chain_to_mempool<S>(
+    chain_index: &ChainIndex,
+    session: &mut S,
+) -> Result<usize, Box<dyn Error>>
+where
+    S: Master,
+{
+    match sqlite3::acids::chain_to_mempool(chain_index, session) {
+        Ok(n) => Ok(n),
+        Err(e) => Err(Box::new(e)),
+    }
+}
