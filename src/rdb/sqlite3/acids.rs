@@ -15,7 +15,7 @@
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
 use super::{Error, Master, Sqlite3Session};
-use crate::data_types::Id;
+use crate::data_types::{ChainIndex, Id};
 use std::borrow::Borrow;
 
 /// Make sure to create table "acids".
@@ -76,6 +76,42 @@ where
     Ok(())
 }
 
+/// Makes each element of `acids` belong to `chain_index` if it is in mempool or does nothing, and
+/// returns the number of changed acids.
+///
+/// # Safety
+///
+/// The behavior is undefined if `chain_index` is not in the "main_chain".
+pub unsafe fn mempool_to_chain<I, S, A>(
+    chain_index: &ChainIndex,
+    acids: I,
+    session: &mut S,
+) -> Result<usize, Error>
+where
+    I: Iterator<Item = A>,
+    S: Master,
+    A: Borrow<Id>,
+{
+    let session = Sqlite3Session::as_sqlite3_session(session);
+
+    const SQL: &'static str =
+        r#"UPDATE acids SET chain_height = ?1 WHERE id = ?2 AND chain_height IS NULL"#;
+    let stmt = session.con.stmt(SQL)?;
+    stmt.bind_int(1, chain_index.height())?;
+
+    let mut ret = 0;
+
+    for id in acids {
+        let id = id.borrow();
+        stmt.bind_blob(2, id.as_ref())?;
+        stmt.step()?;
+
+        ret += stmt.last_changes();
+    }
+
+    Ok(ret)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -103,6 +139,12 @@ mod tests {
             let session = Sqlite3Session::as_sqlite3_session(&mut session);
             create_table(session).unwrap();
         }
+        env
+    }
+
+    fn filled_table() -> Environment {
+        let env = empty_table();
+        accept_to_mempool(ids().iter(), &mut master(&env)).unwrap();
         env
     }
 
@@ -141,5 +183,24 @@ mod tests {
             let ids = ids();
             assert_eq!(true, accept_to_mempool(ids.iter(), &mut session).is_ok());
         }
+    }
+
+    #[test]
+    fn mempool_to_chain_() {
+        let env = filled_table();
+        let mut session = master(&env);
+
+        let chain_index = ChainIndex::new(1, &Id::zeroed());
+        assert_eq!(Ok(1), unsafe {
+            mempool_to_chain(&chain_index, ids()[0..1].iter(), &mut session)
+        });
+
+        assert_eq!(Ok(ACID_COUNT - 1), unsafe {
+            mempool_to_chain(&chain_index, ids().iter(), &mut session)
+        });
+
+        assert_eq!(Ok(0), unsafe {
+            mempool_to_chain(&chain_index, ids().iter(), &mut session)
+        });
     }
 }
