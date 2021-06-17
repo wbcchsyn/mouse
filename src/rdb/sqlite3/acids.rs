@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::{Error, Master, Sqlite3Session};
-use crate::data_types::{ChainIndex, Id};
+use super::{Error, Master, Slave, Sqlite3Session};
+use crate::data_types::{ChainIndex, CryptoHash, Id};
 use std::borrow::Borrow;
+use std::collections::HashMap;
 
 /// Make sure to create table "acids".
 ///
@@ -132,11 +133,63 @@ where
     Ok(stmt.last_changes())
 }
 
+/// Fetches the state of each acid in `acids` .
+///
+/// For each [`Id`] in `acids` ,
+///
+/// - If the acid with the [`Id`] is in mempool, the value with the key [`Id`] is `None` .
+/// - If the acid with the [`Id`] belongs to a Block in main chain, the value with the key [`Id`]
+///   is [`ChainIndex`] of the Block.
+/// - If the acid with the [`Id`] is neither in mempool nor in any Block in main chain, the return
+///   value does not have the key [`Id`] .
+///
+/// [`Id`]: crate::data_types::Id
+pub fn fetch_state<I, S, A>(
+    acids: I,
+    session: &mut S,
+) -> Result<HashMap<Id, Option<ChainIndex>>, Error>
+where
+    I: Iterator<Item = A>,
+    S: Slave,
+    A: Borrow<Id>,
+{
+    let session = Sqlite3Session::as_sqlite3_session(session);
+
+    const SQL: &'static str = r#"SELECT acids.chain_height, main_chain.id FROM acids
+    LEFT OUTER JOIN main_chain ON acids.chain_height = main_chain.height
+    WHERE acids.id = ?1"#;
+    let stmt = session.con.stmt(SQL)?;
+
+    let mut ret = match acids.size_hint() {
+        (n, None) => HashMap::with_capacity(n),
+        (_, Some(n)) => HashMap::with_capacity(n),
+    };
+
+    for id in acids {
+        let id = id.borrow();
+        stmt.bind_blob(1, id.as_ref())?;
+        if stmt.step()? {
+            let height = stmt.column_int(0);
+            match stmt.column_blob(1) {
+                None => {
+                    ret.insert(*id, None);
+                }
+                Some(id_) => {
+                    let height = height.unwrap();
+                    let id_ = unsafe { Id::copy_bytes(id_) };
+                    ret.insert(*id, Some(ChainIndex::new(height, &id_)));
+                }
+            }
+        }
+    }
+
+    Ok(ret)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::data_types::CryptoHash;
-    use crate::rdb::sqlite3::{master, Environment};
+    use crate::rdb::sqlite3::{main_chain, master, Environment};
 
     const ACID_COUNT: usize = 10;
 
@@ -157,6 +210,8 @@ mod tests {
         {
             let mut session = master(&env);
             let session = Sqlite3Session::as_sqlite3_session(&mut session);
+
+            main_chain::create_table(session).unwrap();
             create_table(session).unwrap();
         }
         env
@@ -238,5 +293,38 @@ mod tests {
         assert_eq!(Ok(ACID_COUNT), unsafe {
             chain_to_mempool(&chain_index, &mut session)
         });
+    }
+
+    #[test]
+    fn fetch_state_from_empty_table() {
+        let env = empty_table();
+        let mut session = master(&env);
+
+        let fetched = fetch_state(ids().iter(), &mut session);
+        assert_eq!(true, fetched.is_ok());
+
+        let fetched = fetched.unwrap();
+        assert_eq!(true, fetched.is_empty());
+    }
+
+    #[test]
+    fn fetch_state_from_filled_table() {
+        let env = filled_table();
+        let mut session = master(&env);
+
+        let chain_index = ChainIndex::new(1, &Id::zeroed());
+        main_chain::push(&chain_index, &mut session).unwrap();
+        unsafe { mempool_to_chain(&chain_index, ids()[0..5].iter(), &mut session).unwrap() };
+
+        let fetched = fetch_state(ids().iter(), &mut session);
+        assert_eq!(true, fetched.is_ok());
+
+        let fetched = fetched.unwrap();
+        for id in &ids()[0..5] {
+            assert_eq!(Some(chain_index), fetched[id]);
+        }
+        for id in &ids()[5..] {
+            assert_eq!(None, fetched[id]);
+        }
     }
 }
