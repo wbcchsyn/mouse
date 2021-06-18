@@ -117,6 +117,16 @@ pub fn slave<'a>(env: &'a Environment) -> impl 'a + Slave {
     Sqlite3Session::new(env)
 }
 
+/// Creates RDB tables if not exists.
+pub fn create_table<S>(session: &mut S) -> Result<(), Box<dyn std::error::Error>>
+where
+    S: Master,
+{
+    main_chain::create_table(session)?;
+
+    Ok(())
+}
+
 #[allow(non_camel_case_types)]
 enum sqlite3_stmt {}
 
