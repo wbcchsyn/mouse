@@ -16,6 +16,7 @@
 
 //! 'rdb' module
 
+pub mod acids;
 pub mod main_chain;
 mod sqlite3;
 
