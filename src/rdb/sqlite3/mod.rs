@@ -91,6 +91,9 @@ impl ModuleEnvironment for Environment {
     unsafe fn init(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         self.connection = Cell::new(Connection::try_from(self.data_path.as_ref())?);
 
+        let mut session = master(self);
+        create_table(&mut session)?;
+
         Ok(())
     }
 }
