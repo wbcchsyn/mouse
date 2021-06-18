@@ -16,6 +16,7 @@
 
 mod connection;
 mod error;
+pub mod main_chain;
 mod stmt;
 
 use super::{Master, Session, Slave};
@@ -90,6 +91,9 @@ impl ModuleEnvironment for Environment {
     unsafe fn init(&mut self) -> Result<(), Box<dyn std::error::Error>> {
         self.connection = Cell::new(Connection::try_from(self.data_path.as_ref())?);
 
+        let mut session = master(self);
+        create_table(&mut session)?;
+
         Ok(())
     }
 }
@@ -114,6 +118,16 @@ pub fn master<'a>(env: &'a Environment) -> impl 'a + Master {
 /// [`Slave`]: crate::rdb::Slave
 pub fn slave<'a>(env: &'a Environment) -> impl 'a + Slave {
     Sqlite3Session::new(env)
+}
+
+/// Creates RDB tables if not exists.
+pub fn create_table<S>(session: &mut S) -> Result<(), Box<dyn std::error::Error>>
+where
+    S: Master,
+{
+    main_chain::create_table(session)?;
+
+    Ok(())
 }
 
 #[allow(non_camel_case_types)]
