@@ -100,7 +100,7 @@ impl ModuleEnvironment for Environment {
 ///
 /// Panics if the current thread owns another `Session` instance.
 ///
-/// [`Master`]: ../trait.Master.html
+/// [`Master`]: crate::rdb::Master
 pub fn master<'a>(env: &'a Environment) -> impl 'a + Master {
     Sqlite3Session::new(env)
 }
@@ -111,7 +111,7 @@ pub fn master<'a>(env: &'a Environment) -> impl 'a + Master {
 ///
 /// Panics if the current thread owns another `Session` instance.
 ///
-/// [`Slave`]: ../trait.Slave.html
+/// [`Slave`]: crate::rdb::Slave
 pub fn slave<'a>(env: &'a Environment) -> impl 'a + Slave {
     Sqlite3Session::new(env)
 }

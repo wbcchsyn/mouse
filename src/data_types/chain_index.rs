@@ -20,6 +20,8 @@ use super::{BlockHeight, Id};
 ///
 /// The height of the genesis block (= the first block of the Blockchain) is 1, not 0.
 /// (This is because some database treat '0' as a special value.)
+///
+/// [`Acid`]: crate::data_types::Acid
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ChainIndex {
     height_: BlockHeight,

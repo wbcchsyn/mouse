@@ -19,11 +19,11 @@ use super::{ChainIndex, Id};
 /// `AcidChainRelation` represents a record in RDB table "acids".
 ///
 /// This struct is constituted of [`Id`] of the [`Acid`], and the [`ChainIndex`] including the
-/// [`Acid`].
+/// [`Acid`] .
 ///
-/// [`Id`]: type.Id.html
-/// [`Acid`]: trait.Acid.html
-/// [`ChainIndex`]: struct.ChainIndex.html
+/// [`Id`]: crate::data_types::Id
+/// [`Acid`]: crate::data_types::Acid
+/// [`ChainIndex`]: crate::data_types::ChainIndex
 pub struct AcidChainRelation {
     id_: Id,
     chain_index_: Option<ChainIndex>,
@@ -43,9 +43,9 @@ impl AcidChainRelation {
     /// [`ChainIndex`] including the [`Acid`] , or `None` if not belongs to any block in the
     /// "main_chain" .
     ///
-    /// [`Id`]: type.Id.html
-    /// [`Acid`]: trait.Acid.html
-    /// [`ChainIndex`]: struct.ChainIndex.html
+    /// [`Id`]: crate::data_types::Id
+    /// [`Acid`]: crate::data_types::Acid
+    /// [`ChainIndex`]: crate::data_types::ChainIndex
     pub const fn new(id: &Id, chain_index: Option<&ChainIndex>) -> Self {
         Self {
             id_: *id,
@@ -58,16 +58,17 @@ impl AcidChainRelation {
 
     /// Provides a reference to the [`Id`] of the [`Acid`] .
     ///
-    /// [`Id`]: type.Id.html
-    /// [`Acid`]: trait.Acid.html
+    /// [`Id`]: crate::data_types::Id
+    /// [`Acid`]: crate::data_types::Acid
     pub const fn id(&self) -> &Id {
         &self.id_
     }
 
     /// Provides a reference to the [`ChainIndex`] including the [`Acid`] , or `None` if the
     /// [`Acid`] does not belong to any Block in "main_chain" yet.
-    /// [`Acid`]: trait.Acid.html
-    /// [`ChainIndex`]: struct.ChainIndex.html
+    ///
+    /// [`Acid`]: crate::data_types::Acid
+    /// [`ChainIndex`]: crate::data_types::ChainIndex
     pub const fn chain_index(&self) -> Option<&ChainIndex> {
         (&self.chain_index_).as_ref()
     }

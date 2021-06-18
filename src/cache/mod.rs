@@ -112,7 +112,7 @@ The LRU cache is expired when the total cache size exceeds this value.",
 /// `NotFound` implements [`Acid`] , but all the methods except for `id` and `type_id` causes a
 /// panic.
 ///
-/// [`Acid`]: /mouse/data_types::struct.Acid.html
+/// [`Acid`]: crate::data_types::Acid
 struct NotFound(Id);
 
 impl From<Id> for NotFound {
@@ -177,7 +177,7 @@ impl Acid for NotFound {
 
 /// `CacheFindResult` is return value for function [`find`] .
 ///
-/// [`find`]: fn.find.html
+/// [`find`]: self::find
 pub enum CacheFindResult {
     /// The element is stored in DataBase and cached.
     Hit(CAcid),
@@ -309,7 +309,7 @@ pub fn expire(environment: &Environment) -> bool {
 
 /// `CacheState` is return value for function [`is_cached`] .
 ///
-/// [`is_cached`]: fn.is_cached.html
+/// [`is_cached`]: self::is_cached
 pub enum CacheState {
     /// The element is stored in the DataBase and cached.
     Cached,
