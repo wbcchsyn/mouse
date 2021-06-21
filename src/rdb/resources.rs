@@ -28,9 +28,10 @@
 //!
 //! [`ResourceId`]: crate::data_types::ResourceId
 
-use super::{sqlite3, Master};
+use super::{sqlite3, Master, Slave};
 use crate::data_types::{AssetValue, ResourceId};
 use std::borrow::Borrow;
+use std::collections::HashMap;
 use std::error::Error;
 
 /// Upadtes the asset value in RDB table "resources".
@@ -57,6 +58,24 @@ where
 {
     match sqlite3::resources::update_balance(balances, session) {
         Ok(_) => Ok(()),
+        Err(e) => Err(Box::new(e)),
+    }
+}
+
+/// Fetches the depositted value of each [`ResourceId`] in `resource_ids` .
+///
+/// The returned value does not has the [`ResourceId`] as the key if the corresponding value is 0.
+pub fn fetch<I, S, R>(
+    resource_ids: I,
+    session: &mut S,
+) -> Result<HashMap<ResourceId, AssetValue>, Box<dyn Error>>
+where
+    I: Iterator<Item = R>,
+    S: Slave,
+    R: Borrow<ResourceId>,
+{
+    match sqlite3::resources::fetch(resource_ids, session) {
+        Ok(m) => Ok(m),
         Err(e) => Err(Box::new(e)),
     }
 }
