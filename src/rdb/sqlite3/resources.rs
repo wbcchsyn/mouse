@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with Mouse.  If not, see <https://www.gnu.org/licenses/>.
 
-use super::{Error, Master, Sqlite3Session, SQLITE_CONSTRAINT_CHECK};
+use super::{Error, Master, Slave, Sqlite3Session, SQLITE_CONSTRAINT_CHECK};
 use crate::data_types::{AssetValue, ResourceId};
 use std::borrow::Borrow;
+use std::collections::HashMap;
 
 /// Make sure to create table "resources".
 ///
@@ -134,10 +135,48 @@ where
     Ok(())
 }
 
+/// Fetches the depositted value of each [`ResourceId`] in `resource_ids` .
+///
+/// The returned value does not has the [`ResourceId`] as the key if the corresponding value is 0.
+pub fn fetch<I, S, R>(
+    resource_ids: I,
+    session: &mut S,
+) -> Result<HashMap<ResourceId, AssetValue>, Error>
+where
+    I: Iterator<Item = R>,
+    S: Slave,
+    R: Borrow<ResourceId>,
+{
+    let session = Sqlite3Session::as_sqlite3_session(session);
+
+    const SQL: &'static str = r#"
+    SELECT value FROM resources WHERE owner = ?1 AND asset_type = ?2;
+    "#;
+    let stmt = session.con.stmt(SQL)?;
+
+    let mut ret = match resource_ids.size_hint() {
+        (n, None) => HashMap::with_capacity(n),
+        (_, Some(n)) => HashMap::with_capacity(n),
+    };
+
+    for resource_id in resource_ids {
+        let resource_id = resource_id.borrow();
+        stmt.bind_blob(1, resource_id.owner())?;
+        stmt.bind_blob(2, resource_id.asset_type())?;
+        if stmt.step()? {
+            let value = stmt.column_int(0).unwrap();
+            debug_assert_eq!(true, value > 0);
+            ret.insert(*resource_id, value);
+        }
+    }
+
+    Ok(ret)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::rdb::sqlite3::{master, Environment};
+    use crate::rdb::sqlite3::{master, slave, Environment};
 
     const RESOURCE_COUNT: usize = 10;
 
@@ -226,6 +265,52 @@ mod tests {
                 )
                 .is_ok()
             );
+        }
+    }
+
+    #[test]
+    fn fetch_from_empty_table() {
+        let env = empty_table();
+        let mut session = slave(&env);
+
+        let fetched = fetch(balances().iter().map(|(k, _)| k), &mut session);
+        assert_eq!(true, fetched.is_ok());
+
+        let fetched = fetched.unwrap();
+        assert_eq!(true, fetched.is_empty());
+    }
+
+    #[test]
+    fn fetch_from_filled_table() {
+        let env = empty_table();
+        let mut session = master(&env);
+
+        update_balance(balances().iter(), &mut session).unwrap();
+
+        let fetched = fetch(balances().iter().map(|(k, _)| k), &mut session);
+        assert_eq!(true, fetched.is_ok());
+
+        let fetched = fetched.unwrap();
+        assert_eq!(balances().len() - 1, fetched.len());
+        for balance in balances().iter().skip(1) {
+            let (k, v) = balance;
+            assert_eq!(*v, fetched[k]);
+        }
+
+        update_balance(
+            balances().iter().skip(1).map(|(k, _)| (k, -1)),
+            &mut session,
+        )
+        .unwrap();
+
+        let fetched = fetch(balances().iter().map(|(k, _)| k), &mut session);
+        assert_eq!(true, fetched.is_ok());
+
+        let fetched = fetched.unwrap();
+        assert_eq!(balances().len() - 2, fetched.len());
+        for balance in balances().iter().skip(2) {
+            let (k, v) = balance;
+            assert_eq!(*v - 1, fetched[k]);
         }
     }
 }
