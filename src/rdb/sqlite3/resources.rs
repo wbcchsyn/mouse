@@ -182,36 +182,50 @@ mod tests {
         let env = empty_table();
         let mut session = master(&env);
 
-        // The first balance does nothing; the others deposit the assets.
+        // Depossiting assets.
         assert_eq!(
             true,
-            update_balance(balances().iter(), &mut session).is_ok()
+            update_balance(balances().iter().skip(1), &mut session).is_ok()
         );
 
         // The all balances withdraw the all assets.
         assert_eq!(
             true,
-            update_balance(balances().iter().map(|(k, v)| (k, -v)), &mut session).is_ok()
+            update_balance(
+                balances().iter().skip(1).map(|(k, v)| (k, -v)),
+                &mut session
+            )
+            .is_ok()
         );
 
         // Deposit again.
         assert_eq!(
             true,
-            update_balance(balances().iter(), &mut session).is_ok()
+            update_balance(balances().iter().skip(1), &mut session).is_ok()
         );
 
         // Withdrow from not charged ResourceId.
         {
-            let resource_id = balances()[0].0;
-            let balances = Some((resource_id, -100));
-            assert_eq!(false, update_balance(balances.iter(), &mut session).is_ok());
+            assert_eq!(
+                false,
+                update_balance(
+                    balances().iter().take(1).map(|(k, _)| (k, -100)),
+                    &mut session
+                )
+                .is_ok()
+            );
         }
 
         // Withdrow too much from charged ResourceId.
         {
-            let resource_id = balances()[1].0;
-            let balances = Some((resource_id, -100));
-            assert_eq!(false, update_balance(balances.iter(), &mut session).is_ok());
+            assert_eq!(
+                false,
+                update_balance(
+                    balances().iter().skip(1).map(|(k, _)| (k, -100)),
+                    &mut session
+                )
+                .is_ok()
+            );
         }
     }
 }

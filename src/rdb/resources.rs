@@ -27,3 +27,36 @@
 //! - value: The number of the asset to be depositted.
 //!
 //! [`ResourceId`]: crate::data_types::ResourceId
+
+use super::{sqlite3, Master};
+use crate::data_types::{AssetValue, ResourceId};
+use std::borrow::Borrow;
+use std::error::Error;
+
+/// Upadtes the asset value in RDB table "resources".
+///
+/// `balances` is an iterator of ([`ResourceId`] , [`AssetValue`] ) or a reference to it.
+///
+/// For each balance in `balances` , the value of the [`ResourceId`] is increased by the
+/// [`AssetValue`]; i.e. if the [`AssetValue`] is greater than 0, the value is increased
+/// (depositted), or if the [`AssetValue`] is less than 0, the value is decreased (withdrawn.)
+///
+/// # Error
+///
+/// Errors if any [`AssetValue`] is less than 0.
+///
+/// [`ResourceId`]: crate::data_types::ResourceId
+/// [`AssetValue`]: crate::data_types::AssetValue
+pub fn update_balance<I, S, B, R, V>(balances: I, session: &mut S) -> Result<(), Box<dyn Error>>
+where
+    I: Iterator<Item = B> + Clone,
+    S: Master,
+    B: Borrow<(R, V)>,
+    R: Borrow<ResourceId>,
+    V: Borrow<AssetValue>,
+{
+    match sqlite3::resources::update_balance(balances, session) {
+        Ok(_) => Ok(()),
+        Err(e) => Err(Box::new(e)),
+    }
+}
