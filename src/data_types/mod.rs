@@ -32,7 +32,7 @@ use core::iter::IntoIterator;
 use core::ops::{Deref, DerefMut, Index, IndexMut};
 use core::slice::{Iter, IterMut, SliceIndex};
 pub use crypto_hash::{CryptoHash, CryptoHasher};
-pub use resource::{Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
+pub use resource::{AssetValue, Resource, ResourceId, RESOURCE_ID_BUFFER_CAPACITY};
 use std::borrow::{Borrow, BorrowMut};
 use std::error::Error;
 

@@ -18,6 +18,7 @@
 
 pub mod acids;
 pub mod main_chain;
+pub mod resources;
 mod sqlite3;
 
 pub use sqlite3::{Environment, Error};

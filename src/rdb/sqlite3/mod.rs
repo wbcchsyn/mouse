@@ -18,6 +18,7 @@ pub mod acids;
 mod connection;
 mod error;
 pub mod main_chain;
+pub mod resources;
 mod stmt;
 
 use super::{Master, Session, Slave};
@@ -41,6 +42,7 @@ const SQLITE_TOOBIG: c_int = 18;
 const SQLITE_RANGE: c_int = 25;
 const SQLITE_DONE: c_int = 101;
 const SQLITE_ROW: c_int = 100;
+const SQLITE_CONSTRAINT_CHECK: c_int = 275;
 
 // Constants for column type
 // https://www.sqlite.org/draft/c3ref/c_blob.html
@@ -128,6 +130,7 @@ where
 {
     main_chain::create_table(session)?;
     acids::create_table(session)?;
+    resources::create_table(session)?;
 
     Ok(())
 }
