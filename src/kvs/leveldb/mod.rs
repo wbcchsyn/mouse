@@ -163,6 +163,9 @@ impl WriteBatch {
             let mut r = r.lock().unwrap();
             *r = PutResult::Error(e.clone());
         }
+
+        let mut r = self.result.lock().unwrap();
+        *r = PutResult::Error(e);
     }
 
     fn clear(&mut self) {
