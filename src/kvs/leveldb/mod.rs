@@ -86,13 +86,6 @@ impl Default for WriteBatch {
 }
 
 impl WriteBatch {
-    /// Initializes `self` .
-    ///
-    /// # Panics
-    ///
-    /// Panics if `self` has already initialized.
-    pub fn init(&mut self, max_write_queries: usize) {}
-
     pub fn len(&self) -> usize {
         self.len_
     }
@@ -204,10 +197,6 @@ impl ModuleEnvironment for Environment {
 
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         self.db.open(&self.db_path)?;
-
-        let mut write_batch = self.write_batch.lock().unwrap();
-        write_batch.init(self.max_write_queries);
-
         Ok(())
     }
 }
