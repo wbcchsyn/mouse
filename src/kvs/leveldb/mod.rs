@@ -68,17 +68,19 @@ impl Db {
 }
 
 struct WriteBatch {
-    results: Vec<Asc<Mutex<PutResult>>>,
+    result: Asc<Mutex<PutResult>>,
     intrinsic: mouse_leveldb::WriteBatch,
     extrinsic: mouse_leveldb::WriteBatch,
+    len_: usize,
 }
 
 impl Default for WriteBatch {
     fn default() -> Self {
         Self {
-            results: Vec::new(),
+            result: Asc::from(Mutex::new(PutResult::NotYet)),
             intrinsic: mouse_leveldb::WriteBatch::new(),
             extrinsic: mouse_leveldb::WriteBatch::new(),
+            len_: 0,
         }
     }
 }
@@ -89,30 +91,29 @@ impl WriteBatch {
     /// # Panics
     ///
     /// Panics if `self` has already initialized.
-    pub fn init(&mut self, max_write_queries: usize) {
-        assert_eq!(true, self.results.is_empty());
-        self.results.reserve(max_write_queries);
-
-        self.intrinsic.init();
-        self.extrinsic.init();
-    }
+    pub fn init(&mut self, max_write_queries: usize) {}
 
     pub fn len(&self) -> usize {
-        self.results.len()
+        self.len_
     }
 
     pub fn put(&mut self, id: &Id, intrinsic: &[u8], extrinsic: &[u8]) -> Asc<Mutex<PutResult>> {
+        let mut is_changed = false;
+
         if !intrinsic.is_empty() {
             self.intrinsic.put(id.as_ref(), intrinsic);
+            is_changed = true;
         }
         if !extrinsic.is_empty() {
             self.extrinsic.put(id.as_ref(), extrinsic);
+            is_changed = true;
         }
 
-        let result = Asc::from(Mutex::new(PutResult::NotYet));
-        self.results.push(result.clone());
+        if is_changed {
+            self.len_ += 1;
+        }
 
-        result
+        self.result.clone()
     }
 
     pub fn flush(&mut self, db: &Db) {
@@ -138,9 +139,9 @@ impl WriteBatch {
             }
         }
 
-        // Set the results
-        for r in &self.results {
-            let mut r = r.lock().unwrap();
+        // Set the result
+        {
+            let mut r = self.result.lock().unwrap();
             *r = PutResult::Succeeded;
         }
 
@@ -148,18 +149,15 @@ impl WriteBatch {
     }
 
     fn set_error(&mut self, e: mouse_leveldb::Error) {
-        let e = Asc::from(e);
-
-        for r in &self.results {
-            let mut r = r.lock().unwrap();
-            *r = PutResult::Error(e.clone());
-        }
+        let mut r = self.result.lock().unwrap();
+        *r = PutResult::Error(Asc::from(e));
     }
 
     fn clear(&mut self) {
-        self.results.clear();
+        self.result = Asc::from(Mutex::new(PutResult::NotYet));
         self.intrinsic.clear();
         self.extrinsic.clear();
+        self.len_ = 0;
     }
 }
 
