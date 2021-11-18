@@ -153,6 +153,11 @@ impl WriteBatch {
             *r = PutResult::Succeeded;
         }
 
+        {
+            let mut r = self.result.lock().unwrap();
+            *r = PutResult::Succeeded;
+        }
+
         self.clear();
     }
 
