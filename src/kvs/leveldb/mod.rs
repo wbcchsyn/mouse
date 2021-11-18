@@ -92,9 +92,6 @@ impl WriteBatch {
     pub fn init(&mut self, max_write_queries: usize) {
         assert_eq!(true, self.results.is_empty());
         self.results.reserve(max_write_queries);
-
-        self.intrinsic.init();
-        self.extrinsic.init();
     }
 
     pub fn len(&self) -> usize {
