@@ -71,6 +71,7 @@ struct WriteBatch {
     results: Vec<Asc<Mutex<PutResult>>>,
     intrinsic: mouse_leveldb::WriteBatch,
     extrinsic: mouse_leveldb::WriteBatch,
+    len_: usize,
 }
 
 impl Default for WriteBatch {
@@ -79,6 +80,7 @@ impl Default for WriteBatch {
             results: Vec::new(),
             intrinsic: mouse_leveldb::WriteBatch::new(),
             extrinsic: mouse_leveldb::WriteBatch::new(),
+            len_: 0,
         }
     }
 }
