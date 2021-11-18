@@ -121,7 +121,7 @@ impl WriteBatch {
             self.len_ += 1;
         }
 
-        result
+        self.result.clone()
     }
 
     pub fn flush(&mut self, db: &Db) {
