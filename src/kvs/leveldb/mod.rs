@@ -166,6 +166,7 @@ impl WriteBatch {
     }
 
     fn clear(&mut self) {
+        self.result = Asc::from(Mutex::new(PutResult::NotYet));
         self.results.clear();
         self.intrinsic.clear();
         self.extrinsic.clear();
