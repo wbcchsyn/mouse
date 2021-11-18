@@ -68,6 +68,7 @@ impl Db {
 }
 
 struct WriteBatch {
+    result: Asc<Mutex<PutResult>>,
     results: Vec<Asc<Mutex<PutResult>>>,
     intrinsic: mouse_leveldb::WriteBatch,
     extrinsic: mouse_leveldb::WriteBatch,
@@ -77,6 +78,7 @@ struct WriteBatch {
 impl Default for WriteBatch {
     fn default() -> Self {
         Self {
+            result: Asc::from(Mutex::new(PutResult::NotYet)),
             results: Vec::new(),
             intrinsic: mouse_leveldb::WriteBatch::new(),
             extrinsic: mouse_leveldb::WriteBatch::new(),
