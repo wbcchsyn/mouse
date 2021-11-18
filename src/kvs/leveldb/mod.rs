@@ -302,7 +302,7 @@ impl<'a> PutQuery<'a> {
         let mut batch = env.write_batch.lock().unwrap();
         let result = batch.put(id, intrinsic, extrinsic);
 
-        if batch.len() == env.max_write_queries {
+        if batch.len() <= env.max_write_queries {
             batch.flush(&env.db);
         }
 
