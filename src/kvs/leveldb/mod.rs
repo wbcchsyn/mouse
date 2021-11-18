@@ -86,13 +86,6 @@ impl Default for WriteBatch {
 }
 
 impl WriteBatch {
-    /// Initializes `self` .
-    ///
-    /// # Panics
-    ///
-    /// Panics if `self` has already initialized.
-    pub fn init(&mut self, max_write_queries: usize) {}
-
     pub fn len(&self) -> usize {
         self.len_
     }
@@ -150,7 +143,7 @@ impl WriteBatch {
 
     fn set_error(&mut self, e: mouse_leveldb::Error) {
         let mut r = self.result.lock().unwrap();
-        *r = PutResult::Error(Asc::from(e));
+        *r = PutResult::Error(e);
     }
 
     fn clear(&mut self) {
@@ -204,10 +197,6 @@ impl ModuleEnvironment for Environment {
 
     unsafe fn init(&mut self) -> Result<(), Box<dyn Error>> {
         self.db.open(&self.db_path)?;
-
-        let mut write_batch = self.write_batch.lock().unwrap();
-        write_batch.init(self.max_write_queries);
-
         Ok(())
     }
 }
@@ -300,7 +289,7 @@ pub fn fetch<'a>(id: &Id, env: &'a Environment) -> impl ReadQuery + 'a {
 enum PutResult {
     NotYet,
     Succeeded,
-    Error(Asc<mouse_leveldb::Error>),
+    Error(mouse_leveldb::Error),
 }
 
 struct PutQuery<'a> {
@@ -313,7 +302,7 @@ impl<'a> PutQuery<'a> {
         let mut batch = env.write_batch.lock().unwrap();
         let result = batch.put(id, intrinsic, extrinsic);
 
-        if batch.len() == env.max_write_queries {
+        if batch.len() <= env.max_write_queries {
             batch.flush(&env.db);
         }
 
@@ -340,13 +329,19 @@ impl WriteQuery for PutQuery<'_> {
         match &*self.result.lock().unwrap() {
             PutResult::NotYet => panic!("Never comes here."),
             PutResult::Succeeded => Ok(()),
-            PutResult::Error(e) => unsafe { Err(&*Asc::as_ptr(e)) },
+            PutResult::Error(e) => unsafe {
+                let ptr = e as *const dyn Error;
+                Err(&*ptr)
+            },
         }
     }
 
     fn error(&self) -> Option<&dyn Error> {
         match &*self.result.lock().unwrap() {
-            PutResult::Error(e) => unsafe { Some(&*Asc::as_ptr(e)) },
+            PutResult::Error(e) => unsafe {
+                let ptr = e as *const dyn Error;
+                Some(&*ptr)
+            },
             _ => None,
         }
     }
