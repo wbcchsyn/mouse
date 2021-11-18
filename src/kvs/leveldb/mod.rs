@@ -101,15 +101,23 @@ impl WriteBatch {
     }
 
     pub fn put(&mut self, id: &Id, intrinsic: &[u8], extrinsic: &[u8]) -> Asc<Mutex<PutResult>> {
+        let mut is_changed = false;
+
         if !intrinsic.is_empty() {
             self.intrinsic.put(id.as_ref(), intrinsic);
+            is_changed = true;
         }
         if !extrinsic.is_empty() {
             self.extrinsic.put(id.as_ref(), extrinsic);
+            is_changed = true;
         }
 
         let result = Asc::from(Mutex::new(PutResult::NotYet));
         self.results.push(result.clone());
+
+        if is_changed {
+            self.len_ += 1;
+        }
 
         result
     }
