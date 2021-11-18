@@ -97,7 +97,7 @@ impl WriteBatch {
     }
 
     pub fn len(&self) -> usize {
-        self.results.len()
+        self.len_
     }
 
     pub fn put(&mut self, id: &Id, intrinsic: &[u8], extrinsic: &[u8]) -> Asc<Mutex<PutResult>> {
