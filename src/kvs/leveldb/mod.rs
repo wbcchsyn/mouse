@@ -69,7 +69,6 @@ impl Db {
 
 struct WriteBatch {
     result: Asc<Mutex<PutResult>>,
-    results: Vec<Asc<Mutex<PutResult>>>,
     intrinsic: mouse_leveldb::WriteBatch,
     extrinsic: mouse_leveldb::WriteBatch,
     len_: usize,
@@ -79,7 +78,6 @@ impl Default for WriteBatch {
     fn default() -> Self {
         Self {
             result: Asc::from(Mutex::new(PutResult::NotYet)),
-            results: Vec::new(),
             intrinsic: mouse_leveldb::WriteBatch::new(),
             extrinsic: mouse_leveldb::WriteBatch::new(),
             len_: 0,
@@ -93,10 +91,7 @@ impl WriteBatch {
     /// # Panics
     ///
     /// Panics if `self` has already initialized.
-    pub fn init(&mut self, max_write_queries: usize) {
-        assert_eq!(true, self.results.is_empty());
-        self.results.reserve(max_write_queries);
-    }
+    pub fn init(&mut self, max_write_queries: usize) {}
 
     pub fn len(&self) -> usize {
         self.len_
@@ -113,9 +108,6 @@ impl WriteBatch {
             self.extrinsic.put(id.as_ref(), extrinsic);
             is_changed = true;
         }
-
-        let result = Asc::from(Mutex::new(PutResult::NotYet));
-        self.results.push(result.clone());
 
         if is_changed {
             self.len_ += 1;
@@ -147,12 +139,7 @@ impl WriteBatch {
             }
         }
 
-        // Set the results
-        for r in &self.results {
-            let mut r = r.lock().unwrap();
-            *r = PutResult::Succeeded;
-        }
-
+        // Set the result
         {
             let mut r = self.result.lock().unwrap();
             *r = PutResult::Succeeded;
@@ -162,20 +149,12 @@ impl WriteBatch {
     }
 
     fn set_error(&mut self, e: mouse_leveldb::Error) {
-        let e = Asc::from(e);
-
-        for r in &self.results {
-            let mut r = r.lock().unwrap();
-            *r = PutResult::Error(e.clone());
-        }
-
         let mut r = self.result.lock().unwrap();
-        *r = PutResult::Error(e);
+        *r = PutResult::Error(Asc::from(e));
     }
 
     fn clear(&mut self) {
         self.result = Asc::from(Mutex::new(PutResult::NotYet));
-        self.results.clear();
         self.intrinsic.clear();
         self.extrinsic.clear();
         self.len_ = 0;
