@@ -150,7 +150,7 @@ impl WriteBatch {
 
     fn set_error(&mut self, e: mouse_leveldb::Error) {
         let mut r = self.result.lock().unwrap();
-        *r = PutResult::Error(Asc::from(e));
+        *r = PutResult::Error(e);
     }
 
     fn clear(&mut self) {
@@ -300,7 +300,7 @@ pub fn fetch<'a>(id: &Id, env: &'a Environment) -> impl ReadQuery + 'a {
 enum PutResult {
     NotYet,
     Succeeded,
-    Error(Asc<mouse_leveldb::Error>),
+    Error(mouse_leveldb::Error),
 }
 
 struct PutQuery<'a> {
@@ -340,13 +340,19 @@ impl WriteQuery for PutQuery<'_> {
         match &*self.result.lock().unwrap() {
             PutResult::NotYet => panic!("Never comes here."),
             PutResult::Succeeded => Ok(()),
-            PutResult::Error(e) => unsafe { Err(&*Asc::as_ptr(e)) },
+            PutResult::Error(e) => unsafe {
+                let ptr = e as *const dyn Error;
+                Err(&*ptr)
+            },
         }
     }
 
     fn error(&self) -> Option<&dyn Error> {
         match &*self.result.lock().unwrap() {
-            PutResult::Error(e) => unsafe { Some(&*Asc::as_ptr(e)) },
+            PutResult::Error(e) => unsafe {
+                let ptr = e as *const dyn Error;
+                Some(&*ptr)
+            },
             _ => None,
         }
     }
