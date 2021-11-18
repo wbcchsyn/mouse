@@ -167,6 +167,7 @@ impl WriteBatch {
         self.results.clear();
         self.intrinsic.clear();
         self.extrinsic.clear();
+        self.len_ = 0;
     }
 }
 
